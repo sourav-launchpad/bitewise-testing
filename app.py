@@ -18,7 +18,8 @@ from prompts import (
 load_dotenv()
 
 # Set OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Common household measurements with focus on Australian staples
 COMMON_MEASUREMENTS = {
