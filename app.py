@@ -18,8 +18,8 @@ from prompts import (
 load_dotenv()
 
 # Set OpenAI API key
-# openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = os.getenv("OPENAI_API_KEY")
+# openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Common household measurements with focus on Australian staples
 COMMON_MEASUREMENTS = {
@@ -272,33 +272,113 @@ def get_user_preferences():
         st.error(f"Error getting user preferences: {str(e)}")
         return None
 
-async def generate_meal(meal_type, day, prompt):
+async def generate_meal(meal_type, day, prompt, cuisine="All"):
     try:
+        # Create a session for concurrent requests
         async with aiohttp.ClientSession() as session:
+            # Prepare the request data
+            data = {
+                "model": "gpt-3.5-turbo-0125",
+                "messages": [
+                    {"role": "system", "content": """You are an expert Australian nutritionist and chef specializing in practical, flavorful home cooking. Follow dietary requirements, health conditions, and cultural preferences while maintaining authenticity and practicality. You create meals that:
+                     
+                    **IMPORTANT - TIME MANAGEMENT:**
+                    - You MUST strictly follow the specified time constraint
+                    - Include exact timing for each step in the instructions
+                    - Total time (prep + cooking) must not exceed the specified limit
+                    - Use time-saving techniques when needed
+                    - Break down steps with specific timing
+                    - Include parallel cooking methods when possible
+                    
+                    **IMPORTANT - CUISINE REQUIREMENTS:**
+                    - When a specific cuisine is selected, ALL meals MUST strictly follow that cuisine
+                    - Use authentic ingredients, cooking methods, and flavor combinations
+                    - Breakfast, lunch, and dinner must all reflect the chosen cuisine
+                    - Only use ingredients and techniques traditional to that cuisine
+                    - Adapt traditional dishes to meet dietary restrictions while maintaining authenticity
+                    - Never mix cuisines unless "All" is selected
+                    - Research and include authentic dishes for each meal type
+                    - Use traditional cooking methods and equipment
+                    - Include authentic garnishes and presentation styles
+                    - Maintain cultural authenticity while meeting dietary needs
+                    
+                    **IMPORTANT - MEAL PLAN LENGTH:**
+                    - Generate a complete day of meals with all required meal types (breakfast, lunch, dinner)
+                    - Maintain consistency with previous days
+                    - Ensure variety across the entire plan
+                    - Each day MUST include all requested meal types
+                    - Keep track of ingredient usage across the entire plan
+                    
+                    ** IMPORTANT RULES: Australian Dietary Guidelines Compliance**   
+                    "Create a meal that strictly follows the **Australian Dietary Guidelines**. Ensure it includes:  
+                    - A **protein source** (meat, fish, chicken, eggs, legumes, beans, etc.).  
+                    - A **carbohydrate source**, preferably **whole grains** (wholegrain bread, rice, noodles, pasta, oats, quinoa, etc.).  
+                    - A **healthy fat source** (dairy, olive oil, nuts, seeds, etc.).  
+                    - At least **two different vegetables** for a balanced meal."  
+
+                    ** IMPORTANT RULES: Ingredient Diversity**  
+                    "Design a weekly meal plan that ensures **diversity in ingredients**. Avoid using the same proteins, carbohydrates, and vegetables repeatedly unless necessary to reduce food waste. Each meal should incorporate a variety of nutrient-dense ingredients."  
+
+                    ** IMPORTANT RULES: Cooking Methods & Texture**  
+                    "Generate a meal with **varied and interesting cooking methods** to enhance flavor and texture. Avoid plain techniques like steaming or baking without enhancements. Instead, use methods such as:  
+                    - Sautéing  
+                    - Air-frying  
+                    - Roasting  
+                    - Grilling  
+                    - Charring  
+                    Incorporate a mix of textures (e.g., **crispy, crunchy, creamy, or tender**) to create a satisfying dish."  
+
+                    ** IMPORTANT RULES: Herbs & Spices Usage**  
+                    "Ensure every meal includes **at least 2-3 herbs and spices**, excluding salt and pepper. Use both fresh and dried herbs where appropriate to enhance flavor. **Do not list salt or pepper as ingredients**—instead, mention 'season to taste' in the instructions."  
+
+                    ** IMPORTANT RULES: Complete & Well-Rounded Meals**  
+                    "Meals should be **nutritionally complete and well-balanced**, so be sure to include suitable sides with each main dish. Examples:  
+                    - A stir-fry must include **rice or noodles** rather than just vegetables and protein.  
+                    - A grilled protein should have complementary sides to enhance flavor and texture, such as **crispy sweet potato wedges or sautéed mixed greens**."  
+
+                    ** IMPORTANT RULES: Measurement Units & Packaging Relevance**  
+                    "Use **Australian supermarket measurement units** for all ingredients. Ensure:  
+                    - **Liquids** are measured in teaspoons, tablespoons, or millilitres (ml).  
+                    - **Solids** are measured in grams (g) or whole units (e.g., ½ avocado, 1 zucchini, ½ capsicum).  
+                    - **Garlic** is measured in cloves, and **tomatoes** in halves or quarters.  
+                    Reference **Coles or Woolworths packaging sizes** where possible to ensure accurate portioning."  
+
+                    ** IMPORTANT RULES: Recipe Instructions Formatting**  
+                    "Write clear, structured recipe instructions in **UK English** using the **metric system**. Ensure:  
+                    - Steps flow logically and include **practical cooking tips**.  
+                    - Instructions are easy to follow, catering to a **basic skill level**.  
+                    - The format remains **concise yet detailed**, making recipes accessible for all users."
+                    
+                    **REMINDER**:  
+                    - **Follow all the rules strictly. Do not ignore any points from the instructions above.**
+                    - **Every recipe must include all necessary instructions** and adhere to the specific guidelines listed.
+                    - **Include exact timing for each step** and ensure the total time matches the specified constraint."""},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": 2000,
+                "temperature": 0.7,
+                "presence_penalty": 0.1,
+                "frequency_penalty": 0.1
+            }
+
+            # Make the API request
             headers = {
                 "Authorization": f"Bearer {openai.api_key}",
                 "Content-Type": "application/json"
             }
             
-            data = {
-                "model": "gpt-3.5-turbo",
-                "messages": [
-                    {"role": "system", "content": "You are an expert chef creating personalized meal plans. Follow dietary requirements, health conditions, and cultural preferences while maintaining authenticity and practicality."},
-                    {"role": "user", "content": prompt}
-                ],
-                "max_tokens": 2000,  # Keep original token size
-                "temperature": 0.7
-            }
-            
             async with session.post(
                 "https://api.openai.com/v1/chat/completions",
-                headers=headers,
-                json=data
+                json=data,
+                headers=headers
             ) as response:
-                if response.status == 429:  # Rate limit
-                    raise openai.RateLimitError("Rate limit exceeded")
-                result = await response.json()
-                return (meal_type, day, result['choices'][0]['message']['content'])
+                if response.status == 200:
+                    result = await response.json()
+                    return (meal_type, day, result['choices'][0]['message']['content'])
+                else:
+                    error_text = await response.text()
+                    raise Exception(f"API request failed with status {response.status}: {error_text}")
+
     except Exception as e:
         st.error(f"Error generating {meal_type}: {str(e)}")
         return None
@@ -333,13 +413,67 @@ async def generate_meal_plan(user_prefs):
 
         # Add dietary requirements based on allergies and diet type
         dietary_requirements = f"""
-        Please ensure the recipe meets the following dietary requirements:
+        STRICT DIETARY REQUIREMENTS:
         - Diet Type: {diet_type}
         - Allergies/Intolerances: {allergies}
         - Health Conditions: {health_conditions}
         - Budget: {budget}
         - Time Constraint: {cooking_time}
         - Serving Size: {servings} people
+
+        IMPORTANT RULES:
+        1. Diet Type Compliance:
+           - For {diet_type}: {{
+               "Vegetarian": "No meat, fish, or poultry. Use plant-based proteins like legumes, tofu, and tempeh.",
+               "Vegan": "No animal products. Use plant-based proteins, dairy alternatives, and egg substitutes.",
+               "Pescatarian": "No meat or poultry, but fish and seafood allowed. Include plant-based proteins.",
+               "Mediterranean": "Focus on vegetables, fruits, whole grains, legumes, fish, and olive oil.",
+               "Paleo": "No grains, legumes, or dairy. Use meat, fish, eggs, vegetables, fruits, and nuts.",
+               "Keto": "High fat, moderate protein, very low carb. Focus on healthy fats and protein.",
+               "Low-Carb": "Limited carbohydrates, focus on protein and healthy fats.",
+               "Whole Food Plant-Based": "Unprocessed plant foods, no animal products or refined foods.",
+               "High-Protein": "Emphasize protein-rich foods while maintaining balanced nutrition.",
+               "Diabetic-Friendly": "Low glycemic index foods, balanced carbs, protein, and healthy fats.",
+               "None": "Follow standard dietary guidelines with balanced nutrition."
+           }}.get("{diet_type}", "Follow standard dietary guidelines")
+           - Strictly avoid any ingredients not allowed in this diet
+           - Ensure all substitutions maintain nutritional balance
+
+        2. Allergy & Intolerance Management:
+           - Strictly avoid: {allergies}
+           - Provide safe alternatives for any restricted ingredients
+           - Ensure no cross-contamination in preparation methods
+           - Double-check all ingredients for hidden allergens
+
+        3. Health Condition Considerations:
+           - For {health_conditions}: {IMPORTANT_RULES}
+           - Adjust portion sizes and ingredients accordingly
+           - Include appropriate nutritional modifications
+           - Ensure all recommendations align with medical guidelines
+
+        4. Budget Constraints:
+           - Budget Level: {budget}
+           - Use only ingredients within this budget range
+           - Focus on cost-effective alternatives
+           - Minimize waste and maximize ingredient usage
+           - Use seasonal and local ingredients when possible
+
+        5. Time Management:
+           - Available Time: {cooking_time}
+           - Maximum preparation and cooking time: {{
+               "Busy schedule (15 mins)": "15 minutes total",
+               "Moderate schedule (30 mins)": "30 minutes total",
+               "Busy on some days (45 mins)": "45 minutes total",
+               "Flexible Schedule (60 mins)": "60 minutes total",
+               "No Constraints (Any duration)": "No time limit"
+           }}.get("{cooking_time}", "30 minutes total")
+           - Time-saving techniques required:
+             * Use pre-cut vegetables or frozen options
+             * Choose quick-cooking proteins
+             * Utilize time-saving appliances (air fryer, pressure cooker)
+             * Include prep-ahead steps
+             * Minimize complex techniques
+           - Suggest parallel cooking methods when possible
         """
 
         # Set cuisine requirements based on user preferences
@@ -584,8 +718,8 @@ def display_meal_plan(meal_plan):
     st.markdown(formatted_meal_plan)
     
     # Display generation time in a subtle style at the bottom right
-    if hasattr(st.session_state, 'generation_time'):
-        st.markdown(f"<p style='color: #666666; text-align: right; font-size: 0.9em;'>Total Generation Time: {st.session_state.generation_time:.2f} seconds</p>", unsafe_allow_html=True)
+    # if hasattr(st.session_state, 'generation_time'):
+    #     st.markdown(f"<p style='color: #666666; text-align: right; font-size: 0.9em;'>Total Generation Time: {st.session_state.generation_time:.2f} seconds</p>", unsafe_allow_html=True)
 
 def extract_ingredients(recipe_text):
     """Extract main ingredients from recipe text."""
@@ -733,32 +867,80 @@ def main():
             st.error("Failed to get user preferences. Please try again.")
             return
         
-        # Create a centered container for the button
-        st.markdown('<div class="button-container">', unsafe_allow_html=True)
+        # Inject custom CSS to center the spinner and text
+        st.markdown(
+            """
+            <style>
+            div.stSpinner > div {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .generation-time {
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background-color: rgba(0, 0, 0, 0.7);
+                color: white;
+                padding: 10px 20px;
+                border-radius: 5px;
+                font-size: 14px;
+                z-index: 1000;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
         
         # Generate meal plan button
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             if st.button("Generate Meal Plan"):
-                with st.spinner("Generating your personalized meal plan..."):
+                # Use the standard spinner
+                with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
+                        # Start timing
+                        start_time = time.time()
+                        
                         # Use asyncio to run the async function
                         meal_plan = asyncio.run(generate_meal_plan(user_prefs))
+                        
+                        # Calculate generation time
+                        generation_time = time.time() - start_time
+                        st.session_state.generation_time = generation_time
+                        
                         if meal_plan:  # Only show success if we actually got a meal plan
                             st.session_state.meal_plan = meal_plan
-                            st.success("Meal plan generated successfully!")
+                            
+                            # Using markdown to mimic st.success() with centered alignment
+                            st.markdown(
+                                "<div style='text-align: center; background-color: #d4edda; padding: 10px; border-radius: 5px; color: #155724; font-weight: bold;'>"
+                                "Meal Plan Generated Successfully!"
+                                "</div>",
+                                unsafe_allow_html=True
+                            )
+                            
+                            # Display generation time in a fixed position at the bottom
+                            # st.markdown(
+                            #     f"<div class='generation-time'>Generation Time: {generation_time:.2f} seconds</div>",
+                            #     unsafe_allow_html=True
+                            # )
                         else:
-                            st.error("Failed to generate meal plan. Please try again.")
+                            st.error("Failed to Generate Meal Plan. Please Try Again")
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
                         st.session_state.meal_plan = None
         
-        # Close the button container
-        st.markdown('</div>', unsafe_allow_html=True)
-        
         # Display meal plan if available
         if st.session_state.meal_plan:
             display_meal_plan(st.session_state.meal_plan)
+            
+            # Display generation time again at the bottom of the page
+            # if hasattr(st.session_state, 'generation_time'):
+            #     st.markdown(
+            #         f"<div class='generation-time'>Generation Time: {st.session_state.generation_time:.2f} seconds</div>",
+            #         unsafe_allow_html=True
+            #     )
     except Exception as e:
         st.error(f"An unexpected error occurred: {str(e)}")
 
