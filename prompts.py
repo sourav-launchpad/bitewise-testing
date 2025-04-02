@@ -3186,37 +3186,60 @@ def get_time_constraints(time_constraint):
     constraints = {
         "Busy schedule (15 mins)": {
             "max_time": "15 minutes",
-            "methods": ["stir-fry", "pan-fry", "boiling"],
+            "methods": ["stir-fry", "pan-fry", "boiling", "air-frying"],
             "avoid": ["baking", "roasting", "slow-cooking"],
             "prep": ["pre-cut", "canned", "frozen"],
             "steps": ["simple", "quick", "minimal"]
         },
-        "Moderate time (30 mins)": {
+        "Moderate schedule (30 mins)": {
             "max_time": "30 minutes",
-            "methods": ["stir-fry", "pan-fry", "boiling", "baking"],
+            "methods": ["stir-fry", "pan-fry", "boiling", "baking", "air-frying"],
             "avoid": ["slow-cooking", "complex techniques"],
             "prep": ["fresh", "pre-cut", "canned"],
             "steps": ["moderate", "standard", "balanced"]
         },
-        "Relaxed time (45 mins)": {
+        "Busy on some days (45 mins)": {
             "max_time": "45 minutes",
+            "methods": ["all methods"],
+            "avoid": ["slow-cooking"],
+            "prep": ["fresh", "pre-cut", "canned"],
+            "steps": ["detailed", "elaborate", "complex"]
+        },
+        "Flexible Schedule (60 mins)": {
+            "max_time": "60 minutes",
+            "methods": ["all methods"],
+            "avoid": [],
+            "prep": ["fresh", "pre-cut", "canned"],
+            "steps": ["detailed", "elaborate", "complex"]
+        },
+        "No Constraints (Any duration)": {
+            "max_time": "No limit",
             "methods": ["all methods"],
             "avoid": [],
             "prep": ["fresh", "pre-cut", "canned"],
             "steps": ["detailed", "elaborate", "complex"]
         }
     }
-    return constraints.get(time_constraint, constraints["Busy schedule (15 mins)"])
+    return constraints[time_constraint]
 
-def get_meal_prompt(meal_type, day, user_prefs, health_requirements, cuisine_requirements):
+def get_meal_prompt(meal_type, day, user_prefs, health_requirements, cuisine_requirements, available_ingredients=None):
     # Get budget and time constraints
     budget_constraints = get_budget_constraints(user_prefs['budget'])
     time_constraints = get_time_constraints(user_prefs['time_constraint'])
-    
-    prompt = f"""Generate a unique {meal_type} recipe for Day {day} that meets the following requirements:
+
+    # Add available ingredients to the prompt if provided
+    ingredients_section = ""
+    if available_ingredients:
+        ingredients_section = f"""
+Available Ingredients:
+{', '.join(available_ingredients)}
+
+Please use only these ingredients in your recipe. If you need additional ingredients, they should be common pantry staples or easily available in Australian supermarkets.
+"""
+
+    prompt = f"""Generate a recipe for {meal_type} for Day {day} that features {user_prefs['cuisine']} cuisine and adheres to the following criteria:
 
 User Preferences:
-- Cuisine: {user_prefs['cuisine']}
 - Diet Type: {user_prefs['diet']}
 - Allergies: {user_prefs['allergies']}
 - Health Conditions: {user_prefs['health_conditions']}
@@ -3230,6 +3253,8 @@ Health Requirements:
 Cuisine Requirements:
 {cuisine_requirements}
 
+{ingredients_section}
+
 Budget Constraints:
 - Price Range: {budget_constraints['range']}
 - Recommended Proteins: {', '.join(budget_constraints['proteins'])}
@@ -3239,138 +3264,125 @@ Budget Constraints:
 
 Time Constraints:
 - Maximum Time: {time_constraints['max_time']}
-- Recommended Methods: {', '.join(time_constraints['methods'])}
-- Avoid Methods: {', '.join(time_constraints['avoid'])}
-- Recommended Prep: {', '.join(time_constraints['prep'])}
-- Recommended Steps: {', '.join(time_constraints['steps'])}
 
-CRITICAL UNIQUENESS REQUIREMENTS:
+**RECIPE UNIQUENESS REQUIREMENTS:**
 1. Recipe Name:
-   - Must be completely different from all previous recipes
-   - Should not use words from previous recipe names
-   - Must reflect the unique characteristics of this dish
+    - Must be completely different from all previous recipes
+    - Should not use words from previous recipe names
+    - Must reflect the unique characteristics of this dish
 
 2. Description Style:
-   - Must use a different writing style than previous descriptions
-   - it should be 400-450 character wich will leads to 3-4 sentence engaging, fun, humorous, and creative introduction for a recipe.
-   - Should not start with same phrases as other descriptions
-   - Must highlight unique aspects of this specific dish
-   - Should avoid common phrases used in other descriptions
+    - Must use a different writing style than previous descriptions
+    - it should be 400-450 character wich will leads to 3-4 sentence engaging, fun, humorous, and creative introduction for a recipe.
+    - Should not start with same phrases as other descriptions
+    - Must highlight unique aspects of this specific dish
+    - Should avoid common phrases used in other descriptions
 
 3. Protein Selection:
-   - Must use a different protein than the last 3 meals
-   - If using same protein category, must use different cut/preparation
-   - Must use different cooking method for the protein
+    - Must use a different protein than the last 3 meals
+    - If using same protein category, must use different cut/preparation
+    - Must use different cooking method for the protein
 
 4. Cooking Methods:
-   - Must use different primary cooking method than previous 2 meals
-   - Should combine techniques in unique ways
-   - Must avoid repeating signature techniques
+    - Must use different primary cooking method than previous 2 meals
+    - Should combine techniques in unique ways
+    - Must avoid repeating signature techniques
 
 5. Vegetables and Aromatics:
-   - Must use different vegetable combinations than previous 3 meals
-   - Should introduce at least 2 vegetables not used in previous meals
-   - Must use different aromatic combinations
+    - Must use different vegetable combinations than previous 3 meals
+    - Should introduce at least 2 vegetables not used in previous meals
+    - Must use different aromatic combinations
 
 6. Sauces and Seasonings:
-   - Must create unique sauce combinations
-   - Should not repeat primary seasoning profiles
-   - Must use different ratios of sweet/salty/sour/spicy
+    - Must create unique sauce combinations
+    - Should not repeat primary seasoning profiles
+    - Must use different ratios of sweet/salty/sour/spicy
 
 7. Texture Combinations:
-   - Must provide different textural experience than previous meals
-   - Should incorporate unique crispy/soft/chewy elements
-   - Must vary temperature and moisture content
+    - Must provide different textural experience than previous meals
+    - Should incorporate unique crispy/soft/chewy elements
+    - Must vary temperature and moisture content
 
 8. Presentation Style:
-   - Must use different plating approach than previous meals
-   - Should incorporate unique garnishing elements
-   - Must vary color combinations and arrangement
+    - Must use different plating approach than previous meals
+    - Should incorporate unique garnishing elements
+    - Must vary color combinations and arrangement
 
 9. Flavor Profile:
-   - Must develop distinct flavor profile from previous meals
-   - Should balance flavors differently than other dishes
-   - Must create unique taste progression
+    - Must develop distinct flavor profile from previous meals
+    - Should balance flavors differently than other dishes
+    - Must create unique taste progression
 
 10. Cultural Elements:
-    - Must highlight different aspects of Thai cuisine
-    - Should draw from different regional influences
-    - Must incorporate unique cultural techniques
+     - Must highlight different aspects of Thai cuisine
+     - Should draw from different regional influences
+     - Must incorporate unique cultural techniques
 
-    **RECIPE FORMAT:**
-    **Day {day} - {meal_type} - [Creative, Fun Recipe Title]**
+The recipe should be formatted as follows:
 
-    **Description:**
-    descriptions = [Choose one of the descriptions below as the foundation for the introduction, ensuring it aligns with the recipe without repeating it. Each introduction should be unique, so avoid using the same description style twice. Keep it engaging and concise, maintaining a single captivating paragraph without splitting it into multiple sections.
+**RECIPE FORMAT:**
+**Day {day} - {meal_type} - [Generate a fun, unique, and creative name for a recipe based on the details above. The name should be playful, engaging, and make the dish sound irresistible. Use puns, alliteration, or intriguing phrases, but avoid generic or repetitive names. For example: 'Spicy Kimchi Fried Rice Delight' (Korean), 'Tuscan Herb-Crusted Salmon' (Italian)]**
 
-    "Start your day with a meal that feels like a warm hug! Rich flavors and wholesome ingredients blend together, delivering the perfect balance of comfort and nutrition. Whether it’s a crisp morning or a cozy evening, every bite brings home-cooked goodness that warms the soul. This dish is a reminder that food isn’t just fuel—it’s a connection to nostalgia, happiness, and the joy of simple pleasures.",
+**Description:**
+[Choose one of the descriptions below as the foundation for the introduction, ensuring it aligns with the recipe without repeating it. Each introduction should be unique, so avoid using the same description style twice. Keep it engaging and concise, maintaining a single captivating paragraph without splitting it into multiple sections. The description should be 400-450 characters. For example: 'Embark on a culinary journey to the heart of Italy with this vibrant pasta dish...' (Italian), 'Experience the bold flavors of Korea with this spicy and savory rice dish...' (Korean)]
 
-    "Bursting with color and vibrancy, this dish is a celebration of freshness and flavor! Crisp vegetables, fragrant herbs, and zesty spices come together in perfect harmony, creating an energizing meal that awakens the senses. Every bite is light yet deeply satisfying, offering a refreshing balance that makes it a perfect choice for any time of day. Eat bright, feel light, and fuel yourself with pure goodness!",
+"Start your day with a meal that feels like a warm hug! Rich flavors and wholesome ingredients blend together, delivering the perfect balance of comfort and nutrition. Whether it's a crisp morning or a cozy evening, every bite brings home-cooked goodness that warms the soul. This dish is a reminder that food isn't just fuel—it's a connection to nostalgia, happiness, and the joy of simple pleasures.",
 
-    "Get ready for a bold flavor explosion! This dish turns up the heat with a perfectly balanced mix of fiery spices, rich aromas, and deep, complex flavors. Every bite brings a satisfying kick, teasing your taste buds with just the right amount of intensity. If you love dishes that pack a punch and leave you craving more, this one’s a must-try. Spicy, savory, and oh-so-satisfying—flavor lovers, rejoice!",
+"Bursting with color and vibrancy, this dish is a celebration of freshness and flavor! Crisp vegetables, fragrant herbs, and zesty spices come together in perfect harmony, creating an energizing meal that awakens the senses. Every bite is light yet deeply satisfying, offering a refreshing balance that makes it a perfect choice for any time of day. Eat bright, feel light, and fuel yourself with pure goodness!",
 
-    "Light, refreshing, and packed with flavor, this dish is as delightful as a summer breeze. A combination of fresh ingredients, subtle seasonings, and bright flavors makes every bite feel crisp and rejuvenating. It’s perfect for those moments when you want something nourishing yet not too heavy. Enjoy a meal that satisfies without weighing you down, keeping you refreshed and ready for anything!",
+"Get ready for a bold flavor explosion! This dish is a spicy kick, teasing your taste buds with just the right amount of intensity. If you love dishes that pack a punch and leave you craving more, this one's a must-try. Spicy, savory, and oh-so-satisfying—flavor lovers, rejoice!",
 
-    "Indulge in pure decadence with this rich and luxurious dish! A true treat for the senses, this meal brings together velvety textures, deep flavors, and a touch of indulgence in every bite. Whether it’s a special occasion or simply a well-earned moment of self-care, this dish transforms any meal into a gourmet experience. Life’s too short to skip the good stuff—savor the richness and enjoy!",
+"Light, refreshing, and packed with flavor, this dish is as delightful as a summer breeze. A combination of fresh ingredients, subtle seasonings, and bright flavors makes every bite feel crisp and rejuvenating. It's perfect for those moments when you want something nourishing yet not too heavy. Enjoy a meal that satisfies without weighing you down, keeping you refreshed and ready for anything!",
 
-    "Satisfy your hunger with a hearty, filling meal that delivers comfort and sustenance in every bite. Packed with protein, fiber, and bold flavors, this dish keeps you fueled and energized. Whether you need a power-packed lunch or a satisfying dinner after a long day, it won’t disappoint. Hearty, wholesome, and bursting with goodness, this is the kind of food that keeps you going strong!",
+"Indulge in pure decadence with this rich and luxurious dish! A true treat for the senses, this meal brings together velvety textures, deep flavors, and a touch of indulgence in every bite. Whether it's a luscious pasta, a silky soup, or a decadent dessert, this meal is pure comfort on a plate. Sometimes, a little bit of creaminess is all you need to turn an ordinary dish into something spectacular!",
 
-    "Short on time but still craving something delicious? This dish is the answer! Made with simple, wholesome ingredients, it comes together effortlessly while delivering great flavor and nourishment. Perfect for busy days, it proves that quick meals don’t have to sacrifice taste or quality. Whether you're rushing between meetings or need an easy dinner, this dish has you covered in minutes!",
+"Satisfy your hunger with a hearty, filling meal that delivers comfort and sustenance in every bite. Packed with protein, fiber, and bold flavors, this dish keeps you fueled and energized. Whether you need a power-packed lunch or a satisfying dinner after a long day, it won't disappoint. Hearty, wholesome, and bursting with goodness, this is the kind of food that keeps you going strong!",
 
-    "Some recipes stand the test of time, and this dish is one of them! Rooted in tradition and perfected over generations, it brings together flavors that feel familiar, comforting, and always satisfying. A timeless classic, it reminds us that the best meals don’t need fancy reinventions—just great ingredients and a touch of nostalgia. Simple, delicious, and forever a favorite!",
+"Short on time but still craving something delicious? This dish is the answer! Made with simple, wholesome ingredients, it comes together effortlessly while delivering great flavor and nourishment. Perfect for busy days, it proves that quick meals don't have to sacrifice taste or quality. Whether you're rushing between meetings or need an easy dinner, this dish has you covered in minutes!",
 
-    "Elevate your dining experience with this sophisticated and elegant dish! Balanced flavors, delicate textures, and refined ingredients create a meal that feels like something straight out of a gourmet kitchen. Whether you're celebrating a special occasion or just want to add a touch of class to your day, this dish delivers in both taste and presentation. Fine dining, right from your own kitchen!",
+"Some recipes stand the test of time, and this dish is one of them! Rooted in tradition and perfected over generations, it brings together flavors that feel familiar, comforting, and always satisfying. A timeless classic, it reminds us that the best meals don't need fancy reinventions—just great ingredients and a touch of nostalgia. Simple, delicious, and forever a favorite!",
 
-    "Cozy up with this warm, comforting dish that feels like a big hug on a chilly day! Slow-cooked flavors, aromatic spices, and nourishing ingredients come together to create a meal that soothes the soul. Whether you're looking to unwind after a long day or simply need a bowl of comfort, this dish delivers warmth and satisfaction in every bite. Grab a spoon and let the coziness begin!",
+"Elevate your dining experience with this sophisticated and elegant dish! Balanced flavors, delicate textures, and refined ingredients create a meal that feels like something straight out of a gourmet kitchen. Whether you're celebrating a special occasion or just want to add a touch of class to your day, this dish delivers in both taste and presentation. Fine dining, right from your own kitchen!",
 
-    "Enjoy the perfect balance of sweet and savory flavors in this deliciously complex dish! The richness of umami ingredients meets a touch of natural sweetness, creating an irresistible contrast in every bite. It’s a delightful experience for your palate, proving that sometimes, the best flavors come from unexpected pairings. Get ready for a dish that keeps your taste buds guessing and wanting more!",
+"Cozy up with this warm, comforting dish that feels like a big hug on a chilly day! Slow-cooked flavors, aromatic spices, and nourishing ingredients come together to create a meal that soothes the soul. Whether you're looking to unwind after a long day or simply need a bowl of comfort, this dish delivers warmth and satisfaction in every bite. Grab a spoon and let the coziness begin!",
 
-    "This dish is an ode to the beauty of simplicity, combining earthy, rustic flavors that feel wholesome and deeply satisfying. Inspired by nature’s best, it brings together fresh, unprocessed ingredients for a meal that’s as nourishing as it is flavorful. If you love dishes that taste like they came straight from a countryside kitchen, this one’s for you—grounded, hearty, and utterly delicious.",
+"Enjoy the perfect balance of sweet and savory flavors in this deliciously complex dish! The richness of umami ingredients meets a touch of natural sweetness, creating an irresistible contrast in every bite. It's a delightful experience for your palate, proving that sometimes, the best flavors come from unexpected pairings. Get ready for a dish that keeps your taste buds guessing and wanting more!",
 
-    "Stay energized with this nutrient-dense, power-packed meal! Designed to fuel your day, this dish is rich in protein, healthy fats, and complex carbs, providing sustained energy without any crash. Whether you’re starting a busy morning or refueling after a workout, this meal keeps you going strong. Nourish your body with ingredients that work for you—delicious, wholesome, and full of life!",
+"This dish is an ode to the beauty of simplicity, combining earthy, rustic flavors that feel wholesome and deeply satisfying. Inspired by nature's best, it brings together fresh, unprocessed ingredients for a meal that's as nourishing as it is flavorful. If you love dishes that taste like they came straight from a countryside kitchen, this one's for you—grounded, hearty, and utterly delicious.",
 
-    "Craving a meal with crunch? This dish is all about texture! Every bite delivers a satisfying contrast of crisp, crunchy, and savory elements that make it as fun to eat as it is delicious. Whether it’s roasted nuts, crisp veggies, or a golden-brown crust, this meal proves that texture plays a big role in great food. A perfect way to add excitement to every mouthful!",
+"Stay energized with this nutrient-dense, power-packed meal! Designed to fuel your day, this dish is rich in protein, healthy fats, and complex carbs, providing sustained energy without any crash. Whether you're starting a busy morning or refueling after a workout, this meal keeps you going strong. Nourish your body with ingredients that work for you—delicious, wholesome, and full of life!",
 
-    "Rich, aromatic, and deeply flavorful, this dish transforms simple ingredients into something spectacular. The combination of fragrant spices, slow-cooked depth, and layered flavors makes every bite a sensory experience. Whether it’s a warming curry, a robust stew, or a spice-infused dish, this one fills the air with enticing aromas and leaves a lasting impression on your palate.",
+"Craving a meal with crunch? This dish is all about texture! Every bite delivers a satisfying contrast of crisp, crunchy, and savory elements that make it as fun to eat as it is delicious. Whether it's roasted nuts, crisp veggies, or a golden-brown crust, this meal proves that texture plays a big role in great food. A perfect way to add excitement to every mouthful!",
 
-    "Good food nourishes both body and soul, and this dish does exactly that! Packed with essential nutrients, protein, fiber, and healthy fats, it’s designed to keep you feeling your best while tasting amazing. Balanced, satisfying, and made with wholesome ingredients, it’s a meal that proves healthy eating doesn’t have to be boring. Eat well, feel good, and enjoy every bite!",
+"Rich, aromatic, and deeply flavorful, this dish transforms simple ingredients into something spectacular. The combination of fragrant spices, slow-cooked depth, and layered flavors makes every bite a sensory experience. Whether it's a warming curry, a robust stew, or a spice-infused dish, this one fills the air with enticing aromas and leaves a lasting impression on your palate.",
 
-    "A tangy, zesty burst of flavor awaits! This dish is all about bright, citrusy notes that awaken your taste buds and add a refreshing twist to every bite. Whether it’s a squeeze of lemon, a dash of vinegar, or a hint of spice, the flavors are bold and exciting. Perfect for when you need a meal that’s light, fresh, and packed with just the right amount of zing!",
+"Good food nourishes both body and soul, and this dish does exactly that! Packed with essential nutrients, protein, fiber, and healthy fats, it's designed to keep you feeling your best while tasting amazing. Eat well, feel good, and enjoy every bite!",
 
-    "Travel the world through flavors with this exotic and adventurous dish! Inspired by global cuisines, it brings together unique spices, bold flavors, and exciting textures for a meal that transports you beyond your kitchen. Whether it’s fragrant Thai curry, a Moroccan tagine, or a Latin-inspired dish, this meal is a culinary passport to something extraordinary!",
+"A tangy, zesty burst of flavor awaits! This dish is all about bright, citrusy notes that awaken your taste buds and add a refreshing twist to every bite. Whether it's a squeeze of lemon, a dash of vinegar, or a hint of spice, the flavors are bold and exciting. Perfect for when you need a meal that's light, fresh, and packed with just the right amount of zing!",
 
-    "Indulge in the creamy, dreamy goodness of this comforting dish! Smooth textures, rich flavors, and a velvety finish make every bite a treat for the senses. Whether it’s a luscious pasta, a silky soup, or a decadent dessert, this meal is pure comfort on a plate. Sometimes, a little bit of creaminess is all you need to turn an ordinary dish into something spectacular!",
+"Travel the world through flavors with this exotic and adventurous dish! Inspired by global cuisines, it brings together unique spices, bold flavors, and exciting textures for a meal that transports you beyond your kitchen. Whether it's fragrant Thai curry, a Moroccan tagine, or a Latin-inspired dish, this meal is a culinary passport to something extraordinary!",
 
-    "Fuel your body with this protein-packed powerhouse! Designed to keep you full and energized, this meal is loaded with high-quality protein, balanced nutrients, and incredible flavor. Whether you're hitting the gym, recovering from a workout, or just need a meal that sustains you through a busy day, this dish has your back. Strong, satisfying, and seriously delicious!",
+"Indulge in the creamy, dreamy goodness of this comforting dish! Smooth textures, rich flavors, and a velvety finish make every bite a treat for the senses. Whether it's a luscious pasta, a silky soup, or a decadent dessert, this meal is pure comfort on a plate. Sometimes, a little bit of creaminess is all you need to turn an ordinary dish into something spectacular!",
 
-    "Why should healthy food be boring? This dish is packed with playful textures, fun flavors, and creative twists that make every bite exciting. Whether it’s a surprising ingredient, an unexpected pairing, or a vibrant presentation, this meal proves that good food should be as fun as it is nourishing. Get ready for a plate full of joy!"]
+"Fuel your body with this protein-packed powerhouse! Designed to keep you full and energized, this meal is loaded with high-quality protein, balanced nutrients, and incredible flavor. Whether you're hitting the gym, recovering from a workout, or just need a meal that sustains you through a busy day. Strong, satisfying, and seriously delicious!",
 
+"Why should healthy food be boring? This dish is packed with playful textures, fun flavors, and creative twists that make every bite exciting. Whether it's a surprising ingredient, an unexpected pairing, or a vibrant presentation, this meal proves that good food should be as fun as it is nourishing. Get ready for a plate full of joy!"]
 
-    **Total Time**: {time_constraints['max_time']}
-    **Serves**: {user_prefs['serving_size']} people
+**Total Time**: {time_constraints['max_time']}\n
+**Serves**: {user_prefs['serving_size']}
 
-    **Ingredients**:
-    • [List all ingredients using strictly Australian names and measurements. Do not use US or other international ingredient terms. Ensure ingredients are written clearly and are easily recognisable for an Australian audience.]
+**Ingredients**:
+[List all ingredients have to use Australian measurements. Do not use US measurements. Also, it has to use Australian terms, such as "capsicum" instead of "bell pepper." Ensure that units of measurement are relevant to the ingredient type and aligned with Australian supermarket packaging. Liquids should be measured in teaspoons, tablespoons, or millilitres (ml); solids should be measured in grams (g) or whole units (e.g., ½ avocado, 1 zucchini, ½ capsicum); garlic should be measured in cloves; and tomatoes should be measured in halves, quarters, etc. Where possible, reference Coles or Woolworths packaging sizes to ensure realistic portioning.]
 
-    **Instructions**:
-    1. [Set the stage! Begin by prepping your ingredients like a pro. Chop, dice, or slice according to the instructions (no lazy chopping—we want even cuts so everything cooks perfectly). If you're using onions, get ready for a little eye workout, but trust me, it’s worth it! Heat your pan to exactly temperature°C (yes, we’re precise here), drizzle in some olive oil, and listen for that satisfying sizzle.]
+**Instructions**:
+Write comprehensive and user-friendly recipe instructions in UK English using the metric system. **Each instruction must be between 1350 and 1450 characters and there should be exactly 6 steps (can have 7 if absolutely necessary).** Each steps should flow logically, include practical cooking tips, cater to a basic skill level, use an engaging and conversational style, include sensory details, provide clear explanations. For example:
 
-    2. [Time to bring the magic. Add your base ingredients in the correct order—think of it as layering flavours like a symphony. Stir things around, letting the aromas build. If it starts smelling so good that your neighbours peek over the fence, you're on the right track. Watch for visual cues: onions turning golden, spices toasting to perfection, and that irresistible scent filling your kitchen.]
+1.  [Set the stage! Begin by prepping your ingredients like a pro. If it's an Italian dish, finely mince the garlic and dice the tomatoes. If it's a Japanese dish, thinly slice the beef or prepare the sushi rice. Remember, no lazy chopping—we want even cuts so everything cooks perfectly. If it's something smells like it's burning, well… act quickly!]
+2.  [Time to bring the magic to life! In a sizzling pan, add your base ingredients in the correct order—think of it as layering flavors like a symphony. If it's an Italian dish, sauté the garlic until fragrant. If it's a Japanese dish, sear the beef until browned. Stir things around, letting the aromas build. If it's something smells like it's burning, well… act quickly!]
+3.  [This is where things get exciting, so pay attention! Add the main ingredients, but not too fast! We want everything to cook evenly, so take your time. If it's an Italian dish, add the cherry tomatoes and let them soften. If it's a Japanese dish, add the udon noodles and give it a gentle stir. Taste as you go—this is your dish, your masterpiece! Need a bit more salt? A squeeze of lemon? Make those flavor tweaks like a true kitchen artist.]
+4.  [The multitasking challenge begins! If there's a side dish, now's the time to start. While your main dish simmers, prep your salad, toast your bread, or just take a victory sip of tea (or wine, I won't judge). Keep an eye on both elements—timing is everything! If something smells like it's burning, well… act quickly! If something smells like it's burning, well… act quickly!]
+5.  [Final touch, the grand finale! Your dish is nearly done, so savor this moment. Maybe an extra pinch of herbs for freshness? A final drizzle of olive oil for that perfect finish? Plate it up like you're on a cooking show, and don't forget the garnish. Presentation matters—because we eat with our eyes first!]
+6.  [Serving time! Arrange everything beautifully (or just dig in, I won't tell). Take a moment to appreciate your masterpiece before taking that first bite. And hey, if you snap a photo before eating, I totally understand—it's hard to resist when your food looks this good.]
 
-    3. [This is where things get exciting. Add the next set of ingredients—but not too fast! We want everything to cook evenly, so take your time. Give it a gentle stir, and if you're feeling fancy, do that chef-style pan toss (just don’t send food flying). Taste as you go—this is your dish, your masterpiece! Need a bit more salt? A squeeze of lemon? Make those flavour tweaks like a true kitchen artist.]
-
-    4. [The multitasking challenge. If there's a side dish, now's the time to start. While your main dish simmers, prep your salad, toast your bread, or just take a victory sip of tea (or wine, I won’t judge). Keep an eye on both elements—timing is everything! If something looks like it’s cooking too fast, turn down the heat. If something smells like it’s burning, well… act quickly!]
-
-    5. [Final touch, the grand finale. Your dish is nearly done! Give it one last taste—this is your moment to shine. Maybe an extra pinch of herbs for freshness? A final drizzle of olive oil for that perfect finish? Plate it up like you’re on a cooking show, and don’t forget the garnish. Presentation matters—because we eat with our eyes first!]
-
-    6. [Serving time! Arrange everything beautifully (or just dig in, I won’t tell). Take a moment to appreciate your masterpiece before taking that first bite. And hey, if you snap a photo before eating, I totally understand—it’s hard to resist when your food looks this good.]
-
-    Each instruction must:
-    • Be written in an engaging, conversational style
-    • Include sensory details (what to smell, see, feel, taste)
-    • Explain each step clearly but with personality
-    • Have light humour where natural (but never forced)
-    • Ensure no detail is left unexplained
-    
-    """
+"""
     return prompt
