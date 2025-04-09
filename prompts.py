@@ -13,6 +13,130 @@ IMPORTANT_RULES = """
 10. NEVER use ingredients that don't match the user's preferences
 """
 
+# Dietary Requirements
+DIETARY_REQUIREMENTS = {
+    "None": {
+        "allowed": ["all foods"],
+        "restricted": [],
+        "notes": "No specific dietary restrictions"
+    },
+    "Whole30": {
+        "allowed": ["meat", "fish", "poultry", "eggs", "vegetables", "fruits", "natural fats", "herbs", "spices"],
+        "restricted": ["grains", "legumes", "dairy", "added sugar (real or artificial)", "alcohol", "processed foods"],
+        "notes": "Eliminates potentially inflammatory foods for 30 days"
+    },
+    "Paleo": {
+        "allowed": ["meat", "fish", "poultry", "vegetables", "fruits", "nuts", "seeds"],
+        "restricted": ["grains", "legumes", "dairy", "processed foods", "refined sugar"],
+        "notes": "Focus on whole, unprocessed foods thought to be eaten by Paleolithic ancestors"
+    },
+    "Ketogenic (Keto)": {
+        "allowed": ["meat", "fish", "poultry", "eggs", "low-carb vegetables", "healthy fats (oils, avocados, nuts, seeds)"],
+        "restricted": ["grains", "sugars", "high-carb fruits", "legumes", "most dairy"],
+        "notes": "Maintain high fat, moderate protein, very low carb to induce ketosis"
+    },
+    "Low-carb / High-protein": {
+        "allowed": ["meat", "fish", "poultry", "eggs", "low-carb vegetables", "healthy fats"],
+        "restricted": ["grains", "sugars", "high-carb fruits", "legumes", "starchy vegetables"],
+        "notes": "Focus on protein and healthy fats while significantly limiting carbohydrates"
+    },
+    "High-carb / Low-fat": {
+        "allowed": ["fruits", "vegetables", "whole grains", "legumes"],
+        "restricted": ["oils", "fatty meats", "high-fat dairy", "processed fats"],
+        "notes": "Emphasize carbohydrates as the primary energy source while minimizing fat intake"
+    },
+    "Plant-based": {
+        "allowed": ["vegetables", "fruits", "grains", "legumes", "nuts", "seeds", "plant-based oils"],
+        "restricted": ["meat", "fish", "poultry", "seafood", "dairy", "eggs", "honey (often)"],
+        "notes": "Focus on foods derived from plants"
+    },
+    "Whole food plant-based": {
+        "allowed": ["vegetables", "fruits", "whole grains", "legumes", "nuts", "seeds"],
+        "restricted": ["meat", "fish", "poultry", "dairy", "eggs", "processed foods", "oils"],
+        "notes": "Emphasize whole, unprocessed plant foods, often excluding added oils"
+    },
+    "Vegan": {
+        "allowed": ["vegetables", "fruits", "grains", "legumes", "nuts", "seeds", "plant-based oils"],
+        "restricted": ["meat", "fish", "poultry", "seafood", "dairy", "eggs", "honey", "gelatin", "some additives"],
+        "notes": "Avoids all animal products and by-products"
+    },
+    "Vegetarian (Lacto-ovo)": {
+        "allowed": ["vegetables", "fruits", "grains", "legumes", "dairy", "eggs", "plant-based oils"],
+        "restricted": ["meat", "fish", "poultry", "seafood"],
+        "notes": "Excludes meat, fish, and poultry; allows dairy and eggs"
+    },
+    "Vegetarian (Lacto)": {
+        "allowed": ["vegetables", "fruits", "grains", "legumes", "dairy", "plant-based oils"],
+        "restricted": ["meat", "fish", "poultry", "seafood", "eggs"],
+        "notes": "Excludes meat, fish, poultry, seafood, and eggs; allows dairy"
+    },
+    "Vegetarian (Ovo)": {
+        "allowed": ["vegetables", "fruits", "grains", "legumes", "eggs", "plant-based oils"],
+        "restricted": ["meat", "fish", "poultry", "seafood", "dairy"],
+        "notes": "Excludes meat, fish, poultry, seafood, and dairy; allows eggs"
+    },
+    "Pescatarian": {
+        "allowed": ["vegetables", "fruits", "grains", "legumes", "dairy", "eggs", "fish", "seafood", "plant-based oils"],
+        "restricted": ["meat", "poultry"],
+        "notes": "Excludes meat and poultry; allows fish, seafood, dairy, and eggs"
+    },
+    "Flexitarian": {
+        "allowed": ["mostly plant-based foods", "occasional meat, poultry, fish, dairy, and eggs"],
+        "restricted": ["limits on animal products"],
+        "notes": "Primarily vegetarian with occasional consumption of animal products"
+    },
+    "Pegan (Paleo + Vegan hybrid)": {
+        "allowed": ["vegetables", "fruits", "nuts", "seeds", "some legumes (sparingly)", "fish (sustainably sourced)", "eggs (pasture-raised)", "small amounts of grass-fed meat"],
+        "restricted": ["dairy", "grains", "most legumes", "processed foods", "refined sugar"],
+        "notes": "Combines principles of Paleo and Vegan diets, emphasizing whole plant foods and limited animal products"
+    },
+    "DASH (Dietary Approaches to Stop Hypertension)": {
+        "allowed": ["fruits", "vegetables", "whole grains", "lean proteins (fish, poultry)", "low-fat dairy"],
+        "restricted": ["red meat", "sugary drinks and sweets", "high-sodium foods", "saturated and trans fats"],
+        "notes": "Designed to help manage or prevent high blood pressure"
+    },
+    "MIND Diet (Mediterranean-DASH hybrid)": {
+        "allowed": ["berries", "green leafy vegetables", "nuts", "olive oil", "whole grains", "fish", "poultry", "beans", "wine (in moderation)"],
+        "restricted": ["red meat", "butter and stick margarine", "cheese", "pastries and sweets", "fried or fast food"],
+        "notes": "Focuses on foods that benefit brain health"
+    },
+    "Intermittent Fasting (e.g. 16:8, 5:2)": {
+        "allowed": ["all foods during eating windows"],
+        "restricted": ["food consumption during fasting periods"],
+        "notes": "Focuses on when you eat rather than what you eat"
+    },
+    "Kosher": {
+        "allowed": ["foods meeting Kosher dietary laws (separate dairy and meat, no pork or shellfish, etc.)"],
+        "restricted": ["non-Kosher foods and combinations"],
+        "notes": "Follows Jewish dietary laws outlined in the Torah"
+    },
+    "Halal": {
+        "allowed": ["foods meeting Halal dietary laws (no pork, alcohol, meat slaughtered according to Islamic law, etc.)"],
+        "restricted": ["non-Halal foods and preparations"],
+        "notes": "Follows Islamic dietary laws outlined in the Quran"
+    },
+    "Jain": {
+        "allowed": ["fruits", "most vegetables (excluding root vegetables like potatoes, onions, garlic)", "grains", "legumes"],
+        "restricted": ["root vegetables", "honey", "foods that may have involved violence against living beings"],
+        "notes": "Emphasizes non-violence towards all living beings"
+    },
+    "Buddhist": {
+        "allowed": ["varies greatly depending on the sect and individual; often vegetarian or vegan"],
+        "restricted": ["often meat, sometimes dairy and eggs; avoidance of intoxicants"],
+        "notes": "Dietary practices vary widely; emphasis on mindfulness and compassion"
+    },
+    "Seventh-day Adventist": {
+        "allowed": ["often vegetarian or vegan diets rich in fruits, vegetables, whole grains, legumes, nuts, and seeds; some consume fish and poultry"],
+        "restricted": ["pork, shellfish, alcohol, tobacco, caffeine, highly processed foods"],
+        "notes": "Emphasizes a healthy lifestyle based on biblical principles"
+    },
+    "Rastafarian Ital": {
+        "allowed": ["foods grown from the earth, often organic and unprocessed; fruits, vegetables, grains, legumes, herbs"],
+        "restricted": ["meat, fish (some allow small fish), dairy, eggs, processed foods, salt, artificial additives"],
+        "notes": "Focuses on natural, clean, and life-giving foods"
+    }
+}
+
 # System Prompt
 SYSTEM_PROMPT = """You are an expert chef and nutritionist specializing in creating personalized meal plans. Your task is to generate recipes that meet specific dietary requirements, health conditions, and cultural preferences while maintaining authenticity and practicality.
 
@@ -100,16 +224,8 @@ Key Guidelines:
    - Maintain recipe proportions
    - Consider leftovers
 
-9. Recipe Format:
-   - Clear recipe name
-   - Brief description
-   - Total time
-   - Serving size
-   - Ingredients list
-   - Step-by-step instructions
-   - Additional notes
 
-10. Quality Checks:
+9. Quality Checks:
     - Verify all requirements are met
     - Ensure recipe is practical
     - Check ingredient availability
@@ -133,3021 +249,1934 @@ Remember to:
 - Avoid ingredient repetition
 - Create unique recipes"""
 
-# Meal Plan Length
-MEAL_PLAN_LENGTH = """
-**MEAL PLAN LENGTH:**
-- 1 day
-- 2 days
-- 3 days
-- 4 days
-- 5 days
-- 6 days
-- 7 days
-"""
-
-# Dietary Requirements
-DIETARY_REQUIREMENTS = """
-**IMPORTANT - DIETARY REQUIREMENTS:**
-
-1. Vegetarian Diet:
-   - NO meat, poultry, or seafood
-   - ALLOWED:
-     • Dairy products (milk, cheese, yogurt)
-     • Eggs
-     • Plant-based proteins (tofu, tempeh, seitan)
-     • Legumes (lentils, chickpeas, beans)
-     • Nuts and seeds
-     • All vegetables and fruits
-     • All grains
-   - Protein Sources (Australian Measurements):
-     • Eggs (2-3 large eggs, 50-60g each)
-     • Dairy (Greek yogurt 200g, cheese 30g)
-     • Legumes (1 cup cooked = 250g)
-     • Tofu (1 block = 300g)
-     • Tempeh (1 block = 300g)
-     • Seitan (100g)
-   - Australian Ingredient Names:
-     • Capsicum (not bell pepper)
-     • Zucchini (not courgette)
-     • Eggplant (not aubergine)
-     • Coriander (not cilantro)
-     • Rocket (not arugula)
-     • Sweet potato (not yam)
-     • Snow peas (not mangetout)
-     • Spring onions (not scallions)
-   - Nutrient Focus:
-     • Iron-rich vegetables
-     • Vitamin B12 from eggs/dairy
-     • Complete protein combinations
-     • Calcium from dairy/fortified foods
-
-2. Vegan Diet:
-   - NO animal products at all
-   - ALLOWED:
-     • Plant-based proteins
-     • Legumes
-     • Nuts and seeds
-     • All vegetables and fruits
-     • All grains
-     • Plant-based dairy alternatives
-   - Protein Sources (Australian Measurements):
-     • Tofu (1 block = 300g)
-     • Tempeh (1 block = 300g)
-     • Legumes (1 cup cooked = 250g)
-     • Seitan (100g)
-     • Plant-based meat alternatives (100g)
-   - Australian Ingredient Names:
-     • Capsicum (not bell pepper)
-     • Zucchini (not courgette)
-     • Eggplant (not aubergine)
-     • Coriander (not cilantro)
-     • Rocket (not arugula)
-     • Sweet potato (not yam)
-     • Snow peas (not mangetout)
-     • Spring onions (not scallions)
-     • Chickpeas (not garbanzo beans)
-     • Lentils (red, brown, green)
-   - Nutrient Focus:
-     • Vitamin B12 from fortified foods
-     • Iron from plant sources
-     • Calcium from fortified plant milk
-     • Omega-3 from flax/chia seeds
-
-3. Pescatarian Diet:
-   - NO meat or poultry
-   - ALLOWED:
-     • Seafood and fish
-     • Dairy products
-     • Eggs
-     • Plant-based proteins
-     • All vegetables and fruits
-     • All grains
-   - Protein Sources (Australian Measurements):
-     • Fish (150-200g fillet)
-     • Seafood (150-200g)
-     • Eggs (2-3 large eggs, 50-60g each)
-     • Dairy products
-     • Legumes (1 cup cooked = 250g)
-   - Australian Ingredient Names:
-     • Barramundi (not sea bass)
-     • Snapper (not red snapper)
-     • Flathead (not flounder)
-     • Prawns (not shrimp)
-     • Squid (not calamari)
-     • Capsicum (not bell pepper)
-     • Zucchini (not courgette)
-     • Eggplant (not aubergine)
-   - Nutrient Focus:
-     • Omega-3 from fish
-     • Iron from seafood
-     • Vitamin B12 from fish/eggs/dairy
-     • Iodine from seafood
-
-4. Mediterranean Diet:
-   - Focus on whole, unprocessed foods
-   - ALLOWED:
-     • Fish and seafood (2-3 times/week)
-     • Poultry (2-3 times/week)
-     • Red meat (rarely)
-     • Dairy (moderate)
-     • Eggs
-     • Olive oil
-     • All vegetables and fruits
-     • Whole grains
-     • Legumes
-     • Nuts and seeds
-   - Key Components (Australian Measurements):
-     • Extra virgin olive oil (1-2 tbsp = 15-30ml)
-     • Fresh vegetables (2-3 cups = 500-750g)
-     • Whole grains (1 cup cooked = 250g)
-     • Fish (150-200g fillet)
-     • Seafood (150-200g)
-     • Legumes (1 cup cooked = 250g)
-   - Australian Ingredient Names:
-     • Barramundi (not sea bass)
-     • Snapper (not red snapper)
-     • Flathead (not flounder)
-     • Prawns (not shrimp)
-     • Squid (not calamari)
-     • Capsicum (not bell pepper)
-     • Zucchini (not courgette)
-     • Eggplant (not aubergine)
-     • Rocket (not arugula)
-     • Sweet potato (not yam)
-   - Nutrient Focus:
-     • Healthy fats from olive oil
-     • Omega-3 from fish
-     • Fiber from vegetables/grains
-     • Antioxidants from produce
-
-5. Paleo Diet:
-   - NO grains, legumes, dairy
-   - ALLOWED:
-     • Meat and poultry
-     • Fish and seafood
-     • Eggs
-     • Vegetables
-     • Fruits (moderate)
-     • Nuts and seeds
-     • Healthy fats
-   - Protein Sources (Australian Measurements):
-     • Meat (150-200g)
-     • Fish (150-200g fillet)
-     • Eggs (2-3 large eggs, 50-60g each)
-     • Seafood (150-200g)
-   - Australian Ingredient Names:
-     • Rump steak (not sirloin)
-     • Chuck steak (not chuck roast)
-     • Barramundi (not sea bass)
-     • Snapper (not red snapper)
-     • Flathead (not flounder)
-     • Prawns (not shrimp)
-     • Squid (not calamari)
-     • Capsicum (not bell pepper)
-     • Zucchini (not courgette)
-     • Eggplant (not aubergine)
-   - Nutrient Focus:
-     • Protein from meat/fish
-     • Healthy fats
-     • Fiber from vegetables
-     • Vitamins from produce
-
-6. Keto Diet:
-   - Very low carb, high fat
-   - ALLOWED:
-     • Meat and poultry
-     • Fish and seafood
-     • Eggs
-     • Low-carb vegetables
-     • High-fat dairy
-     • Nuts and seeds
-     • Healthy oils
-   - Macronutrient Ratios:
-     • 70-75% fat
-     • 20-25% protein
-     • 5-10% carbs
-   - Key Components (Australian Measurements):
-     • Healthy fats (avocado 1/2 = 100g, olive oil 1-2 tbsp = 15-30ml)
-     • Protein (150-200g meat/fish)
-     • Low-carb vegetables (2-3 cups = 500-750g)
-     • High-fat dairy (cream 60ml, cheese 30g)
-   - Australian Ingredient Names:
-     • Rump steak (not sirloin)
-     • Chuck steak (not chuck roast)
-     • Barramundi (not sea bass)
-     • Snapper (not red snapper)
-     • Flathead (not flounder)
-     • Prawns (not shrimp)
-     • Squid (not calamari)
-     • Capsicum (not bell pepper)
-     • Zucchini (not courgette)
-     • Eggplant (not aubergine)
-     • Rocket (not arugula)
-   - Key Components:
-     • Healthy fats (avocado, olive oil)
-     • Protein (moderate)
-     • Low-carb vegetables
-     • No grains or sugar
-
-7. Low-Carb Diet:
-   - Moderate carb reduction
-   - ALLOWED:
-     • Meat and poultry
-     • Fish and seafood
-     • Eggs
-     • Vegetables
-     • Some fruits
-     • Dairy
-     • Nuts and seeds
-   - Carb Limits:
-     • 50-150g carbs per day
-     • Focus on complex carbs
-   - Protein Sources (Australian Measurements):
-     • Lean meats (150-200g)
-     • Fish (150-200g fillet)
-     • Eggs (2-3 large eggs, 50-60g each)
-     • Dairy (milk 250ml, yogurt 200g)
-   - Australian Ingredient Names:
-     • Rump steak (not sirloin)
-     • Chuck steak (not chuck roast)
-     • Barramundi (not sea bass)
-     • Snapper (not red snapper)
-     • Flathead (not flounder)
-     • Prawns (not shrimp)
-     • Squid (not calamari)
-     • Capsicum (not bell pepper)
-     • Zucchini (not courgette)
-     • Eggplant (not aubergine)
-     • Rocket (not arugula)
-     • Sweet potato (not yam)
-
-8. Whole Food Plant-Based Diet:
-   - NO processed foods
-   - ALLOWED:
-     • Whole grains
-     • Legumes
-     • Vegetables
-     • Fruits
-     • Nuts and seeds
-     • Minimal oil
-   - Key Components (Australian Measurements):
-     • Whole grains (1 cup cooked = 250g)
-     • Legumes (1 cup cooked = 250g)
-     • Vegetables (2-3 cups = 500-750g)
-     • Fruits (1-2 serves = 150-300g)
-     • Nuts (30g)
-     • Seeds (15g)
-   - Australian Ingredient Names:
-     • Capsicum (not bell pepper)
-     • Zucchini (not courgette)
-     • Eggplant (not aubergine)
-     • Coriander (not cilantro)
-     • Rocket (not arugula)
-     • Sweet potato (not yam)
-     • Snow peas (not mangetout)
-     • Spring onions (not scallions)
-     • Chickpeas (not garbanzo beans)
-     • Lentils (red, brown, green)
-     • Brown rice (not whole grain rice)
-     • Rolled oats (not oatmeal)
-
-9. High-Protein Diet:
-   - Focus on protein-rich foods
-   - ALLOWED:
-     • Lean meats
-     • Fish and seafood
-     • Eggs
-     • Dairy
-     • Vegetables
-     • Some grains
-   - Protein Requirements:
-     • 1.6-2.2g per kg body weight
-     • Spread across meals
-   - Key Components (Australian Measurements):
-     • Lean protein (150-200g)
-     • Vegetables (2-3 cups = 500-750g)
-     • Complex carbs (1 cup cooked = 250g)
-     • Healthy fats (1-2 tbsp = 15-30ml)
-   - Australian Ingredient Names:
-     • Rump steak (not sirloin)
-     • Chuck steak (not chuck roast)
-     • Barramundi (not sea bass)
-     • Snapper (not red snapper)
-     • Flathead (not flounder)
-     • Prawns (not shrimp)
-     • Squid (not calamari)
-     • Capsicum (not bell pepper)
-     • Zucchini (not courgette)
-     • Eggplant (not aubergine)
-     • Rocket (not arugula)
-     • Sweet potato (not yam)
-
-10. Diabetic-Friendly Diet:
-    - Focus on blood sugar control
-    - ALLOWED:
-      • Lean proteins
-      • Low-GI vegetables
-      • Whole grains (moderate)
-      • Some fruits
-      • Healthy fats
-    - Key Components (Australian Measurements):
-      • Low-GI foods (1 serve = 15g carbs)
-      • Fiber-rich foods (25-30g daily)
-      • Lean protein (150-200g)
-      • Healthy fats (1-2 tbsp = 15-30ml)
-    - Australian Ingredient Names:
-      • Rump steak (not sirloin)
-      • Chuck steak (not chuck roast)
-      • Barramundi (not sea bass)
-      • Snapper (not red snapper)
-      • Flathead (not flounder)
-      • Prawns (not shrimp)
-      • Squid (not calamari)
-      • Capsicum (not bell pepper)
-      • Zucchini (not courgette)
-      • Eggplant (not aubergine)
-      • Rocket (not arugula)
-      • Sweet potato (not yam)
-      • Brown rice (not whole grain rice)
-      • Rolled oats (not oatmeal)
-    - Nutrient Focus:
-      • Complex carbs
-      • Fiber
-      • Lean protein
-      • Healthy fats
-    - Portion Control:
-      • Controlled carb portions
-      • Balanced meals
-      • Regular timing
-
-Core Requirements (Adapt Based on User Input):
-1. Sodium Level:
-   - For hypertension: Strictly low-sodium (NO added salt)
-   - For others: Moderate sodium allowed (use salt in moderation)
-2. Potassium Content:
-   - For hypertension: High in potassium-rich foods
-   - For others: Balanced potassium content
-3. Fiber Content:
-   - For diabetic-friendly: High fiber with clear portions
-   - For others: Moderate fiber content
-4. Allergies:
-   - Strictly avoid specified allergens
-   - No cross-contamination risks
-5. Protein Sources:
-   - For tight budget ($3-$7): Focus on eggs, legumes, canned fish
-   - For moderate budget ($8-$15): Mix of budget and premium proteins
-   - For high budget ($15+): Premium cuts allowed
-6. Herbs and Spices:
-   - For tight budget: Limit to 1-2 types per recipe
-   - For moderate/high budget: Multiple herbs allowed
-7. Ingredient Quality:
-   - For tight budget: Use canned/frozen when needed
-   - For moderate/high budget: Fresh ingredients preferred
-"""
-
-# Core Requirements
-CORE_REQUIREMENTS = """
-**CORE REQUIREMENTS:**
-- Follow dietary restrictions
-- Consider health conditions
-- Match budget constraints
-- Adapt to time available
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • Sodium Restrictions:
-       - NO added salt in recipes
-       - NO high-sodium ingredients (soy sauce, stock cubes, processed meats)
-       - Use salt-free alternatives (herbs, spices, citrus)
-       - Maximum 2000mg sodium per day
-     • Potassium-Rich Foods:
-       - Sweet potato (1 medium = 450mg potassium)
-       - Spinach (1 cup = 840mg potassium)
-       - Bananas (1 medium = 400mg potassium)
-       - Avocado (1/2 = 485mg potassium)
-     • Heart-Healthy Choices:
-       - Lean proteins (150-200g)
-       - Omega-3 rich fish (salmon, barramundi)
-       - Fresh vegetables (2-3 cups = 500-750g)
-       - Whole grains (1 cup cooked = 250g)
-     • Cooking Methods:
-       - Steaming
-       - Grilling
-       - Baking
-       - Poaching
-     • Avoid:
-       - Deep frying
-       - High-sodium sauces
-       - Processed foods
-       - Canned soups
-       - Deli meats
-
-   - Diabetes:
-     • Glycemic Control:
-       - Low-GI foods (GI < 55)
-       - Complex carbohydrates
-       - Fiber-rich ingredients
-       - Protein with each meal
-     • Carbohydrate Management:
-       - 15-30g carbs per meal
-       - 45-60g carbs per day
-       - Spread carbs evenly
-       - Include fiber (25-30g daily)
-     • Protein Requirements:
-       - Lean proteins (150-200g)
-       - Plant proteins (tofu, legumes)
-       - Fish (150-200g)
-       - Eggs (2-3 large)
-     • Healthy Fats:
-       - Olive oil (1-2 tbsp = 15-30ml)
-       - Avocado (1/4 = 50g)
-       - Nuts (30g)
-       - Seeds (15g)
-     • Avoid:
-       - Refined sugars
-       - White flour
-       - Processed foods
-       - High-GI fruits
-       - Sweetened beverages
-
-   - Heart Disease:
-     • Fat Management:
-       - Saturated fat < 7% daily calories
-       - Trans fat < 1% daily calories
-       - Focus on unsaturated fats
-       - Omega-3 rich foods
-     • Protein Selection:
-       - Lean meats (150-200g)
-       - Fish (150-200g)
-       - Plant proteins
-       - Low-fat dairy
-     • Fiber Focus:
-       - Soluble fiber (10-25g daily)
-       - Insoluble fiber (10-25g daily)
-       - Whole grains
-       - Fresh vegetables
-     • Sodium Control:
-       - < 2000mg daily
-       - No added salt
-       - Low-sodium alternatives
-       - Fresh ingredients
-     • Avoid:
-       - High-fat meats
-       - Processed foods
-       - Deep-fried items
-       - High-sodium foods
-       - Trans fats
-
-   - Kidney Disease:
-     • Protein Control:
-       - Moderate protein (0.8g/kg body weight)
-       - High-quality proteins
-       - Plant proteins preferred
-       - Limited animal protein
-     • Potassium Management:
-       - Low-potassium vegetables
-       - Limited high-potassium fruits
-       - Avoid potassium-rich foods
-       - Monitor portion sizes
-     • Phosphorus Control:
-       - Limit dairy products
-       - Avoid processed foods
-       - Choose fresh ingredients
-       - Read food labels
-     • Sodium Restrictions:
-       - < 2000mg daily
-       - No added salt
-       - Fresh ingredients
-       - Low-sodium alternatives
-     • Avoid:
-       - High-potassium foods
-       - Processed meats
-       - Canned foods
-       - High-sodium items
-       - Dark colas
-
-   - Celiac Disease:
-     • Gluten-Free Requirements:
-       - NO wheat, barley, rye
-       - NO cross-contamination
-       - Certified gluten-free products
-       - Separate cooking equipment
-     • Safe Grains:
-       - Rice (brown, white)
-       - Quinoa
-       - Buckwheat
-       - Millet
-       - Corn
-     • Protein Sources:
-       - Fresh meats
-       - Fish
-       - Eggs
-       - Legumes
-     • Fresh Ingredients:
-       - Vegetables
-       - Fruits
-       - Herbs
-       - Spices
-     • Avoid:
-       - Wheat flour
-       - Barley malt
-       - Rye bread
-       - Processed foods
-       - Cross-contamination risks
-
-   - Food Allergies:
-     • Strict Avoidance:
-       - Complete elimination of allergen
-       - No cross-contamination
-       - Separate equipment
-       - Safe preparation area
-     • Common Allergens:
-       - Nuts (peanuts, tree nuts)
-       - Dairy
-       - Eggs
-       - Shellfish
-       - Soy
-     • Safe Alternatives:
-       - Plant-based milks
-       - Egg substitutes
-       - Nut-free options
-       - Shellfish alternatives
-     • Label Reading:
-       - Check all ingredients
-       - Look for allergen warnings
-       - Verify processing facilities
-       - Confirm safety protocols
-     • Emergency Preparedness:
-       - EpiPen if prescribed
-       - Emergency plan
-       - Medical alert
-       - Safe food list
-
-   - Other Conditions:
-     • Adapt based on specific needs
-     • Consult healthcare provider
-     • Follow medical advice
-     • Monitor symptoms
-     • Adjust as needed
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant-based proteins
-     • Fresh vegetables
-     • Whole grains
-     • Healthy fats
-   - Vegan:
-     • Plant-based proteins
-     • Fresh vegetables
-     • Whole grains
-     • Plant fats
-   - Pescatarian:
-     • Seafood proteins
-     • Fresh vegetables
-     • Whole grains
-     • Healthy fats
-   - Mediterranean:
-     • Mediterranean proteins
-     • Fresh vegetables
-     • Whole grains
-     • Olive oil
-   - Paleo:
-     • Natural proteins
-     • Fresh vegetables
-     • No grains
-     • Healthy fats
-   - Keto:
-     • High protein
-     • Low carb vegetables
-     • No grains
-     • High fats
-   - Low-Carb:
-     • Proteins
-     • Low carb vegetables
-     • Healthy fats
-     • Limited grains
-   - Whole Food Plant-Based:
-     • Plant proteins
-     • Fresh vegetables
-     • Whole grains
-     • Plant fats
-   - High-Protein:
-     • High protein foods
-     • Vegetables
-     • Limited grains
-     • Healthy fats
-   - Diabetic-Friendly:
-     • Low glycemic proteins
-     • Fiber-rich vegetables
-     • Limited grains
-     • Healthy fats
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Budget proteins
-     • Basic vegetables
-     • Basic grains
-     • Basic fats
-   - Moderate ($8-$15):
-     • Standard proteins
-     • Quality vegetables
-     • Quality grains
-     • Quality fats
-   - High ($15+):
-     • Premium proteins
-     • Premium vegetables
-     • Premium grains
-     • Premium fats
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick proteins
-     • Pre-cut vegetables
-     • Quick grains
-     • Simple fats
-   - Moderate (30 mins):
-     • Standard proteins
-     • Fresh vegetables
-     • Standard grains
-     • Standard fats
-   - Relaxed (45+ mins):
-     • Complex proteins
-     • Fresh vegetables
-     • Complex grains
-     • Complex fats
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Nut-free proteins
-     • Nut-free grains
-     • Safe vegetables
-     • Safe oils
-   - Dairy Intolerance:
-     • Dairy-free proteins
-     • Dairy-free grains
-     • Safe vegetables
-     • Dairy-free fats
-   - Gluten Intolerance:
-     • Gluten-free proteins
-     • Gluten-free grains
-     • Safe vegetables
-     • Safe fats
-   - Shellfish Allergy:
-     • Shellfish-free proteins
-     • Safe grains
-     • Safe vegetables
-     • Safe fats
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Italian proteins
-     • Pasta/rice
-     • Italian vegetables
-     • Olive oil
-   - Mexican:
-     • Mexican proteins
-     • Corn/tortillas
-     • Mexican vegetables
-     • Mexican oils
-   - Chinese:
-     • Chinese proteins
-     • Rice/noodles
-     • Chinese vegetables
-     • Chinese oils
-   - Indian:
-     • Indian proteins
-     • Rice/naan
-     • Indian vegetables
-     • Indian oils
-   - Japanese:
-     • Japanese proteins
-     • Rice/noodles
-     • Japanese vegetables
-     • Japanese oils
-   - Thai:
-     • Thai proteins
-     • Rice/noodles
-     • Thai vegetables
-     • Thai oils
-   - Mediterranean:
-     • Mediterranean proteins
-     • Mediterranean grains
-     • Mediterranean vegetables
-     • Olive oil
-   - Australian:
-     • Local proteins
-     • Local grains
-     • Local vegetables
-     • Local oils
-   - All Cuisines:
-     • Mix of proteins
-     • Mix of grains
-     • Mix of vegetables
-     • Mix of oils
-"""
-
-# Cuisine Requirements
-CUISINE_REQUIREMENTS = """
-**CUISINE-SPECIFIC REQUIREMENTS:**
-
-1. Australian Cuisine:
-   - Essential Ingredients:
-     • Fresh produce (seasonal fruits and vegetables)
-     • Quality meats (beef, lamb, chicken)
-     • Seafood (barramundi, prawns, snapper)
-     • Native ingredients (macadamia nuts, wattleseed)
-     • Bush herbs (lemon myrtle, wattleseed)
-   - Traditional Breakfast Dishes:
-     • Vegemite on toast
-     • Avocado toast with poached eggs
-     • Breakfast burrito
-     • Bircher muesli
-     • Bacon and egg roll
-   - Authentic Cooking Methods:
-     • Grilling (BBQ)
-     • Roasting
-     • Fresh preparation
-     • Minimal processing
-   - Meal Structure:
-     • Hearty breakfasts
-     • Fresh ingredients
-     • Simple preparation
-     • Quality produce focus
-
-2. Italian Cuisine:
-   - Essential Ingredients:
-     • Extra virgin olive oil
-     • Fresh herbs (basil, oregano, rosemary)
-     • Garlic
-     • Tomatoes
-     • Parmesan cheese
-     • Fresh pasta
-     • Arborio rice
-   - Traditional Breakfast Dishes:
-     • Frittata
-     • Cornetto (Italian croissant)
-     • Cappuccino
-     • Bruschetta
-     • Italian breakfast cookies
-   - Authentic Cooking Methods:
-     • Al dente pasta
-     • Risotto technique
-     • Fresh sauce making
-     • Proper cheese grating
-   - Regional Variations:
-     • Northern: Rice, butter, cream
-     • Southern: Olive oil, tomatoes
-     • Central: Fresh herbs, vegetables
-   - Meal Structure:
-     • Multiple courses
-     • Fresh ingredients
-     • Simple preparation
-     • Quality focus
-
-3. Japanese Cuisine:
-   - Essential Ingredients:
-     • Japanese rice
-     • Miso paste
-     • Soy sauce
-     • Dashi stock
-     • Mirin
-     • Nori
-     • Tofu
-   - Traditional Breakfast Dishes:
-     • Tamago Kake Gohan
-     • Miso Soup
-     • Natto
-     • Onigiri
-     • Japanese-style omelette
-   - Authentic Cooking Methods:
-     • Proper rice cooking
-     • Dashi preparation
-     • Miso soup making
-     • Sushi rolling
-   - Regional Variations:
-     • Kanto: Strong flavors
-     • Kansai: Lighter flavors
-     • Kyushu: Spicy dishes
-   - Meal Structure:
-     • Rice-based
-     • Multiple small dishes
-     • Balance of flavors
-     • Fresh ingredients
-
-4. Mexican Cuisine:
-   - Essential Ingredients:
-     • Corn tortillas
-     • Beans
-     • Avocados
-     • Tomatoes
-     • Chilies
-     • Cilantro
-     • Lime
-   - Traditional Breakfast Dishes:
-     • Huevos Rancheros
-     • Chilaquiles
-     • Breakfast burritos
-     • Atole
-     • Pan dulce
-   - Authentic Cooking Methods:
-     • Tortilla making
-     • Salsa preparation
-     • Proper chili handling
-     • Bean cooking
-   - Regional Variations:
-     • Northern: Meat-focused
-     • Southern: Seafood-based
-     • Central: Complex sauces
-   - Meal Structure:
-     • Tortilla-based
-     • Spicy elements
-     • Fresh toppings
-     • Bean accompaniments
-
-5. Indian Cuisine:
-   - Essential Ingredients:
-     • Spices (turmeric, cumin, coriander)
-     • Lentils
-     • Rice
-     • Ghee
-     • Fresh herbs
-     • Ginger
-     • Garlic
-   - Traditional Breakfast Dishes:
-     • Dosa
-     • Idli
-     • Upma
-     • Poha
-     • Paratha
-   - Authentic Cooking Methods:
-     • Tempering spices
-     • Proper rice cooking
-     • Dal preparation
-     • Bread making
-   - Regional Variations:
-     • North: Wheat-based
-     • South: Rice-based
-     • East: Fish-based
-     • West: Coastal influences
-   - Meal Structure:
-     • Spice balance
-     • Multiple dishes
-     • Fresh accompaniments
-     • Proper serving order
-
-6. Chinese Cuisine:
-   - Essential Ingredients:
-     • Rice
-     • Soy sauce
-     • Oyster sauce
-     • Sesame oil
-     • Ginger
-     • Garlic
-     • Green onions
-   - Traditional Breakfast Dishes:
-     • Congee
-     • You tiao
-     • Dim sum
-     • Baozi
-     • Jianbing
-   - Authentic Cooking Methods:
-     • Stir-frying
-     • Steaming
-     • Wok cooking
-     • Dumpling making
-   - Regional Variations:
-     • Cantonese: Light flavors
-     • Sichuan: Spicy
-     • Northern: Wheat-based
-     • Eastern: Sweet-sour
-   - Meal Structure:
-     • Rice-based
-     • Multiple dishes
-     • Balance of flavors
-     • Fresh ingredients
-
-7. Thai Cuisine:
-   - Essential Ingredients:
-     • Jasmine rice
-     • Fish sauce
-     • Coconut milk
-     • Thai chilies
-     • Lemongrass
-     • Kaffir lime
-     • Thai basil
-   - Traditional Breakfast Dishes:
-     • Jok (rice porridge)
-     • Khao Tom
-     • Khanom krok
-     • Thai-style omelette
-     • Roti
-   - Authentic Cooking Methods:
-     • Curry paste making
-     • Proper rice cooking
-     • Coconut milk handling
-     • Fresh herb usage
-   - Regional Variations:
-     • Central: Complex flavors
-     • Northern: Herbal focus
-     • Southern: Spicy
-     • Northeastern: Salty-spicy
-   - Meal Structure:
-     • Rice-based
-     • Multiple dishes
-     • Balance of flavors
-     • Fresh herbs
-
-8. Mediterranean Cuisine:
-   - Essential Ingredients:
-     • Olive oil
-     • Fresh herbs
-     • Tomatoes
-     • Garlic
-     • Lemon
-     • Feta cheese
-     • Olives
-   - Traditional Breakfast Dishes:
-     • Greek yogurt
-     • Feta and olives
-     • Mediterranean omelette
-     • Fresh bread
-     • Fruit and nuts
-   - Authentic Cooking Methods:
-     • Olive oil usage
-     • Fresh preparation
-     • Simple cooking
-     • Herb combinations
-   - Regional Variations:
-     • Greek: Feta and olives
-     • Italian: Pasta focus
-     • Spanish: Seafood
-     • French: Herbs
-   - Meal Structure:
-     • Fresh ingredients
-     • Simple preparation
-     • Multiple courses
-     • Quality focus
-
-9. Middle Eastern Cuisine:
-   - Essential Ingredients:
-     • Olive oil
-     • Tahini
-     • Hummus
-     • Pita bread
-     • Za'atar
-     • Sumac
-     • Fresh herbs
-   - Traditional Breakfast Dishes:
-     • Ful medames
-     • Shakshuka
-     • Manakish
-     • Labneh
-     • Arabic bread
-   - Authentic Cooking Methods:
-     • Hummus making
-     • Pita baking
-     • Spice blending
-     • Fresh preparation
-   - Regional Variations:
-     • Levantine: Fresh herbs
-     • Persian: Rice-based
-     • Egyptian: Bean-based
-     • Turkish: Bread-based
-   - Meal Structure:
-     • Shared dishes
-     • Fresh ingredients
-     • Multiple courses
-     • Bread focus
-
-10. French Cuisine:
-    - Essential Ingredients:
-      • Butter
-      • Wine
-      • Fresh herbs
-      • Cheese
-      • Baguette
-      • Dijon mustard
-      • Shallots
-    - Traditional Breakfast Dishes:
-      • Croissants
-      • Pain au chocolat
-      • French toast
-      • Omelette
-      • Café au lait
-    - Authentic Cooking Methods:
-      • Sauce making
-      • Proper bread baking
-      • Wine reduction
-      • Butter usage
-    - Regional Variations:
-      • Northern: Rich dishes
-      • Southern: Mediterranean
-      • Eastern: German influence
-      • Western: Seafood
-    - Meal Structure:
-      • Multiple courses
-      • Wine pairing
-      • Fresh ingredients
-      • Quality focus
-
-11. Korean Cuisine:
-    - Essential Ingredients:
-      • Rice
-      • Gochujang
-      • Kimchi
-      • Sesame oil
-      • Soy sauce
-      • Garlic
-      • Green onions
-    - Traditional Breakfast Dishes:
-      • Juk (rice porridge)
-      • Kimchi
-      • Korean-style eggs
-      • Tteok (rice cakes)
-      • Gimbap
-    - Authentic Cooking Methods:
-      • Kimchi making
-      • Rice cooking
-      • Fermentation
-      • Spice handling
-    - Regional Variations:
-      • Seoul: Modern fusion
-      • Busan: Seafood
-      • Jeju: Island cuisine
-      • North: Hearty dishes
-    - Meal Structure:
-      • Rice-based
-      • Multiple side dishes
-      • Fermented foods
-      • Spice balance
-
-12. Vietnamese Cuisine:
-    - Essential Ingredients:
-      • Rice noodles
-      • Fish sauce
-      • Fresh herbs
-      • Rice paper
-      • Lemongrass
-      • Ginger
-      • Chilies
-    - Traditional Breakfast Dishes:
-      • Pho
-      • Banh mi
-      • Xoi (sticky rice)
-      • Banh cuon
-      • Vietnamese coffee
-    - Authentic Cooking Methods:
-      • Noodle preparation
-      • Fresh wrapping
-      • Herb usage
-      • Broth making
-    - Regional Variations:
-      • Northern: Subtle flavors
-      • Southern: Sweet-spicy
-      • Central: Spicy
-      • Highland: Unique herbs
-    - Meal Structure:
-      • Noodle-based
-      • Fresh herbs
-      • Multiple textures
-      • Balance of flavors
-
-13. Greek Cuisine:
-    - Essential Ingredients:
-      • Olive oil
-      • Feta cheese
-      • Olives
-      • Fresh herbs
-      • Lemon
-      • Garlic
-      • Yogurt
-    - Traditional Breakfast Dishes:
-      • Greek yogurt
-      • Spanakopita
-      • Tiropita
-      • Fresh bread
-      • Fruit and honey
-    - Authentic Cooking Methods:
-      • Filo handling
-      • Olive oil usage
-      • Fresh preparation
-      • Herb combinations
-    - Regional Variations:
-      • Islands: Seafood
-      • Mainland: Meat
-      • Northern: Mountain cuisine
-      • Southern: Mediterranean
-    - Meal Structure:
-      • Shared dishes
-      • Fresh ingredients
-      • Multiple courses
-      • Quality focus
-
-14. Spanish Cuisine:
-    - Essential Ingredients:
-      • Olive oil
-      • Saffron
-      • Paprika
-      • Garlic
-      • Tomatoes
-      • Jamón
-      • Manchego cheese
-    - Traditional Breakfast Dishes:
-      • Churros
-      • Tortilla española
-      • Pan con tomate
-      • Croquetas
-      • Café con leche
-    - Authentic Cooking Methods:
-      • Paella making
-      • Tapas preparation
-      • Olive oil usage
-      • Fresh preparation
-    - Regional Variations:
-      • Catalonia: Seafood
-      • Andalusia: Fried foods
-      • Basque: Pintxos
-      • Galicia: Seafood
-    - Meal Structure:
-      • Tapas style
-      • Multiple courses
-      • Fresh ingredients
-      • Quality focus
-"""
-
-# Recipe Descriptions
-RECIPE_DESCRIPTIONS = """
-**RECIPE DESCRIPTIONS:**
-- Engaging and appetizing
-- Highlight key features
-- Match dietary needs
-- Consider preferences
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • Low-sodium benefits
-     • Heart-healthy features
-     • Fresh ingredients
-     • Health benefits
-   - Diabetes:
-     • Low glycemic benefits
-     • Fiber-rich features
-     • Health benefits
-     • Fresh ingredients
-   - Heart Disease:
-     • Heart-healthy benefits
-     • Low-fat features
-     • Fresh ingredients
-     • Health benefits
-   - Other Conditions:
-     • Adapt based on specific needs
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant-based benefits
-     • Protein features
-     • Fresh ingredients
-     • Health benefits
-   - Vegan:
-     • Plant-based benefits
-     • Protein features
-     • Fresh ingredients
-     • Health benefits
-   - Pescatarian:
-     • Seafood benefits
-     • Plant features
-     • Fresh ingredients
-     • Health benefits
-   - Mediterranean:
-     • Mediterranean benefits
-     • Fresh features
-     • Health benefits
-     • Regional benefits
-   - Paleo:
-     • Paleo benefits
-     • Natural features
-     • Health benefits
-     • Basic benefits
-   - Keto:
-     • Keto benefits
-     • Low-carb features
-     • Health benefits
-     • Fresh ingredients
-   - Low-Carb:
-     • Low-carb benefits
-     • Fresh features
-     • Health benefits
-     • Healthy benefits
-   - Whole Food Plant-Based:
-     • Plant benefits
-     • Natural features
-     • Health benefits
-     • Basic benefits
-   - High-Protein:
-     • Protein benefits
-     • Fresh features
-     • Health benefits
-     • Healthy benefits
-   - Diabetic-Friendly:
-     • Low glycemic benefits
-     • Fresh features
-     • Health benefits
-     • Healthy benefits
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Budget benefits
-     • Basic features
-     • Simple benefits
-     • Basic advantages
-   - Moderate ($8-$15):
-     • Standard benefits
-     • Quality features
-     • Standard benefits
-     • Standard advantages
-   - High ($15+):
-     • Premium benefits
-     • Premium features
-     • Complex benefits
-     • Premium advantages
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick benefits
-     • Pre-cut features
-     • Simple benefits
-     • Quick advantages
-   - Moderate (30 mins):
-     • Standard benefits
-     • Fresh features
-     • Standard benefits
-     • Standard advantages
-   - Relaxed (45+ mins):
-     • Complex benefits
-     • Fresh features
-     • Complex benefits
-     • Complex advantages
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Nut-free benefits
-     • Safe features
-     • Alternative benefits
-     • Safe advantages
-   - Dairy Intolerance:
-     • Dairy-free benefits
-     • Safe features
-     • Alternative benefits
-     • Safe advantages
-   - Gluten Intolerance:
-     • Gluten-free benefits
-     • Safe features
-     • Alternative benefits
-     • Safe advantages
-   - Shellfish Allergy:
-     • Shellfish-free benefits
-     • Safe features
-     • Alternative benefits
-     • Safe advantages
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Italian benefits
-     • Italian features
-     • Italian advantages
-     • Italian highlights
-   - Mexican:
-     • Mexican benefits
-     • Mexican features
-     • Mexican advantages
-     • Mexican highlights
-   - Chinese:
-     • Chinese benefits
-     • Chinese features
-     • Chinese advantages
-     • Chinese highlights
-   - Indian:
-     • Indian benefits
-     • Indian features
-     • Indian advantages
-     • Indian highlights
-   - Japanese:
-     • Japanese benefits
-     • Japanese features
-     • Japanese advantages
-     • Japanese highlights
-   - Thai:
-     • Thai benefits
-     • Thai features
-     • Thai advantages
-     • Thai highlights
-   - Mediterranean:
-     • Mediterranean benefits
-     • Mediterranean features
-     • Mediterranean advantages
-     • Mediterranean highlights
-   - Australian:
-     • Local benefits
-     • Local features
-     • Local advantages
-     • Local highlights
-   - All Cuisines:
-     • Mix of benefits
-     • Mix of features
-     • Mix of advantages
-     • Mix of highlights
-"""
-
-# Australian Dietary Guidelines
-AUSTRALIAN_DIETARY_GUIDELINES = """
-**AUSTRALIAN DIETARY GUIDELINES:**
-- Follow guidelines
-- Consider preferences
-- Adapt to needs
-- Match requirements
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • Low-sodium guidelines
-     • Heart-healthy choices
-     • Fresh ingredients
-     • Health benefits
-   - Diabetes:
-     • Low glycemic guidelines
-     • Fiber-rich choices
-     • Health benefits
-     • Fresh ingredients
-   - Heart Disease:
-     • Heart-healthy guidelines
-     • Low-fat choices
-     • Fresh ingredients
-     • Health benefits
-   - Other Conditions:
-     • Adapt based on specific needs
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant-based guidelines
-     • Protein choices
-     • Fresh ingredients
-     • Health benefits
-   - Vegan:
-     • Plant-based guidelines
-     • Protein choices
-     • Fresh ingredients
-     • Health benefits
-   - Pescatarian:
-     • Seafood guidelines
-     • Plant choices
-     • Fresh ingredients
-     • Health benefits
-   - Mediterranean:
-     • Mediterranean guidelines
-     • Fresh choices
-     • Health benefits
-     • Regional benefits
-   - Paleo:
-     • Paleo guidelines
-     • Natural choices
-     • Health benefits
-     • Basic benefits
-   - Keto:
-     • Keto guidelines
-     • Low-carb choices
-     • Health benefits
-     • Fresh ingredients
-   - Low-Carb:
-     • Low-carb guidelines
-     • Fresh choices
-     • Health benefits
-     • Healthy benefits
-   - Whole Food Plant-Based:
-     • Plant guidelines
-     • Natural choices
-     • Health benefits
-     • Basic benefits
-   - High-Protein:
-     • Protein guidelines
-     • Fresh choices
-     • Health benefits
-     • Healthy benefits
-   - Diabetic-Friendly:
-     • Low glycemic guidelines
-     • Fresh choices
-     • Health benefits
-     • Healthy benefits
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Budget guidelines
-     • Basic choices
-     • Simple benefits
-     • Basic advantages
-   - Moderate ($8-$15):
-     • Standard guidelines
-     • Quality choices
-     • Standard benefits
-     • Standard advantages
-   - High ($15+):
-     • Premium guidelines
-     • Premium choices
-     • Complex benefits
-     • Premium advantages
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick guidelines
-     • Pre-cut choices
-     • Simple benefits
-     • Quick advantages
-   - Moderate (30 mins):
-     • Standard guidelines
-     • Fresh choices
-     • Standard benefits
-     • Standard advantages
-   - Relaxed (45+ mins):
-     • Complex guidelines
-     • Fresh choices
-     • Complex benefits
-     • Complex advantages
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Nut-free guidelines
-     • Safe choices
-     • Alternative benefits
-     • Safe advantages
-   - Dairy Intolerance:
-     • Dairy-free guidelines
-     • Safe choices
-     • Alternative benefits
-     • Safe advantages
-   - Gluten Intolerance:
-     • Gluten-free guidelines
-     • Safe choices
-     • Alternative benefits
-     • Safe advantages
-   - Shellfish Allergy:
-     • Shellfish-free guidelines
-     • Safe choices
-     • Alternative benefits
-     • Safe advantages
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Italian guidelines
-     • Italian choices
-     • Italian advantages
-     • Italian highlights
-   - Mexican:
-     • Mexican guidelines
-     • Mexican choices
-     • Mexican advantages
-     • Mexican highlights
-   - Chinese:
-     • Chinese guidelines
-     • Chinese choices
-     • Chinese advantages
-     • Chinese highlights
-   - Indian:
-     • Indian guidelines
-     • Indian choices
-     • Indian advantages
-     • Indian highlights
-   - Japanese:
-     • Japanese guidelines
-     • Japanese choices
-     • Japanese advantages
-     • Japanese highlights
-   - Thai:
-     • Thai guidelines
-     • Thai choices
-     • Thai advantages
-     • Thai highlights
-   - Mediterranean:
-     • Mediterranean guidelines
-     • Mediterranean choices
-     • Mediterranean advantages
-     • Mediterranean highlights
-   - Australian:
-     • Local guidelines
-     • Local choices
-     • Local advantages
-     • Local highlights
-   - All Cuisines:
-     • Mix of guidelines
-     • Mix of choices
-     • Mix of advantages
-     • Mix of highlights
-"""
-
-# Ingredient Diversity
-INGREDIENT_DIVERSITY = """
-**INGREDIENT DIVERSITY:**
-- Vary protein sources
-- Mix up carbohydrates
-- Use different vegetables
-- Only repeat when needed
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • Potassium-rich vegetables
-     • Low-sodium proteins
-     • Heart-healthy fats
-     • No salt alternatives
-   - Diabetes:
-     • Low glycemic vegetables
-     • Lean proteins
-     • Healthy fats
-     • Fiber-rich ingredients
-   - Heart Disease:
-     • Heart-healthy proteins
-     • Whole grains
-     • Healthy oils
-     • Antioxidant-rich vegetables
-   - Other Conditions:
-     • Adapt based on specific needs
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant proteins
-     • Whole grains
-     • Vegetables
-     • Dairy/eggs if allowed
-   - Vegan:
-     • Plant proteins only
-     • Whole grains
-     • Vegetables
-     • Plant-based alternatives
-   - Pescatarian:
-     • Seafood
-     • Plant proteins
-     • Whole grains
-     • Vegetables
-   - Mediterranean:
-     • Seafood
-     • Legumes
-     • Whole grains
-     • Fresh vegetables
-   - Paleo:
-     • Meat/fish
-     • No grains
-     • Vegetables
-     • Healthy fats
-   - Keto:
-     • High protein
-     • Low carb vegetables
-     • Healthy fats
-     • No grains
-   - Low-Carb:
-     • Proteins
-     • Low carb vegetables
-     • Healthy fats
-     • Limited grains
-   - Whole Food Plant-Based:
-     • Plant proteins
-     • Whole grains
-     • Vegetables
-     • Plant fats
-   - High-Protein:
-     • High protein foods
-     • Vegetables
-     • Healthy fats
-     • Limited grains
-   - Diabetic-Friendly:
-     • Lean proteins
-     • Low glycemic vegetables
-     • Healthy fats
-     • Limited grains
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Budget proteins
-     • Basic grains
-     • Seasonal vegetables
-     • Basic oils
-   - Moderate ($8-$15):
-     • Mix of proteins
-     • Quality grains
-     • Fresh vegetables
-     • Quality oils
-   - High ($15+):
-     • Premium proteins
-     • Specialty grains
-     • Premium vegetables
-     • Premium oils
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick-cook proteins
-     • Quick-cook grains
-     • Pre-cut vegetables
-     • Simple ingredients
-   - Moderate (30 mins):
-     • Standard proteins
-     • Standard grains
-     • Fresh-cut vegetables
-     • Standard ingredients
-   - Relaxed (45+ mins):
-     • Complex proteins
-     • Complex grains
-     • Fresh vegetables
-     • Complex ingredients
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Nut-free proteins
-     • Nut-free grains
-     • Safe vegetables
-     • Safe oils
-   - Dairy Intolerance:
-     • Dairy-free proteins
-     • Dairy-free grains
-     • Safe vegetables
-     • Dairy-free fats
-   - Gluten Intolerance:
-     • Gluten-free proteins
-     • Gluten-free grains
-     • Safe vegetables
-     • Safe fats
-   - Shellfish Allergy:
-     • Shellfish-free proteins
-     • Safe grains
-     • Safe vegetables
-     • Safe fats
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Italian proteins
-     • Pasta/rice
-     • Italian vegetables
-     • Olive oil
-   - Mexican:
-     • Mexican proteins
-     • Corn/tortillas
-     • Mexican vegetables
-     • Mexican oils
-   - Chinese:
-     • Chinese proteins
-     • Rice/noodles
-     • Chinese vegetables
-     • Chinese oils
-   - Indian:
-     • Indian proteins
-     • Rice/naan
-     • Indian vegetables
-     • Indian oils
-   - Japanese:
-     • Japanese proteins
-     • Rice/noodles
-     • Japanese vegetables
-     • Japanese oils
-   - Thai:
-     • Thai proteins
-     • Rice/noodles
-     • Thai vegetables
-     • Thai oils
-   - Mediterranean:
-     • Mediterranean proteins
-     • Mediterranean grains
-     • Mediterranean vegetables
-     • Olive oil
-   - Australian:
-     • Local proteins
-     • Local grains
-     • Local vegetables
-     • Local oils
-   - All Cuisines:
-     • Mix of proteins
-     • Mix of grains
-     • Mix of vegetables
-     • Mix of oils
-"""
-
-# Cooking Methods
-COOKING_METHODS = """
-**COOKING METHODS:**
-- Choose appropriate methods
-- Consider time constraints
-- Use equipment available
-- Adapt for dietary needs
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • Low-sodium cooking
-     • Steaming
-     • Poaching
-     • Grilling without salt
-   - Diabetes:
-     • Low-fat methods
-     • Steaming
-     • Baking
-     • Grilling
-   - Heart Disease:
-     • Heart-healthy methods
-     • Steaming
-     • Baking
-     • Grilling
-   - Other Conditions:
-     • Adapt based on specific needs
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant-based methods
-     • Tofu pressing
-     • Tempeh marinating
-     • Vegetable roasting
-   - Vegan:
-     • Plant-based methods
-     • Tofu pressing
-     • Tempeh marinating
-     • Vegetable roasting
-   - Pescatarian:
-     • Seafood methods
-     • Fish poaching
-     • Shellfish steaming
-     • Fish grilling
-   - Mediterranean:
-     • Olive oil methods
-     • Grilling
-     • Baking
-     • Steaming
-   - Paleo:
-     • Meat methods
-     • Grilling
-     • Roasting
-     • Pan-frying
-   - Keto:
-     • High-fat methods
-     • Pan-frying
-     • Baking
-     • Grilling
-   - Low-Carb:
-     • Low-carb methods
-     • Steaming
-     • Baking
-     • Grilling
-   - Whole Food Plant-Based:
-     • Plant methods
-     • Steaming
-     • Baking
-     • Roasting
-   - High-Protein:
-     • Protein methods
-     • Grilling
-     • Baking
-     • Pan-frying
-   - Diabetic-Friendly:
-     • Low-fat methods
-     • Steaming
-     • Baking
-     • Grilling
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Simple methods
-     • One-pot cooking
-     • Basic equipment
-     • Minimal prep
-   - Moderate ($8-$15):
-     • Standard methods
-     • Multi-step cooking
-     • Standard equipment
-     • Moderate prep
-   - High ($15+):
-     • Complex methods
-     • Multi-pan cooking
-     • Premium equipment
-     • Extensive prep
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick methods
-     • One-pan cooking
-     • Pre-cut ingredients
-     • Minimal prep
-   - Moderate (30 mins):
-     • Standard methods
-     • Two-pan cooking
-     • Standard prep
-     • Moderate steps
-   - Relaxed (45+ mins):
-     • Complex methods
-     • Multi-pan cooking
-     • Full prep
-     • Multiple steps
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Nut-free methods
-     • Separate equipment
-     • Cross-contamination prevention
-     • Safe alternatives
-   - Dairy Intolerance:
-     • Dairy-free methods
-     • Plant-based alternatives
-     • Safe equipment
-     • Safe prep
-   - Gluten Intolerance:
-     • Gluten-free methods
-     • Separate equipment
-     • Safe alternatives
-     • Safe prep
-   - Shellfish Allergy:
-     • Shellfish-free methods
-     • Separate equipment
-     • Safe alternatives
-     • Safe prep
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Pasta cooking
-     • Sauce making
-     • Pizza baking
-     • Risotto making
-   - Mexican:
-     • Tortilla making
-     • Taco assembly
-     • Salsa making
-     • Guacamole making
-   - Chinese:
-     • Stir-frying
-     • Steaming
-     • Wok cooking
-     • Sauce making
-   - Indian:
-     • Curry making
-     • Rice cooking
-     • Naan baking
-     • Spice toasting
-   - Japanese:
-     • Sushi making
-     • Tempura frying
-     • Miso making
-     • Rice cooking
-   - Thai:
-     • Curry making
-     • Stir-frying
-     • Rice cooking
-     • Sauce making
-   - Mediterranean:
-     • Grilling
-     • Baking
-     • Steaming
-     • Sauce making
-   - Australian:
-     • BBQ methods
-     • Roasting
-     • Grilling
-     • Baking
-   - All Cuisines:
-     • Mix of methods
-     • Adapt to ingredients
-     • Consider equipment
-     • Match cuisine style
-"""
-
-# Seasoning
-SEASONING = """
-**SEASONING:**
-- Use appropriate seasonings
-- Consider dietary restrictions
-- Adapt to time constraints
-- Match budget constraints
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • No added salt
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - Diabetes:
-     • Low-sugar seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - Heart Disease:
-     • Low-sodium seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - Other Conditions:
-     • Adapt based on specific needs
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant-based seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - Vegan:
-     • Plant-based seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - Pescatarian:
-     • Seafood seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - Mediterranean:
-     • Mediterranean herbs
-     • Olive oil
-     • Citrus
-     • Vinegars
-   - Paleo:
-     • Natural seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - Keto:
-     • Low-carb seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - Low-Carb:
-     • Low-carb seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - Whole Food Plant-Based:
-     • Plant-based seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - High-Protein:
-     • Protein seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-   - Diabetic-Friendly:
-     • Low-sugar seasonings
-     • Herbs and spices
-     • Citrus
-     • Vinegars
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Basic herbs
-     • Basic spices
-     • Basic oils
-     • Basic vinegars
-   - Moderate ($8-$15):
-     • Standard herbs
-     • Standard spices
-     • Quality oils
-     • Quality vinegars
-   - High ($15+):
-     • Premium herbs
-     • Premium spices
-     • Premium oils
-     • Premium vinegars
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick seasonings
-     • Pre-mixed blends
-     • Basic herbs
-     • Basic spices
-   - Moderate (30 mins):
-     • Standard seasonings
-     • Custom blends
-     • Fresh herbs
-     • Fresh spices
-   - Relaxed (45+ mins):
-     • Complex seasonings
-     • Multiple blends
-     • Premium herbs
-     • Premium spices
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Nut-free seasonings
-     • Safe herbs
-     • Safe spices
-     • Safe oils
-   - Dairy Intolerance:
-     • Dairy-free seasonings
-     • Safe herbs
-     • Safe spices
-     • Safe oils
-   - Gluten Intolerance:
-     • Gluten-free seasonings
-     • Safe herbs
-     • Safe spices
-     • Safe oils
-   - Shellfish Allergy:
-     • Shellfish-free seasonings
-     • Safe herbs
-     • Safe spices
-     • Safe oils
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Italian herbs
-     • Italian spices
-     • Olive oil
-     • Balsamic vinegar
-   - Mexican:
-     • Mexican herbs
-     • Mexican spices
-     • Mexican oils
-     • Mexican vinegars
-   - Chinese:
-     • Chinese herbs
-     • Chinese spices
-     • Chinese oils
-     • Chinese vinegars
-   - Indian:
-     • Indian herbs
-     • Indian spices
-     • Indian oils
-     • Indian vinegars
-   - Japanese:
-     • Japanese herbs
-     • Japanese spices
-     • Japanese oils
-     • Japanese vinegars
-   - Thai:
-     • Thai herbs
-     • Thai spices
-     • Thai oils
-     • Thai vinegars
-   - Mediterranean:
-     • Mediterranean herbs
-     • Mediterranean spices
-     • Olive oil
-     • Mediterranean vinegars
-   - Australian:
-     • Local herbs
-     • Local spices
-     • Local oils
-     • Local vinegars
-   - All Cuisines:
-     • Mix of herbs
-     • Mix of spices
-     • Mix of oils
-     • Mix of vinegars
-"""
-
-# Complete Meals
-COMPLETE_MEALS = """
-**COMPLETE MEALS:**
-- Include all components
-- Balance nutrients
-- Consider dietary needs
-- Adapt to time constraints
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • Low-sodium main
-     • Potassium-rich sides
-     • Heart-healthy fats
-     • Fresh vegetables
-   - Diabetes:
-     • Low glycemic main
-     • Fiber-rich sides
-     • Healthy fats
-     • Fresh vegetables
-   - Heart Disease:
-     • Heart-healthy main
-     • Whole grain sides
-     • Healthy fats
-     • Fresh vegetables
-   - Other Conditions:
-     • Adapt based on specific needs
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant-based main
-     • Vegetarian sides
-     • Plant fats
-     • Fresh vegetables
-   - Vegan:
-     • Vegan main
-     • Vegan sides
-     • Plant fats
-     • Fresh vegetables
-   - Pescatarian:
-     • Seafood main
-     • Vegetarian sides
-     • Healthy fats
-     • Fresh vegetables
-   - Mediterranean:
-     • Mediterranean main
-     • Mediterranean sides
-     • Olive oil
-     • Fresh vegetables
-   - Paleo:
-     • Paleo main
-     • Paleo sides
-     • Healthy fats
-     • Fresh vegetables
-   - Keto:
-     • Keto main
-     • Keto sides
-     • High fats
-     • Low-carb vegetables
-   - Low-Carb:
-     • Low-carb main
-     • Low-carb sides
-     • Healthy fats
-     • Low-carb vegetables
-   - Whole Food Plant-Based:
-     • Plant-based main
-     • Plant-based sides
-     • Plant fats
-     • Fresh vegetables
-   - High-Protein:
-     • High-protein main
-     • Protein-rich sides
-     • Healthy fats
-     • Fresh vegetables
-   - Diabetic-Friendly:
-     • Low glycemic main
-     • Fiber-rich sides
-     • Healthy fats
-     • Fresh vegetables
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Budget main
-     • Basic sides
-     • Basic fats
-     • Basic vegetables
-   - Moderate ($8-$15):
-     • Standard main
-     • Quality sides
-     • Quality fats
-     • Quality vegetables
-   - High ($15+):
-     • Premium main
-     • Premium sides
-     • Premium fats
-     • Premium vegetables
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick main
-     • Quick sides
-     • Simple fats
-     • Quick vegetables
-   - Moderate (30 mins):
-     • Standard main
-     • Standard sides
-     • Standard fats
-     • Standard vegetables
-   - Relaxed (45+ mins):
-     • Complex main
-     • Complex sides
-     • Complex fats
-     • Complex vegetables
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Nut-free main
-     • Nut-free sides
-     • Safe fats
-     • Safe vegetables
-   - Dairy Intolerance:
-     • Dairy-free main
-     • Dairy-free sides
-     • Safe fats
-     • Safe vegetables
-   - Gluten Intolerance:
-     • Gluten-free main
-     • Gluten-free sides
-     • Safe fats
-     • Safe vegetables
-   - Shellfish Allergy:
-     • Shellfish-free main
-     • Safe sides
-     • Safe fats
-     • Safe vegetables
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Italian main
-     • Italian sides
-     • Italian fats
-     • Italian vegetables
-   - Mexican:
-     • Mexican main
-     • Mexican sides
-     • Mexican fats
-     • Mexican vegetables
-   - Chinese:
-     • Chinese main
-     • Chinese sides
-     • Chinese fats
-     • Chinese vegetables
-   - Indian:
-     • Indian main
-     • Indian sides
-     • Indian fats
-     • Indian vegetables
-   - Japanese:
-     • Japanese main
-     • Japanese sides
-     • Japanese fats
-     • Japanese vegetables
-   - Thai:
-     • Thai main
-     • Thai sides
-     • Thai fats
-     • Thai vegetables
-   - Mediterranean:
-     • Mediterranean main
-     • Mediterranean sides
-     • Mediterranean fats
-     • Mediterranean vegetables
-   - Australian:
-     • Local main
-     • Local sides
-     • Local fats
-     • Local vegetables
-   - All Cuisines:
-     • Mix of mains
-     • Mix of sides
-     • Mix of fats
-     • Mix of vegetables
-"""
-
-# Food Waste Prevention
-FOOD_WASTE_PREVENTION = """
-**FOOD WASTE PREVENTION:**
-- Minimize waste
-- Use leftovers
-- Plan portions
-- Store properly
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • Fresh ingredients
-     • Proper storage
-     • Portion control
-     • Leftover planning
-   - Diabetes:
-     • Fresh ingredients
-     • Portion control
-     • Storage planning
-     • Leftover planning
-   - Heart Disease:
-     • Fresh ingredients
-     • Proper storage
-     • Portion control
-     • Leftover planning
-   - Other Conditions:
-     • Adapt based on specific needs
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant storage
-     • Portion planning
-     • Leftover use
-     • Waste reduction
-   - Vegan:
-     • Plant storage
-     • Portion planning
-     • Leftover use
-     • Waste reduction
-   - Pescatarian:
-     • Seafood storage
-     • Portion planning
-     • Leftover use
-     • Waste reduction
-   - Mediterranean:
-     • Fresh storage
-     • Portion planning
-     • Leftover use
-     • Waste reduction
-   - Paleo:
-     • Fresh storage
-     • Portion planning
-     • Leftover use
-     • Waste reduction
-   - Keto:
-     • Fresh storage
-     • Portion planning
-     • Leftover use
-     • Waste reduction
-   - Low-Carb:
-     • Fresh storage
-     • Portion planning
-     • Leftover use
-     • Waste reduction
-   - Whole Food Plant-Based:
-     • Plant storage
-     • Portion planning
-     • Leftover use
-     • Waste reduction
-   - High-Protein:
-     • Protein storage
-     • Portion planning
-     • Leftover use
-     • Waste reduction
-   - Diabetic-Friendly:
-     • Fresh storage
-     • Portion planning
-     • Leftover use
-     • Waste reduction
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Basic storage
-     • Exact portions
-     • Leftover use
-     • Minimal waste
-   - Moderate ($8-$15):
-     • Standard storage
-     • Flexible portions
-     • Leftover use
-     • Controlled waste
-   - High ($15+):
-     • Premium storage
-     • Flexible portions
-     • Leftover use
-     • Controlled waste
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick storage
-     • Pre-portioned
-     • Quick leftovers
-     • Minimal waste
-   - Moderate (30 mins):
-     • Standard storage
-     • Standard portions
-     • Standard leftovers
-     • Controlled waste
-   - Relaxed (45+ mins):
-     • Complex storage
-     • Flexible portions
-     • Complex leftovers
-     • Controlled waste
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Safe storage
-     • Safe portions
-     • Safe leftovers
-     • Safe waste
-   - Dairy Intolerance:
-     • Safe storage
-     • Safe portions
-     • Safe leftovers
-     • Safe waste
-   - Gluten Intolerance:
-     • Safe storage
-     • Safe portions
-     • Safe leftovers
-     • Safe waste
-   - Shellfish Allergy:
-     • Safe storage
-     • Safe portions
-     • Safe leftovers
-     • Safe waste
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Italian storage
-     • Italian portions
-     • Italian leftovers
-     • Italian waste
-   - Mexican:
-     • Mexican storage
-     • Mexican portions
-     • Mexican leftovers
-     • Mexican waste
-   - Chinese:
-     • Chinese storage
-     • Chinese portions
-     • Chinese leftovers
-     • Chinese waste
-   - Indian:
-     • Indian storage
-     • Indian portions
-     • Indian leftovers
-     • Indian waste
-   - Japanese:
-     • Japanese storage
-     • Japanese portions
-     • Japanese leftovers
-     • Japanese waste
-   - Thai:
-     • Thai storage
-     • Thai portions
-     • Thai leftovers
-     • Thai waste
-   - Mediterranean:
-     • Mediterranean storage
-     • Mediterranean portions
-     • Mediterranean leftovers
-     • Mediterranean waste
-   - Australian:
-     • Local storage
-     • Local portions
-     • Local leftovers
-     • Local waste
-   - All Cuisines:
-     • Mix of storage
-     • Mix of portions
-     • Mix of leftovers
-     • Mix of waste
-"""
-
-# Measurements
-MEASUREMENTS = """
-**MEASUREMENTS:**
-- Use appropriate units
-- Consider serving size
-- Adapt to equipment
-- Match cuisine style
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • Precise measurements
-     • Portion control
-     • Salt-free options
-     • Potassium-rich amounts
-   - Diabetes:
-     • Precise measurements
-     • Portion control
-     • Carb counting
-     • Fiber amounts
-   - Heart Disease:
-     • Precise measurements
-     • Portion control
-     • Fat amounts
-     • Fiber amounts
-   - Other Conditions:
-     • Adapt based on specific needs
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant measurements
-     • Protein amounts
-     • Portion sizes
-     • Alternative amounts
-   - Vegan:
-     • Plant measurements
-     • Protein amounts
-     • Portion sizes
-     • Alternative amounts
-   - Pescatarian:
-     • Seafood measurements
-     • Portion sizes
-     • Alternative amounts
-     • Balance amounts
-   - Mediterranean:
-     • Mediterranean measurements
-     • Portion sizes
-     • Balance amounts
-     • Oil amounts
-   - Paleo:
-     • Paleo measurements
-     • Portion sizes
-     • Alternative amounts
-     • Balance amounts
-   - Keto:
-     • Keto measurements
-     • Portion sizes
-     • Fat amounts
-     • Carb amounts
-   - Low-Carb:
-     • Low-carb measurements
-     • Portion sizes
-     • Carb amounts
-     • Alternative amounts
-   - Whole Food Plant-Based:
-     • Plant measurements
-     • Portion sizes
-     • Alternative amounts
-     • Balance amounts
-   - High-Protein:
-     • Protein measurements
-     • Portion sizes
-     • Balance amounts
-     • Alternative amounts
-   - Diabetic-Friendly:
-     • Precise measurements
-     • Portion sizes
-     • Carb amounts
-     • Alternative amounts
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Basic measurements
-     • Standard portions
-     • Basic amounts
-     • Simple units
-   - Moderate ($8-$15):
-     • Standard measurements
-     • Flexible portions
-     • Standard amounts
-     • Standard units
-   - High ($15+):
-     • Premium measurements
-     • Flexible portions
-     • Premium amounts
-     • Premium units
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick measurements
-     • Pre-portioned
-     • Simple amounts
-     • Quick units
-   - Moderate (30 mins):
-     • Standard measurements
-     • Standard portions
-     • Standard amounts
-     • Standard units
-   - Relaxed (45+ mins):
-     • Complex measurements
-     • Flexible portions
-     • Complex amounts
-     • Complex units
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Safe measurements
-     • Safe portions
-     • Safe amounts
-     • Safe units
-   - Dairy Intolerance:
-     • Safe measurements
-     • Safe portions
-     • Safe amounts
-     • Safe units
-   - Gluten Intolerance:
-     • Safe measurements
-     • Safe portions
-     • Safe amounts
-     • Safe units
-   - Shellfish Allergy:
-     • Safe measurements
-     • Safe portions
-     • Safe amounts
-     • Safe units
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Italian measurements
-     • Italian portions
-     • Italian amounts
-     • Italian units
-   - Mexican:
-     • Mexican measurements
-     • Mexican portions
-     • Mexican amounts
-     • Mexican units
-   - Chinese:
-     • Chinese measurements
-     • Chinese portions
-     • Chinese amounts
-     • Chinese units
-   - Indian:
-     • Indian measurements
-     • Indian portions
-     • Indian amounts
-     • Indian units
-   - Japanese:
-     • Japanese measurements
-     • Japanese portions
-     • Japanese amounts
-     • Japanese units
-   - Thai:
-     • Thai measurements
-     • Thai portions
-     • Thai amounts
-     • Thai units
-   - Mediterranean:
-     • Mediterranean measurements
-     • Mediterranean portions
-     • Mediterranean amounts
-     • Mediterranean units
-   - Australian:
-     • Local measurements
-     • Local portions
-     • Local amounts
-     • Local units
-   - All Cuisines:
-     • Mix of measurements
-     • Mix of portions
-     • Mix of amounts
-     • Mix of units
-"""
-
-# Ingredient Names
-INGREDIENT_NAMES = """
-**INGREDIENT NAMES:**
-- Use common names
-- Consider availability
-- Match cuisine style
-- Adapt to region
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • Low-sodium options
-     • Potassium-rich names
-     • Heart-healthy terms
-     • Fresh ingredients
-   - Diabetes:
-     • Low glycemic terms
-     • Fiber-rich names
-     • Healthy options
-     • Fresh ingredients
-   - Heart Disease:
-     • Heart-healthy terms
-     • Low-fat options
-     • Fresh ingredients
-     • Healthy names
-   - Other Conditions:
-     • Adapt based on specific needs
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant-based terms
-     • Protein alternatives
-     • Fresh ingredients
-     • Common names
-   - Vegan:
-     • Plant-based terms
-     • Protein alternatives
-     • Fresh ingredients
-     • Common names
-   - Pescatarian:
-     • Seafood terms
-     • Plant alternatives
-     • Fresh ingredients
-     • Common names
-   - Mediterranean:
-     • Mediterranean terms
-     • Fresh ingredients
-     • Common names
-     • Regional options
-   - Paleo:
-     • Paleo terms
-     • Natural names
-     • Fresh ingredients
-     • Common options
-   - Keto:
-     • Keto terms
-     • Low-carb names
-     • Fresh ingredients
-     • Common options
-   - Low-Carb:
-     • Low-carb terms
-     • Fresh names
-     • Common ingredients
-     • Healthy options
-   - Whole Food Plant-Based:
-     • Plant terms
-     • Natural names
-     • Fresh ingredients
-     • Common options
-   - High-Protein:
-     • Protein terms
-     • Fresh names
-     • Common ingredients
-     • Healthy options
-   - Diabetic-Friendly:
-     • Low glycemic terms
-     • Fresh names
-     • Common ingredients
-     • Healthy options
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Basic terms
-     • Common names
-     • Budget options
-     • Simple ingredients
-   - Moderate ($8-$15):
-     • Standard terms
-     • Quality names
-     • Mixed options
-     • Standard ingredients
-   - High ($15+):
-     • Premium terms
-     • Specialty names
-     • Premium options
-     • Premium ingredients
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick terms
-     • Pre-cut names
-     • Simple options
-     • Quick ingredients
-   - Moderate (30 mins):
-     • Standard terms
-     • Fresh names
-     • Standard options
-     • Standard ingredients
-   - Relaxed (45+ mins):
-     • Complex terms
-     • Specialty names
-     • Complex options
-     • Complex ingredients
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Nut-free terms
-     • Safe names
-     • Alternative options
-     • Safe ingredients
-   - Dairy Intolerance:
-     • Dairy-free terms
-     • Safe names
-     • Alternative options
-     • Safe ingredients
-   - Gluten Intolerance:
-     • Gluten-free terms
-     • Safe names
-     • Alternative options
-     • Safe ingredients
-   - Shellfish Allergy:
-     • Shellfish-free terms
-     • Safe names
-     • Alternative options
-     • Safe ingredients
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Italian terms
-     • Italian names
-     • Italian options
-     • Italian ingredients
-   - Mexican:
-     • Mexican terms
-     • Mexican names
-     • Mexican options
-     • Mexican ingredients
-   - Chinese:
-     • Chinese terms
-     • Chinese names
-     • Chinese options
-     • Chinese ingredients
-   - Indian:
-     • Indian terms
-     • Indian names
-     • Indian options
-     • Indian ingredients
-   - Japanese:
-     • Japanese terms
-     • Japanese names
-     • Japanese options
-     • Japanese ingredients
-   - Thai:
-     • Thai terms
-     • Thai names
-     • Thai options
-     • Thai ingredients
-   - Mediterranean:
-     • Mediterranean terms
-     • Mediterranean names
-     • Mediterranean options
-     • Mediterranean ingredients
-   - Australian:
-     • Local terms
-     • Local names
-     • Local options
-     • Local ingredients
-   - All Cuisines:
-     • Mix of terms
-     • Mix of names
-     • Mix of options
-     • Mix of ingredients
-"""
-
-# Instructions
-INSTRUCTIONS = """
-**INSTRUCTIONS:**
-- Clear and concise steps
-- Consider skill level
-- Adapt to equipment
-- Match time constraints
-
-Adaptations Based on User Requirements:
-
-1. Health Conditions:
-   - Hypertension:
-     • Low-sodium steps
-     • Potassium-rich prep
-     • Heart-healthy methods
-     • Fresh preparation
-   - Diabetes:
-     • Low glycemic prep
-     • Fiber-rich steps
-     • Healthy methods
-     • Fresh preparation
-   - Heart Disease:
-     • Heart-healthy steps
-     • Low-fat prep
-     • Healthy methods
-     • Fresh preparation
-   - Other Conditions:
-     • Adapt based on specific needs
-
-2. Diet Type:
-   - Vegetarian:
-     • Plant-based steps
-     • Protein prep
-     • Fresh methods
-     • Common techniques
-   - Vegan:
-     • Plant-based steps
-     • Protein prep
-     • Fresh methods
-     • Common techniques
-   - Pescatarian:
-     • Seafood steps
-     • Plant prep
-     • Fresh methods
-     • Common techniques
-   - Mediterranean:
-     • Mediterranean steps
-     • Fresh prep
-     • Common methods
-     • Regional techniques
-   - Paleo:
-     • Paleo steps
-     • Natural prep
-     • Fresh methods
-     • Common techniques
-   - Keto:
-     • Keto steps
-     • Low-carb prep
-     • Fresh methods
-     • Common techniques
-   - Low-Carb:
-     • Low-carb steps
-     • Fresh prep
-     • Common methods
-     • Healthy techniques
-   - Whole Food Plant-Based:
-     • Plant steps
-     • Natural prep
-     • Fresh methods
-     • Common techniques
-   - High-Protein:
-     • Protein steps
-     • Fresh prep
-     • Common methods
-     • Healthy techniques
-   - Diabetic-Friendly:
-     • Low glycemic steps
-     • Fresh prep
-     • Common methods
-     • Healthy techniques
-
-3. Budget Adaptation:
-   - Tight ($3-$7):
-     • Basic steps
-     • Simple prep
-     • Common methods
-     • Basic techniques
-   - Moderate ($8-$15):
-     • Standard steps
-     • Quality prep
-     • Mixed methods
-     • Standard techniques
-   - High ($15+):
-     • Premium steps
-     • Specialty prep
-     • Premium methods
-     • Premium techniques
-
-4. Time Adaptation:
-   - Busy (15 mins):
-     • Quick steps
-     • Pre-cut prep
-     • Simple methods
-     • Quick techniques
-   - Moderate (30 mins):
-     • Standard steps
-     • Fresh prep
-     • Standard methods
-     • Standard techniques
-   - Relaxed (45+ mins):
-     • Complex steps
-     • Specialty prep
-     • Complex methods
-     • Complex techniques
-
-5. Allergies/Intolerances:
-   - Nut Allergies:
-     • Nut-free steps
-     • Safe prep
-     • Alternative methods
-     • Safe techniques
-   - Dairy Intolerance:
-     • Dairy-free steps
-     • Safe prep
-     • Alternative methods
-     • Safe techniques
-   - Gluten Intolerance:
-     • Gluten-free steps
-     • Safe prep
-     • Alternative methods
-     • Safe techniques
-   - Shellfish Allergy:
-     • Shellfish-free steps
-     • Safe prep
-     • Alternative methods
-     • Safe techniques
-   - Other Allergies:
-     • Adapt based on specific allergens
-
-6. Cuisine-Specific Adaptations:
-   - Italian:
-     • Italian steps
-     • Italian prep
-     • Italian methods
-     • Italian techniques
-   - Mexican:
-     • Mexican steps
-     • Mexican prep
-     • Mexican methods
-     • Mexican techniques
-   - Chinese:
-     • Chinese steps
-     • Chinese prep
-     • Chinese methods
-     • Chinese techniques
-   - Indian:
-     • Indian steps
-     • Indian prep
-     • Indian methods
-     • Indian techniques
-   - Japanese:
-     • Japanese steps
-     • Japanese prep
-     • Japanese methods
-     • Japanese techniques
-   - Thai:
-     • Thai steps
-     • Thai prep
-     • Thai methods
-     • Thai techniques
-   - Mediterranean:
-     • Mediterranean steps
-     • Mediterranean prep
-     • Mediterranean methods
-     • Mediterranean techniques
-   - Australian:
-     • Local steps
-     • Local prep
-     • Local methods
-     • Local techniques
-   - All Cuisines:
-     • Mix of steps
-     • Mix of prep
-     • Mix of methods
-     • Mix of techniques
-"""
+AUTHENTIC_RECIPE_NAMES = {
+    "Traditional Australian / British / American": [
+    # --- Breakfast - Tight budget ($3-$7) - Busy schedule (15 mins) ---
+    "Porridge with Berries and Honey",
+    "Scrambled Eggs on Toast with Avocado",
+    "Vegemite on Toast with Sliced Tomato",
+    "Baked Beans on Toast",
+    "Breakfast Burrito",
+    "Fruit Salad with Yogurt",
+    "Cheese on Toast",
+    "Oatmeal with Brown Sugar",
+    "Toast with Peanut Butter and Banana",
+    "Crumpets with Butter",
+    "Cinnamon Toast",
+    "Toast with Honey",
+    "Marmite and Cheese on Toast",
+    "Breakfast Quesadilla (Simplified)",
+    "Weet-Bix with Milk and Fruit",
+    "Tea and Toast with Jam",
+    "Grits with Butter",
+    "Toast with Scrambled Eggs",
+    "Fruit and Yogurt Bowl",
+    "Cold Cereal with Milk",
+    "Scrambled Egg and Cheese Muffin",
+    "Toast with Veggie Spread",
+    "Porridge with Salt and Butter",
+    "Breakfast Tacos",
+    "Toast with Ricotta and Honey",
+    "Eggy Bread (French Toast)",
+    "Yogurt Parfait with Granola",
+    "Breakfast Smoothie",
+    "Kedgeree (Simplified)",
+    "Breakfast Quesadillas",
+    "Toast with Peanut Butter and Banana",
+    "Marmite on Toast",
+    "Bagel with Cream Cheese and Lox (Simplified)",
+
+    # --- Breakfast - Moderate budget ($8-$15) - Moderate schedule (30 mins) ---
+    "Pancakes with Maple Syrup and Berries",
+    "French Toast with Cinnamon and Fruit Compote",
+    "Full English Breakfast (Simplified)",
+    "Biscuits and Gravy",
+    "Breakfast Frittata with Vegetables",
+    "Kedgeree (Fish and Rice)",
+    "Breakfast Quesadillas with Salsa and Guacamole",
+    "Spinach and Ricotta Rolls with Tomato Relish",
+    "Devilled Kidneys on Toast with Mushrooms",
+    "Breakfast Hash with Sweet Potatoes and Peppers",
+    "Breakfast Burrito Bowls",
+    "Corn Fritters with Bacon and Avocado",
+    "Smoked Salmon and Cream Cheese Bagel",
+    "Huevos Rancheros",
+    "Breakfast Bruschetta with Tomatoes and Basil",
+    "Crumpets with Smoked Salmon and Cream Cheese",
+    "Breakfast Tostadas",
+    "Baked Beans with Chorizo and Eggs",
+    "Black Pudding and Apple Stack",
+    "Corned Beef Hash with Fried Eggs",
+    "Breakfast Omelette with Cheese and Ham",
+    "Breakfast Crepes with Nutella and Banana",
+    "Full Irish Breakfast",
+    "Steak and Egg Breakfast Wrap",
+    "Breakfast Salad with Grilled Halloumi",
+    "Eggs Florentine",
+    "Breakfast Pizza with Bacon and Spinach",
+    "Breakfast Burger with Bacon and Egg",
+    "Smoked Salmon Scramble with Chives",
+    "Breakfast Sandwich with Sausage and Peppers",
+
+    # --- Breakfast - Generous budget ($16-$30) - Busy on some days (45 mins) ---
+    "Eggs Benedict with Smoked Salmon and Avocado",
+    "Steak and Eggs with Breakfast Potatoes and Peppers",
+    "Breakfast Board with Avocado, Salmon, and Sourdough",
+    "Full English Breakfast Platter",
+    "Shrimp and Grits with Andouille Sausage and Creole Sauce",
+    "Breakfast Pancakes with Berries and Mascarpone",
+    "Eggs Royale with Asparagus and Hollandaise",
+    "Crab Cake Benedict with Spicy Aioli",
+    "Breakfast Pizza with Bacon and Spinach",
+    "Kipper with Scrambled Eggs and Buttered Toast",
+    "Chicken and Waffles with Maple Glaze",
+    "Breakfast Ramen with Bacon and Soft-Boiled Egg",
+    "Bubble and Squeak with Poached Eggs and Hollandaise",
+    "Breakfast Tacos with Chorizo and Cilantro Lime Crema",
+    "Breakfast Crepes with Berries and Lemon Ricotta",
+    "Full Scottish Breakfast",
+    "Monte Cristo Sandwich with Raspberry Jam",
+    "Breakfast Bowl with Quinoa and Roasted Vegetables",
+    "Crumpets with Mushrooms, Bacon, and Cheese",
+    "Breakfast Pizza with Sausage, Peppers, and Onions",
+    "Steak and Eggs with Hollandaise and Grilled Tomatoes",
+    "Full Welsh Breakfast",
+    "Breakfast Frittata with Smoked Salmon and Dill",
+    "Breakfast Burger with Bacon Jam and Fried Egg",
+    "Smoked Haddock Omelette with Cheese Sauce and Toast",
+    "Breakfast Sandwich with Sausage and Peppers",
+
+    # --- Breakfast - No budget constraints ($31+) - No Constraints (Any duration) ---
+    "Full English Breakfast with All the Trimmings",
+    "Steak and Lobster Benedict",
+    "Seafood Breakfast Platter",
+    "Eggs Royale with Caviar",
+    "Crab and Asparagus Omelette with Truffle Oil",
+    "Breakfast Tasting Menu",
+    "Gamekeeper's Breakfast",
+    "Lobster Benedict",
+    "Breakfast Barramundi with Avocado and Greens",
+    "Smoked Haddock Omelette with Cheese Sauce",
+    "Breakfast Chilaquiles with Short Rib",
+    "Breakfast Po'boys with Shrimp and Andouille and Creole Remoulade",
+    "Breakfast Seafood Stew",
+    "Crumpets with Smoked Eel and Horseradish Cream and Dill",
+
+    # --- Lunch - Tight budget ($3-$7) - Busy schedule (15 mins) ---
+    "Tuna Mayonnaise Sandwich",
+    "Peanut Butter and Jelly Sandwich",
+    "Cheese and Salad Wrap",
+    "Egg Salad Sandwich",
+    "Pasta Salad (simple)",
+    "Chicken and Salad Roll",
+    "Cheese and Pickle Sandwich",
+    "Leftover Chili (reheated)",
+    "2-Minute Noodles (upgraded)",
+    "Soup and a Roll",
+    "Tuna Salad Sandwich",
+    "Ham and Cheese Sandwich",
+    "Veggie Wrap",
+    "Pasta with Tomato Sauce (quick)",
+    "Rice and Beans (canned)",
+    "Quesadilla (plain)",
+    "Leftover Pizza",
+    "Salad with Canned Tuna",
+    "Baked Potato with Cheese",
+    "Instant Ramen (upgraded)",
+    "Chicken Caesar Wrap",
+    "BLT Sandwich",
+    "Soup and Crackers",
+    "Hummus and Veggie Wrap",
+    "Chicken Noodle Cup",
+    "Mac and Cheese Cup",
+    "Hard-Boiled Eggs and Fruit",
+    "Yogurt and Granola",
+    "Fruit Salad",
+    "Trail Mix",
+
+    # --- Lunch - Moderate budget ($8-$15) - Moderate schedule (30 mins) ---
+    "Chicken Caesar Salad with Grilled Chicken",
+    "Chef's Salad with Ham and Turkey",
+    "Reuben Sandwich with Chips",
+    "Club Sandwich with Fries",
+    "Chicken Salad Sandwich on Croissant",
+    "Tuna Nicoise Salad",
+    "Greek Salad with Grilled Chicken",
+    "Pasta Primavera (simple)",
+    "Spaghetti with Meat Sauce (quick)",
+    "Chicken Stir-Fry with Rice (quick)",
+    "Beef Stir-Fry with Noodles (quick)",
+    "Fish Tacos with Cabbage Slaw",
+    "Shrimp Po'boy (simplified)",
+    "Turkey and Avocado Wrap",
+    "Quiche with Side Salad (pre-made quiche)",
+    "Soup and Sandwich Combo (better quality soup)",
+    "Baked Potato Bar",
+    "Salad with Grilled Salmon (canned salmon)",
+    "Chicken and Rice Soup (homemade)",
+    "Tomato Basil Soup with Grilled Cheese (gourmet cheese)",
+    "Chicken Fajitas (quick)",
+    "Beef Burrito (quick)",
+    "Chicken Quesadillas (with veggies)",
+    "Ham and Swiss Panini",
+    "Caprese Sandwich",
+    "Pesto Chicken Sandwich",
+    "Chicken and Broccoli Alfredo (quick)",
+    "Shrimp Scampi with Linguine (quick)",
+    "Chicken Gyro",
+    "Falafel Wrap",
+
+    # --- Lunch - Generous budget ($16-$30) - Busy on some days (45 mins) ---
+    "Lobster Roll with Fries",
+    "Steak Salad with Blue Cheese Dressing",
+    "Salmon Caesar Salad",
+    "Shrimp and Grits with Garlic Bread",
+    "Chicken Parmesan Sandwich (gourmet bread)",
+    "Beef Stroganoff with Egg Noodles (homemade sauce)",
+    "French Dip Sandwich with Au Jus",
+    "Cuban Sandwich with Plantain Chips and Black Beans",
+    "Pulled Pork Sandwich with Coleslaw and BBQ Sauce",
+    "Croque Monsieur with Salad (homemade Béchamel)",
+    "Croque Madame with Salad (homemade Béchamel)",
+    "Chicken Pot Pie with Biscuit Topping",
+    "Beef Bourguignon with Crusty Bread (quick version)",
+    "Lamb Gyro Platter with Tzatziki",
+    "Shrimp and Avocado Tostadas with Lime Crema",
+    "Grilled Swordfish Sandwich with Pesto Mayo",
+    "Crab Cake Sandwich with Aioli",
+    "Seafood Pasta Salad with Lemon Vinaigrette",
+    "Spicy Tuna Melt with Onion Rings",
+    "Chicken and Bacon Ranch Wrap with Avocado",
+    "Chicken and Waffle Sandwich with Maple Glaze",
+    "Steak Fajitas with All the Fixings",
+    "Shrimp and Chorizo Paella (small portion)",
+    "Chicken and Sausage Gumbo with Rice",
+    "Beef and Barley Soup with Crusty Bread",
+    "Lobster Bisque (canned, but with garnishes)",
+    "Creamy Tomato Soup with Grilled Cheese Dippers (gourmet cheese)",
+    "Chicken and Broccoli Stir-Fry with Brown Rice",
+    "Shrimp and Vegetable Skewers with Quinoa",
+    "Chicken and Spinach Salad with Citrus Vinaigrette",
+
+    # --- Lunch - No budget constraints ($31+) - No Constraints (Any duration) ---
+    "Lobster Salad Sandwich on Brioche with Truffle Aioli",
+    "Steak Tartare with Crostini and Quail Egg",
+    "Seared Foie Gras Salad with Balsamic Glaze and Fig Jam",
+    "Pan-Seared Scallops with Lemon Risotto and White Wine Butter Sauce",
+    "Grilled Halibut with Asparagus and Hollandaise",
+    "Bouillabaisse with Rouille and Sourdough Bread",
+    "Osso Buco with Saffron Risotto and Gremolata",
+    "Rack of Lamb with Rosemary Potatoes and Red Wine Reduction",
+    "Seafood Tower with Oysters, Shrimp, and Crab and Dipping Sauces",
+    "Truffle Mac and Cheese with Lobster and Breadcrumbs",
+    "Wagyu Beef Burger with Caramelized Onions and Truffle Fries",
+    "Pan-Seared Duck Breast with Cherry Sauce and Wild Rice Pilaf",
+    "Crispy Skin Salmon with Beurre Blanc and Roasted Root Vegetables",
+    "Seafood Linguine with White Wine Sauce and Garlic Bread",
+    "Tuna Tataki Salad with Sesame Dressing and Avocado",
+    "Grilled Octopus Salad with Lemon Vinaigrette and Kalamata Olives",
+    "Lobster Bisque with Cognac and Sherry",
+    "French Onion Soup with Gruyere Croutons and Baguette",
+    "Steak and Blue Cheese Salad with Candied Pecans and Balsamic Glaze",
+    "Pan-Seared Chilean Sea Bass with Mango Salsa and Black Beans",
+    "Lobster Ravioli with Brown Butter Sauce and Crispy Sage",
+    "Crispy Duck Confit Salad with Fig Dressing and Goat Cheese",
+    "Seafood Cioppino with Sourdough Bread and Garlic Toast",
+    "Grilled Swordfish with Mediterranean Salsa and Couscous",
+    "Veal Milanese with Arugula Salad and Lemon Vinaigrette",
+    "Steak Frites with Béarnaise Sauce and Truffle Salt",
+    "Seafood Paella with Saffron Aioli and Grilled Bread",
+    "Grilled Lamb Chops with Mint Chimichurri and Roasted Vegetables",
+    "Pan-Seared Ahi Tuna with Wasabi Aioli and Seaweed Salad",
+    "Roasted Bone Marrow with Parsley Salad and Toasted Baguette",
+
+    # --- Dinner - Tight budget ($3-$7) - Busy schedule (15 mins) ---
+    "Spaghetti with Tomato Sauce",
+    "Ramen Noodles with Egg",
+    "Quesadillas with Beans and Cheese",
+    "Tuna Pasta",
+    "Rice and Beans",
+    "Mac and Cheese",
+    "Hot Dogs",
+    "Hamburgers",
+    "Bean Burritos",
+    "Lentil Soup",
+    "Tomato Soup",
+    "Grilled Cheese and Tomato Soup",
+    "Egg Fried Rice",
+    "Pasta with Pesto",
+    "Veggie Stir-Fry",
+    "Chicken Noodle Soup",
+    "Baked Potatoes",
+    "Salad with Canned Tuna",
+    "Scrambled Eggs and Toast",
+    "Oatmeal with Veggies",
+    "Spaghetti Aglio e Olio",
+    "Black Bean Burgers",
+    "Quesadillas with Veggies",
+    "Rice and Lentils",
+    "Veggie Burgers on Buns",
+    "Noodle Soup with Tofu",
+    "Baked Sweet Potatoes",
+    "Salad with Chickpeas",
+    "Pasta with Marinara Sauce",
+    "Veggie Chili",
+
+    # --- Dinner - Moderate budget ($8-$15) - Moderate schedule (30 mins) ---
+    "Chicken Stir-Fry with Rice",
+    "Beef Stir-Fry with Noodles",
+    "Fish Tacos with Cabbage Slaw",
+    "Chicken Fajitas with Peppers and Onions",
+    "Beef Burrito Bowls with Guacamole",
+    "Spaghetti with Meat Sauce",
+    "Chicken Parmesan with Salad",
+    "Meatloaf with Mashed Potatoes",
+    "Shepherd's Pie",
+    "Chicken Pot Pie",
+    "Baked Salmon with Roasted Vegetables",
+    "Shrimp Scampi with Linguine",
+    "Chicken and Broccoli Alfredo",
+    "Pork Chops with Applesauce",
+    "Steak with Baked Potatoes",
+    "Roasted Chicken with Root Vegetables",
+    "Beef Stew",
+    "Chicken Curry with Rice",
+    "Vegetable Curry with Naan",
+    "Fish and Chips",
+    "Chicken Caesar Salad",
+    "Chicken Noodle Soup",
+    "Tomato Basil Soup with Grilled Cheese",
+    "French Onion Soup",
+    "Chili with Cornbread",
+    "Lasagna",
+    "Enchiladas",
+    "Tuna Casserole",
+    "Chicken and Rice Casserole",
+    "Baked Ziti",
+
+    # --- Dinner - Generous budget ($16-$30) - Busy on some days (45 mins) ---
+    "Steak with Roasted Asparagus and Potatoes",
+    "Salmon with Lemon Herb Sauce",
+    "Shrimp Linguine with White Wine Sauce",
+    "Chicken Marsala with Mushrooms",
+    "Beef Wellington with Red Wine Reduction (simplified)",
+    "Lamb Shanks with Rosemary and Garlic",
+    "Pork Tenderloin with Cranberry Sauce",
+    "Chicken and Sausage Gumbo",
+    "Seafood Cioppino (quick version)",
+    "Chicken Piccata with Capers",
+    "Beef Stroganoff with Egg Noodles",
+    "Chicken and Broccoli Alfredo",
+    "Shrimp and Chorizo Paella (small portion)",
+    "Fish Tacos with Mango Salsa",
+    "Chicken Fajitas with Guacamole and Sour Cream",
+    "Beef Burritos with Sour Cream and Rice",
+    "Lamb Curry with Naan Bread",
+    "Vegetable Curry with Rice and Chutney",
+    "Salmon with Dill Sauce",
+    "Baked Cod with Lemon Butter and Green Beans",
+    "Chicken and Spinach Salad with Vinaigrette",
+    "Caesar Salad with Grilled Shrimp and Croutons",
+    "Waldorf Salad with Chicken and Walnuts",
+    "Broccoli Salad with Bacon, Cheddar, and Raisins",
+    "Pasta Primavera with Parmesan and Garlic Bread",
+    "Chicken Cacciatore with Polenta",
+    "Beef Bourguignon with Crusty Bread (quick version)",
+    "Chicken and Mushroom Casserole with Noodles",
+    "Roast Duck with Orange Sauce and Wild Rice",
+    "Prawn and Chorizo Pasta with Linguine and Herbs",
+
+    # --- Dinner - No budget constraints ($31+) - No Constraints (Any duration) ---
+    "Lobster Thermidor with Asparagus and Hollandaise Sauce",
+    "Rack of Lamb with Rosemary Potatoes and Mint Sauce",
+    "Filet Mignon with Béarnaise Sauce and Truffle Fries",
+    "Pan-Seared Scallops with Lemon Risotto and White Wine Butter Sauce",
+    "Braised Short Ribs with Creamy Polenta and Gremolata",
+    "Seafood Bouillabaisse with Saffron Rouille and Sourdough Bread",
+    "Duck Confit with Cherry Sauce and Wild Rice Pilaf",
+    "Grilled Swordfish with Mediterranean Salsa and Couscous",
+    "Veal Milanese with Arugula Salad and Lemon Vinaigrette",
+    "Beef Tournedos Rossini with Foie Gras and Madeira Sauce",
+    "Lobster Ravioli with Brown Butter Sauce and Crispy Sage",
+    "Pan-Seared Chilean Sea Bass with Mango Salsa and Black Beans",
+    "Crispy Skin Salmon with Beurre Blanc and Roasted Root Vegetables",
+    "Seafood Linguine with White Wine Sauce and Garlic Bread",
+    "Tuna Tataki Salad with Sesame Dressing and Avocado",
+    "Grilled Octopus Salad with Lemon Vinaigrette and Kalamata Olives",
+    "Lobster Bisque with Cognac and Sherry",
+    "French Onion Soup with Gruyere Croutons and Baguette",
+    "Steak and Blue Cheese Salad with Candied Pecans and Balsamic Glaze",
+    "Pan-Seared Ahi Tuna with Wasabi Aioli and Seaweed Salad",
+    "Lobster Ravioli with Brown Butter Sauce and Crispy Sage",
+    "Crispy Duck Confit Salad with Fig Dressing and Goat Cheese",
+    "Seafood Cioppino with Sourdough Bread and Garlic Toast",
+    "Grilled Swordfish with Mediterranean Salsa and Couscous",
+    "Veal Milanese with Arugula Salad and Lemon Vinaigrette",
+    "Steak Frites with Béarnaise Sauce and Truffle Salt",
+    "Seafood Paella with Saffron Aioli and Grilled Bread",
+    "Grilled Lamb Chops with Mint Chimichurri and Roasted Vegetables",
+    "Pan-Seared Ahi Tuna with Wasabi Aioli and Seaweed Salad",
+    "Roasted Bone Marrow with Parsley Salad and Toasted Baguette"
+],
+    "Italian": [
+        # Classic Pasta Dishes
+        "Spaghetti alla Carbonara (with Eggs, Pecorino Romano, Guanciale)",
+        "Pasta all'Amatriciana (with Tomato, Guanciale, Pecorino)",
+        "Spaghetti al Ragù alla Bolognese (with Meat Sauce)",
+        "Lasagne al Forno (Baked Lasagna)",
+        "Fettuccine Alfredo (with Butter and Parmesan)",
+        "Pasta alla Norma (with Eggplant, Tomato, Ricotta Salata)",
+        "Penne all'Arrabbiata (with Spicy Tomato Sauce)",
+        "Linguine alle Vongole (with Clams)",
+        "Spaghetti alle Cozze (with Mussels)",
+        "Pasta al Forno (Baked Pasta)",
+        "Orecchiette alle Cime di Rapa (with Broccoli Rabe)",
+        "Trofie al Pesto (with Pesto)",
+        "Tagliatelle ai Funghi Porcini (with Porcini Mushrooms)",
+        "Ravioli di Magro (with Spinach and Ricotta)",
+        "Tortellini in Brodo (Pasta in Broth)",
+        "Cappelletti in Brodo (Small Stuffed Pasta in Broth)",
+        "Pappardelle al Cinghiale (with Wild Boar Ragù)",
+        "Gnocchi alla Sorrentina (Baked Gnocchi with Tomato and Mozzarella)",
+        "Gnocchi al Pesto (Gnocchi with Pesto)",
+        "Risotto alla Carbonara",
+
+        # Pizza & Breads
+        "Pizza Margherita (Tomato, Mozzarella, Basil)",
+        "Pizza Marinara (Tomato, Garlic, Oregano)",
+        "Pizza Napoletana (Neapolitan Pizza)",
+        "Pizza Quattro Stagioni (Four Seasons Pizza)",
+        "Pizza Capricciosa (with Ham, Mushrooms, Artichokes)",
+        "Focaccia Genovese (Genoese Flatbread)",
+        "Focaccia Barese (Bari-style Focaccia)",
+        "Schiacciata (Tuscan Flatbread)",
+        "Piadina Romagnola (Romagna Flatbread)",
+        "Pane di Altamura (Altamura Bread)",
+
+        # Soups & Stews
+        "Minestrone (Vegetable Soup)",
+        "Ribollita (Tuscan Bread Soup)",
+        "Zuppa di Pesce (Fish Soup)",
+        "Pasta e Fagioli (Pasta and Bean Soup)",
+        "Acquacotta (Tuscan Bread and Vegetable Soup)",
+        "Stracciatella (Roman Egg Drop Soup)",
+
+        # Meat & Poultry
+        "Osso Buco alla Milanese (Braised Veal Shanks)",
+        "Saltimbocca alla Romana (Veal with Prosciutto and Sage)",
+        "Pollo alla Cacciatora (Hunter's Style Chicken)",
+        "Arrosto Misto (Mixed Roast Meat)",
+        "Bollito Misto (Mixed Boiled Meat)",
+        "Cotoletta alla Milanese (Milanese Cutlet)",
+        "Scaloppine al Limone (Veal with Lemon Sauce)",
+        "Involtini (Stuffed Meat Rolls)",
+        "Spezzatino (Meat Stew)",
+        "Porchetta (Roasted Pork)",
+
+        # Seafood
+        "Cacciucco (Tuscan Seafood Stew)",
+        "Brodetto di Pesce (Adriatic Fish Stew)",
+        "Baccalà alla Livornese (Cod with Tomato Sauce)",
+        "Sarde a Beccafico (Stuffed Sardines)",
+        "Impepata di Cozze (Peppered Mussels)",
+        "Alici Marinati (Marinated Anchovies)",
+        "Fritto Misto di Mare (Fried Seafood)",
+        "Risotto alla Pescatora (Seafood Risotto)",
+
+        # Vegetables & Side Dishes
+        "Caponata (Sicilian Eggplant Stew)",
+        "Carciofi alla Romana (Roman-style Artichokes)",
+        "Carciofi alla Giudia (Jewish-style Artichokes)",
+        "Melanzane alla Parmigiana (Eggplant Parmesan)",
+        "Peperonata (Stewed Peppers)",
+        "Patate al Forno (Roasted Potatoes)",
+        "Insalata Caprese (Tomato, Mozzarella, Basil)",
+        "Pinzimonio (Raw Vegetables with Olive Oil)",
+        "Fagiolini all'Uccelletto (Beans with Tomato Sauce)",
+        "Cicoria Ripassata (Sautéed Chicory)",
+
+        # Rice Dishes
+        "Risotto alla Milanese (with Saffron)",
+        "Risotto ai Funghi (Mushroom Risotto)",
+        "Risotto alla Marinara (Seafood Risotto)",
+        "Arancini Siciliani (Fried Rice Balls)",
+        "Suppli (Roman Rice Croquettes)",
+
+        # Cheese & Charcuterie
+        "Tagliere di Salumi e Formaggi (Charcuterie and Cheese Board)",
+        "Burrata con Pomodorini (Burrata with Cherry Tomatoes)",
+        "Mozzarella di Bufala Campana (Buffalo Mozzarella)",
+        "Pecorino Romano (Roman Sheep's Milk Cheese)",
+        "Prosciutto di Parma (Parma Ham)",
+        "Salame Milano (Milan Salami)",
+        "Mortadella di Bologna (Bologna Mortadella)",
+        "Finocchiona (Fennel Salami)",
+
+        # Desserts
+        "Tiramisu (Coffee-Flavored Dessert)",
+        "Panna Cotta (Cooked Cream Dessert)",
+        "Cannoli Siciliani (Fried Pastry Shells with Sweet Ricotta)",
+        "Gelato Artigianale (Artisan Ice Cream)",
+        "Semifreddo (Semi-Frozen Dessert)",
+        "Zuccotto (Florentine Dome Cake)",
+        "Pastiera Napoletana (Neapolitan Easter Pie)",
+        "Ricciarelli (Sienese Almond Cookies)",
+        "Panettone (Sweet Bread)",
+        "Pandoro (Sweet Star-Shaped Bread)",
+        "Torta della Nonna (Grandmother's Tart)",
+        "Sfogliatella (Shell-Shaped Pastry)",
+        "Zeppole (Fried Doughnuts)",
+
+        # Regional Specialties
+        "Cacio e Pepe (Roman Pasta with Cheese and Pepper)",
+        "Carbonara di Mare (Seafood Carbonara)",
+        "Sarde in Saor (Venetian Sweet and Sour Sardines)",
+        "Pizzoccheri (Valtellina Buckwheat Pasta)",
+        "Casunziei (Venetian Beet Ravioli)",
+        "Polenta Taragna (Lombard Cornmeal Dish)",
+        "Torta Pasqualina (Ligurian Savory Pie)",
+        "Vincisgrassi (Marche Lasagna)",
+        "Timpano (Sicilian Baked Pasta Drum)",
+        "Pane Cunzato (Sicilian Seasoned Bread)",
+        "Cianfotta (Campanian Vegetable Stew)",
+        "Puttanesca (Neapolitan Pasta with Olives and Capers)"
+    ],
+    "Latin American / Mexican": [
+    # Mexican
+    "Tacos al Pastor (Marinated Pork Tacos)",
+    "Mole Poblano (Chocolate Chili Sauce)",
+    "Chiles en Nogada (Stuffed Poblano Peppers with Walnut Sauce)",
+    "Pozole Rojo (Hominy and Meat Stew)",
+    "Tamales (Steamed Corn Dough with Fillings)",
+    "Enchiladas Rojas (Corn Tortillas with Red Sauce and Cheese)",
+    "Chiles Rellenos (Stuffed and Fried Chili Peppers)",
+    "Carnitas (Slow-Cooked Pulled Pork)",
+    "Birria de Chivo (Spicy Goat Stew)",
+    "Quesadillas (Cheese-Filled Tortillas)",
+    "Sopes (Thick Corn Tortillas with Toppings)",
+    "Huaraches (Oblong Corn Tortillas with Toppings)",
+    "Tostadas (Crispy Tortillas with Toppings)",
+    "Menudo (Tripe Soup)",
+    "Pambazos (Bread Dipped in Chili Sauce with Fillings)",
+    "Flan (Custard Dessert)",
+    "Churros con Chocolate (Fried Dough with Chocolate Sauce)",
+    "Pastel de Tres Leches (Three Milks Cake)",
+    "Arroz con Leche (Rice Pudding)",
+    "Chocolate Caliente (Hot Chocolate)",
+    "Esquites (Street Corn Salad)",
+    "Cochinita Pibil (Yucatan-Style Slow-Roasted Pork)",
+    "Sopa de Tortilla (Tortilla Soup)",
+    "Guacamole con Totopos (Avocado Dip with Tortilla Chips)",
+    "Ceviche (Seafood Marinated in Citrus)",
+    "Barbacoa (Pit-Barbecued Meat)",
+    "Tlayudas (Oaxacan Large Tortillas with Toppings)",
+    "Picaditas (Veracruz Small Tortillas with Toppings)",
+    "Chalupas (Anahuac Small Thick Tortillas with Toppings)",
+    "Chilaquiles (Tortilla Chips Cooked in Salsa)",
+    "Rajas Poblanos (Poblano Pepper Strips in Cream Sauce)",
+    "Caldo de Pollo (Chicken Soup)",
+    "Elote (Mexican Street Corn)",
+    "Champurrado (Thick Chocolate Atole)",
+
+    # Peruvian
+    "Ceviche Peruano (Peruvian Ceviche)",
+    "Lomo Saltado (Stir-Fried Beef with Vegetables)",
+    "Ají de Gallina (Creamy Chicken Stew)",
+    "Papa a la Huancaína (Potatoes with Cheese Sauce)",
+    "Rocoto Relleno (Stuffed Rocoto Peppers)",
+    "Anticuchos (Grilled Beef Heart Skewers)",
+    "Causa Rellena (Layered Potato Casserole)",
+    "Seco de Cabrito (Goat Stew)",
+    "Arroz con Mariscos (Rice with Seafood)",
+    "Suspiro Limeño (Peruvian Caramel Custard)",
+    "Pollo a la Brasa (Peruvian Roasted Chicken)",
+    "Tiradito (Peruvian Sashimi)",
+    "Tacu Tacu (Rice and Beans Dish)",
+    "Picarones (Peruvian Sweet Potato Doughnuts)",
+
+    # Colombian
+    "Bandeja Paisa (Colombian Platter)",
+    "Ajiaco (Colombian Chicken and Potato Soup)",
+    "Empanadas Colombianas (Colombian Empanadas)",
+    "Arepas (Cornmeal Cakes)",
+    "Sancocho (Colombian Stew)",
+    "Mondongo (Colombian Tripe Soup)",
+    "Lechona (Colombian Roasted Pig)",
+    "Tamales Tolimenses (Tolima-Style Tamales)",
+    "Frijoles Antioqueños (Antioquian Beans)",
+    "Mazamorra (Colombian Corn Pudding)",
+    "Buñuelos (Colombian Cheese Fritters)",
+
+    # Argentinian
+    "Asado (Argentinian Barbecue)",
+    "Empanadas Argentinas (Argentinian Empanadas)",
+    "Locro (Argentinian Stew)",
+    "Milanesa a la Napolitana (Argentinian Breaded Meat with Toppings)",
+    "Pastel de Papa (Shepherd's Pie)",
+    "Choripán (Chorizo Sandwich)",
+    "Provoleta (Grilled Provolone Cheese)",
+    "Alfajores (Argentinian Sandwich Cookies)",
+    "Dulce de Leche (Caramelized Milk)",
+    "Humita en Chala (Corn Tamales)",
+
+    # Brazilian
+    "Feijoada (Brazilian Black Bean Stew)",
+    "Moqueca (Brazilian Fish Stew)",
+    "Pão de Queijo (Brazilian Cheese Bread)",
+    "Coxinha (Brazilian Chicken Croquettes)",
+    "Pastel (Brazilian Fried Pastries)",
+    "Escondidinho (Brazilian Shepherd's Pie)",
+    "Acarajé (Brazilian Black-Eyed Pea Fritters)",
+    "Brigadeiro (Brazilian Chocolate Truffles)",
+    "Quindim (Brazilian Coconut Custard)",
+    "Caipirinha (Brazilian Cocktail)",
+
+    # Caribbean (with Latin American Influences)
+    "Mofongo (Puerto Rican Mashed Plantains)",
+    "Ropa Vieja (Cuban Shredded Beef)",
+    "Moros y Cristianos (Cuban Rice and Beans)",
+    "Arroz Congrí (Cuban Rice and Beans)",
+    "Tostones (Fried Plantains)",
+    "Pernil (Puerto Rican Roasted Pork Shoulder)",
+    "Pasteles (Puerto Rican Root Vegetable Tamales)",
+    "Coquito (Puerto Rican Coconut Drink)",
+    "Flan de Coco (Caribbean Coconut Flan)",
+    "Guanime (Puerto Rican Cornmeal Dumplings)",
+
+    # Central American
+    "Pupusas (Salvadoran Stuffed Flatbreads)",
+    "Gallo Pinto (Costa Rican Rice and Beans)",
+    "Casado (Costa Rican Lunch Plate)",
+    "Rondon (Caribbean Coast Seafood Stew)",
+    "Baleadas (Honduran Folded Tortillas)",
+    "Enchiladas Guatemaltecas (Guatemalan Enchiladas)",
+    "Fiambre (Guatemalan Salad)",
+    "Chuchitos (Guatemalan Small Tamales)",
+    "Platanos en Gloria (Nicaraguan Sweet Plantains)",
+    "Nacatamales (Nicaraguan Tamales)"
+],
+    "Indian": [
+        # North Indian
+    "Butter Chicken (Murgh Makhani)",
+    "Chicken Biryani (Fragrant Rice with Chicken)",
+    "Rogan Josh (Aromatic Kashmiri Lamb Curry)",
+    "Palak Paneer (Spinach and Cottage Cheese Curry)",
+    "Chana Masala (Chickpea Curry)",
+    "Dal Makhani (Black Lentil and Kidney Bean Curry)",
+    "Tandoori Chicken (Yogurt Marinated Roasted Chicken)",
+    "Aloo Gobi (Potato and Cauliflower Curry)",
+    "Saag Paneer (Mustard Greens and Cottage Cheese Curry)",
+    "Rajma Chawal (Kidney Bean Curry with Rice)",
+    "Matar Paneer (Peas and Cottage Cheese Curry)",
+    "Navratan Korma (Vegetable and Nut Curry)",
+    "Malai Kofta (Vegetable and Paneer Dumplings in Cream Sauce)",
+    "Chole Bhature (Chickpea Curry with Fried Bread)",
+    "Paneer Tikka Masala (Cottage Cheese in Tomato-Based Gravy)",
+    "Chicken Tikka Masala (Chicken in Tomato-Based Gravy)",
+    "Lamb Korma (Creamy Lamb Curry)",
+    "Dal Tadka (Tempered Lentil Curry)",
+    "Baingan Bharta (Smoked Eggplant Mash)",
+    "Sarson ka Saag (Mustard Greens Curry)",
+    "Makki di Roti (Corn Flour Flatbread)",
+    "Naan (Oven-Baked Flatbread)",
+    "Roti (Whole Wheat Flatbread)",
+    "Paratha (Stuffed Flatbread)",
+    "Lassi (Yogurt-Based Drink)",
+    "Gulab Jamun (Milk Solid Dumplings in Sugar Syrup)",
+    "Kheer (Rice Pudding)",
+    "Jalebi (Fried Wheat Flour Spirals in Syrup)",
+    "Rasmalai (Cheese Patties in Sweet Milk)",
+    "Gajar ka Halwa (Carrot Pudding)",
+
+    # South Indian
+    "Masala Dosa (Crispy Crepe with Potato Filling)",
+    "Idli Sambhar (Steamed Rice Cakes with Lentil Soup)",
+    "Vada Sambhar (Fried Lentil Doughnuts with Lentil Soup)",
+    "Uttapam (Thick Rice and Lentil Pancake)",
+    "Rasam (Spicy Tomato Soup)",
+    "Sambar (Vegetable Lentil Stew)",
+    "Avial (Mixed Vegetable Curry with Coconut)",
+    "Chettinad Chicken (Spicy Chicken Curry)",
+    "Meen Moilee (Fish Curry with Coconut Milk)",
+    "Hyderabadi Biryani (Fragrant Rice with Meat)",
+    "Upma (Semolina Porridge)",
+    "Pongal (Rice and Lentil Dish)",
+    "Appam with Stew (Fermented Rice Pancake with Stew)",
+    "Idiyappam (Rice Noodle Cakes)",
+    "Korma (Coconut-Based Curry)",
+    "Payasam (Sweet Milk Pudding)",
+    "Mysore Pak (Sweet Fudge)",
+    "Rava Kesari (Semolina Dessert)",
+    "Coconut Chutney (Coconut Dip)",
+    "Sambar Powder (Spice Blend)",
+
+    # East Indian
+    "Macher Jhol (Fish Curry)",
+    "Aloo Posto (Potato Curry with Poppy Seeds)",
+    "Shukto (Mixed Vegetable Curry)",
+    "Daal Puri (Lentil Stuffed Bread)",
+    "Chingri Malai Curry (Prawn Curry with Coconut Milk)",
+    "Kosha Mangsho (Mutton Curry)",
+    "Luchi (Fried Flatbread)",
+    "Sandesh (Sweet Cheese Dessert)",
+    "Roshogolla (Sweet Cheese Balls in Syrup)",
+    "Momos (Dumplings)",
+    "Thukpa (Noodle Soup)",
+    "Poha (Flattened Rice Dish)",
+    "Sattu Paratha (Roasted Gram Flour Flatbread)",
+
+    # West Indian
+    "Pav Bhaji (Vegetable Mash with Buttered Bread Rolls)",
+    "Vada Pav (Potato Fritter Sandwich)",
+    "Misal Pav (Spicy Sprout Curry with Bread)",
+    "Dhokla (Steamed Chickpea Flour Cakes)",
+    "Thepla (Spiced Flatbread)",
+    "Undhiyu (Mixed Vegetable Curry)",
+    "Bhel Puri (Savory Snack with Puffed Rice and Vegetables)",
+    "Pani Puri (Crispy Semolina Shells with Spiced Water)",
+    "Ragda Pattice (Potato Patties with Chickpea Curry)",
+    "Shrikhand (Sweet Yogurt Dessert)",
+    "Puran Poli (Sweet Stuffed Flatbread)",
+    "Batata Vada (Potato Fritters)",
+    "Sabudana Khichdi (Tapioca Pearl Dish)",
+
+    # Snacks & Street Food
+    "Samosas (Spiced Potato and Pea Pastries)",
+    "Pakoras (Vegetable Fritters)",
+    "Dahi Puri (Crispy Shells with Yogurt)",
+    "Sev Puri (Crispy Crackers with Toppings)",
+    "Papdi Chaat (Crispy Wafers with Toppings)",
+    "Aloo Tikki (Potato Patties)",
+    "Chaat Masala (Spice Blend)",
+    "Tandoori Paneer Tikka (Roasted Cottage Cheese)",
+    "Chicken 65 (Spicy Fried Chicken)",
+    "Seekh Kebab (Minced Meat Skewers)",
+    "Hara Bhara Kebab (Spinach and Pea Patties)",
+    "Onion Bhaji (Onion Fritters)",
+    "Papadum (Thin Crispy Flatbread)",
+
+    # Pickles & Chutneys
+    "Mango Pickle (Aam ka Achar)",
+    "Lime Pickle (Nimbu ka Achar)",
+    "Mint Chutney (Pudina Chutney)",
+    "Tamarind Chutney (Imli Chutney)",
+    "Coriander Chutney (Dhania Chutney)",
+    "Garlic Chutney (Lahsun Chutney)",
+],
+    "Japanese": [
+    # Sushi & Sashimi
+    "Nigiri Sushi (Vinegared Rice with Toppings)",
+    "Sashimi (Thinly Sliced Raw Fish)",
+    "Maki Sushi (Rolled Sushi)",
+    "Uramaki Sushi (Inside-Out Rolls)",
+    "Temaki Sushi (Hand-Rolled Sushi)",
+    "Gunkan Maki (Battleship Rolls)",
+    "Chirashi Sushi (Scattered Sushi)",
+    "Inari Sushi (Fried Tofu Pockets)",
+
+    # Noodles
+    "Ramen (Wheat Noodles in Broth)",
+    "Udon (Thick Wheat Noodles)",
+    "Soba (Buckwheat Noodles)",
+    "Yakitori Ramen",
+    "Tempura Udon/Soba",
+    "Kitsune Udon/Soba (with Fried Tofu)",
+    "Tsukemen (Dipping Noodles)",
+    "Yakisoba (Stir-Fried Noodles)",
+    "Yaki Udon (Stir-Fried Udon)",
+    "Somen (Thin Wheat Noodles)",
+    "Hiyamugi (Thin Wheat Noodles)",
+    "Champon (Nagasaki Noodle Dish)",
+
+    # Rice Dishes
+    "Donburi (Rice Bowl Dishes)",
+    "Gyudon (Beef Bowl)",
+    "Oyakodon (Chicken and Egg Bowl)",
+    "Katsudon (Pork Cutlet Bowl)",
+    "Tendon (Tempura Bowl)",
+    "Unadon (Eel Bowl)",
+    "Curry Rice (Japanese Curry with Rice)",
+    "Omurice (Omelette Rice)",
+    "Takikomi Gohan (Mixed Rice)",
+    "Okayu (Rice Porridge)",
+
+    # Meat & Poultry
+    "Teriyaki Chicken (Grilled Chicken with Sweet Soy Glaze)",
+    "Yakitori (Grilled Chicken Skewers)",
+    "Tonkatsu (Deep-Fried Pork Cutlet)",
+    "Chicken Nanban (Fried Chicken with Tartar Sauce)",
+    "Shogayaki (Ginger Pork)",
+    "Nikujaga (Meat and Potato Stew)",
+    "Hamburg Steak (Japanese-style Hamburger)",
+    "Karaage (Japanese Fried Chicken)",
+    "Toriten (Tempura Chicken)",
+    "Buta no Kakuni (Braised Pork Belly)",
+
+    # Seafood
+    "Tempura (Deep-Fried Seafood and Vegetables)",
+    "Sushi (Vinegared Rice with Toppings)",
+    "Sashimi (Thinly Sliced Raw Fish)",
+    "Shabu-Shabu (Thinly Sliced Meat Cooked in Broth)",
+    "Sukiyaki (Hot Pot with Thinly Sliced Beef and Vegetables)",
+    "Oden (Hot Pot Dish)",
+    "Sanma no Shioyaki (Grilled Pacific Saury)",
+    "Saba no Misoni (Mackerel Cooked in Miso)",
+    "Takoyaki (Octopus Balls)",
+    "Ebi Chili (Shrimp Chili)",
+
+    # Savory Dishes
+    "Okonomiyaki (Savory Pancake)",
+    "Chawanmushi (Savory Egg Custard)",
+    "Gyoza (Pan-Fried Dumplings)",
+    "Edamame (Steamed Soybeans)",
+    "Agedashi Tofu (Fried Tofu in Broth)",
+    "Nimono (Simmered Dishes)",
+    "Sunomono (Vinegared Salad)",
+    "Miso Soup (Soybean Paste Soup)",
+    "Dashimaki Tamago (Rolled Omelette)",
+    "Tsukemono (Pickled Vegetables)",
+
+    # Bread & Sandwiches
+    "Sandos (Japanese Sandwiches)",
+    "Katsu Sando (Pork Cutlet Sandwich)",
+    "Tamago Sando (Egg Sandwich)",
+    "Yakisoba Pan (Noodle Sandwich)",
+    "Anpan (Sweet Bean Bun)",
+    "Shokupan (Japanese Milk Bread)",
+
+    # Desserts
+    "Mochi (Rice Cakes)",
+    "Daifuku (Stuffed Mochi)",
+    "Dorayaki (Sweet Red Bean Pancakes)",
+    "Taiyaki (Fish-Shaped Cake with Filling)",
+    "Anmitsu (Agar Jelly Dessert)",
+    "Matcha Ice Cream (Green Tea Ice Cream)",
+    "Kakigori (Shaved Ice)",
+    "Zenzai (Sweet Red Bean Soup)",
+    "Castella (Japanese Sponge Cake)",
+    "Purin (Japanese Pudding)",
+
+    # Regional Specialties
+    "Hiroshima-style Okonomiyaki",
+    "Osaka-style Okonomiyaki",
+    "Hakata Ramen",
+    "Sapporo Ramen",
+    "Nagoya-style Hitsumabushi (Grilled Eel)",
+    "Okinawa Soba",
+    "Goya Champuru (Okinawan Stir-Fry)",
+    "Monjayaki (Tokyo Savory Pancake)",
+    "Fugu Sashimi (Pufferfish Sashimi)",
+    "Onigiri Cha-zuke (Rice Balls in Tea)",
+    "Nabe (Hot Pot Dishes)",
+    "Yosenabe (Mixed Hot Pot)",
+    "Kimchi Nabe (Korean-influenced Hot Pot)",
+    "Chanko Nabe (Sumo Wrestler Hot Pot)",
+    "Ishikari Nabe (Salmon Hot Pot)"
+],
+    "Chinese": [
+    # Cantonese Cuisine
+    "Cantonese Char Siu (Barbecue Pork)",
+    "Cantonese Dim Sum (Steamed and Fried Small Dishes)",
+    "Har Gow (Shrimp Dumplings)",
+    "Siu Mai (Pork and Shrimp Dumplings)",
+    "Cheung Fun (Rice Noodle Rolls)",
+    "Congee (Rice Porridge)",
+    "Wonton Noodle Soup (Dumplings in Broth)",
+    "Roast Duck (Cantonese Style)",
+    "Roast Pork Belly (Siu Yuk)",
+    "Clay Pot Rice (煲仔饭)",
+    "Steamed Fish with Ginger and Scallions",
+    "Chow Mein (Stir-Fried Noodles)",
+    "Fried Rice (Cantonese Style)",
+    "Lo Mein (Stir-Fried Noodles with Sauce)",
+    "Cantonese Egg Tarts (Custard Tarts)",
+    "Mango Pudding (Sweet Mango Dessert)",
+    "Sweet and Sour Pork (Pork in Tangy Sauce)",
+    "Beef Chow Fun (Stir-Fried Rice Noodles with Beef)",
+    "Congee with Preserved Egg and Pork",
+    "Steamed Spare Ribs with Black Bean Sauce",
+
+    # Sichuan Cuisine
+    "Mapo Tofu (Silken Tofu in Spicy Bean Sauce)",
+    "Kung Pao Chicken (Spicy Stir-Fried Chicken with Peanuts)",
+    "Sichuan Dan Dan Noodles (Spicy Noodle Dish)",
+    "Twice Cooked Pork (回锅肉)",
+    "Fish-Fragrant Eggplant (Yu Xiang Qie Zi)",
+    "Sichuan Hot Pot (Spicy Broth with Ingredients)",
+    "Mala Chicken (Spicy and Numbing Chicken)",
+    "Shui Zhu Yu (Fish in Chili Oil)",
+    "Dry Pot (干锅)",
+    "Spicy Boiled Beef (水煮牛肉)",
+    "Sichuan Cold Noodles (凉面)",
+    "Fuqi Feipian (Spicy Beef Offal)",
+    "La Zi Ji (Spicy Chicken Cubes)",
+    "Chongqing Chicken (辣子鸡)",
+    "Gong Bao Chicken (宫保鸡丁)",
+    "Mao Xue Wang (毛血旺)",
+    "Sichuan Pickled Vegetables (泡菜)",
+    "Sichuan Hotpot (火锅)",
+    "Sichuan Dumplings (钟水饺)",
+    "Sichuan Liangfen (凉粉)",
+
+    # Peking Cuisine
+    "Peking Duck (Crispy Roasted Duck)",
+    "Jiaozi (Boiled Dumplings)",
+    "Baozi (Steamed Buns with Fillings)",
+    "Zha Jiang Mian (Noodles with Soybean Paste Sauce)",
+    "Jing Jiang Rou Si (Shredded Pork with Sweet Bean Sauce)",
+    "Suan Cai Yu (Fish with Pickled Cabbage)",
+    "Peking Roast Duck (北京烤鸭)",
+    "Peking Style Noodles (老北京炸酱面)",
+    "Peking Style Dumplings (老北京饺子)",
+    "Peking Style Hot Pot (老北京涮羊肉)",
+
+    # Shanghai Cuisine
+    "Xiao Long Bao (Steamed Soup Dumplings)",
+    "Shanghai Fried Noodles (上海炒面)",
+    "Shanghai Style Spring Rolls (上海春卷)",
+    "Lion's Head Meatballs (狮子头)",
+    "Braised Pork Belly (Hong Shao Rou)",
+    "Sweet and Sour Spare Ribs (糖醋排骨)",
+    "Shanghai Bok Choy (上海青)",
+    "Shanghai Style Dumplings (生煎包)",
+    "Shanghai Rice Cakes (上海炒年糕)",
+    "Shanghai Style Braised Fish (红烧鱼)",
+
+    # Fujian Cuisine
+    "Buddha Jumps Over the Wall (佛跳墙)",
+    "Oyster Omelette (蚵仔煎)",
+    "Fujian Fried Rice (福建炒饭)",
+    "Fujian Noodles (福建面)",
+    "Fujian Style Dumplings (扁肉)",
+    "Fujian Style Fish Balls (鱼丸)",
+    "Fujian Style Peanut Soup (花生汤)",
+
+    # Xinjiang Cuisine
+    "Big Plate Chicken (大盘鸡)",
+    "Hand-Pulled Noodles (拉条子)",
+    "Lamb Skewers (羊肉串)",
+    "Pilaf (抓饭)",
+    "Dapanji (大盘鸡)",
+    "Xinjiang Style Noodles (拌面)",
+    "Xinjiang Style Bread (馕)",
+
+    # Desserts & Snacks
+    "Mooncakes (Sweet Pastries for Mid-Autumn Festival)",
+    "Red Bean Buns (Steamed Buns with Sweet Red Bean Paste)",
+    "Tang Yuan (Sweet Rice Balls)",
+    "Glutinous Rice Balls (汤圆)",
+    "Almond Cookies (Crisp Almond Flavored Cookies)",
+    "Sesame Balls (煎堆)",
+    "Pineapple Buns (菠萝包)",
+    "Egg Tarts (蛋挞)",
+    "Sweet Rice Cake (年糕)",
+    "Eight Treasure Rice (八宝饭)",
+    "Candied Hawthorns (糖葫芦)",
+    "Bing Tang Hulu (糖葫芦)",
+    "Tangyuan with Sesame Filling (芝麻汤圆)",
+    "Tangyuan with Peanut Filling (花生汤圆)",
+    "Tangyuan with Red Bean Filling (豆沙汤圆)",
+
+    # Other Dishes
+    "Chow Mein (炒面)",
+    "Spring Rolls (春卷)",
+    "General Tso's Chicken (左宗棠鸡)",
+    "Egg Drop Soup (蛋花汤)",
+    "Wonton Soup (云吞汤)",
+    "Hot and Sour Soup (酸辣汤)",
+    "Dumplings (饺子)",
+    "Fried Rice (炒饭)",
+    "Sweet and Sour Ribs (糖醋里脊)",
+    "Braised Pork Knuckles (红烧猪蹄)",
+    "Stir-Fried Green Beans (干煸四季豆)",
+    "Stir-Fried Cabbage (醋溜白菜)",
+    "Spicy Cucumber Salad (拍黄瓜)",
+    "Cold Sesame Noodles (麻酱凉面)",
+    "Lion's Head (狮子头)"
+],
+    "Thai": [
+    # Noodles
+    "Pad Thai (ผัดไทย) - Stir-Fried Rice Noodles with Shrimp, Tofu, Peanuts",
+    "Pad See Ew (ผัดซีอิ๊ว) - Stir-Fried Wide Rice Noodles with Soy Sauce",
+    "Pad Kee Mao (ผัดขี้เมา) - Drunken Noodles",
+    "Khao Soi (ข้าวซอย) - Northern Thai Curry Noodle Soup",
+    "Rad Na (ราดหน้า) - Noodles with Gravy",
+    "Guay Teow Kua Gai (ก๋วยเตี๋ยวคั่วไก่) - Stir-Fried Noodles with Chicken",
+    "Ba Mee Kiew (บะหมี่เกี๊ยว) - Egg Noodles with Wonton",
+    "Sen Lek Tom Yum (เส้นเล็กต้มยำ) - Rice Noodles in Tom Yum Soup",
+    "Sen Yai Pad See Ew (เส้นใหญ่ผัดซีอิ๊ว) - Wide Rice Noodles Pad See Ew",
+    "Sen Mee Pad Thai (เส้นหมี่ผัดไทย) - Thin Rice Noodles Pad Thai",
+
+    # Rice Dishes
+    "Khao Pad (ข้าวผัด) - Fried Rice",
+    "Khao Pad Sapparot (ข้าวผัดสับปะรด) - Pineapple Fried Rice",
+    "Khao Pad Krapow (ข้าวผัดกะเพรา) - Basil Fried Rice",
+    "Khao Man Gai (ข้าวมันไก่) - Chicken Rice",
+    "Khao Mok Gai (ข้าวหมกไก่) - Steamed Chicken and Rice in Banana Leaf",
+    "Khao Chae (ข้าวแช่) - Rice Soaked in Jasmine Water with Condiments",
+    "Khao Niao Mamuang (ข้าวเหนียวมะม่วง) - Mango Sticky Rice",
+    "Khao Niao Sangkhaya (ข้าวเหนียวสังขยา) - Sticky Rice with Custard",
+    "Khao Tom (ข้าวต้ม) - Rice Soup",
+    "Khao Pad Poo (ข้าวผัดปู) - Crab Fried Rice",
+
+    # Curries
+    "Green Curry with Chicken (Gaeng Keow Wan Gai) (แกงเขียวหวานไก่)",
+    "Red Curry (Gaeng Daeng) (แกงแดง)",
+    "Massaman Curry with Beef (Gaeng Massaman Neua) (แกงมัสมั่นเนื้อ)",
+    "Panaeng Curry (แกงพะแนง)",
+    "Yellow Curry (Gaeng Kari) (แกงกะหรี่)",
+    "Jungle Curry (Gaeng Pa) (แกงป่า)",
+    "Sour Curry (Gaeng Som) (แกงส้ม)",
+    "Hung Lay Curry (แกงฮังเล) - Northern Thai Pork Curry",
+    "Gaeng Keow Wan Pla (แกงเขียวหวานปลา) - Green Curry with Fish",
+    "Gaeng Daeng Ped Yang (แกงแดงเป็ดย่าง) - Red Curry with Roasted Duck",
+
+    # Soups
+    "Tom Yum Goong (ต้มยำกุ้ง) - Spicy Shrimp Soup",
+    "Tom Kha Gai (ต้มข่าไก่) - Coconut Milk Soup with Chicken",
+    "Tom Saap (ต้มแซ่บ) - Spicy Isan Soup",
+    "Gaeng Jued Woon Sen (แกงจืดวุ้นเส้น) - Clear Noodle Soup",
+    "Tom Yum Pla (ต้มยำปลา) - Spicy Fish Soup",
+    "Tom Kha Pla (ต้มข่าปลา) - Coconut Milk Soup with Fish",
+    "Tom Yum Talay (ต้มยำทะเล) - Spicy Seafood Soup",
+    "Tom Kha Hed (ต้มข่าเห็ด) - Coconut Milk Soup with Mushrooms",
+    "Tom Yum Kung Nam Sai (ต้มยำกุ้งน้ำใส) - Clear Tom Yum Soup",
+    "Tom Yum Kung Nam Khon (ต้มยำกุ้งน้ำข้น) - Creamy Tom Yum Soup",
+
+    # Salads
+    "Som Tam (ส้มตำ) - Spicy Green Papaya Salad",
+    "Larb (ลาบ) - Minced Meat Salad",
+    "Yam Woon Sen (ยำวุ้นเส้น) - Glass Noodle Salad",
+    "Yam Talay (ยำทะเล) - Seafood Salad",
+    "Yam Pla Duk Foo (ยำปลาดุกฟู) - Crispy Catfish Salad",
+    "Yam Moo Yor (ยำหมูยอ) - Vietnamese Sausage Salad",
+    "Som Tum Pla Ra (ส้มตำปลาร้า) - Papaya Salad with Fermented Fish Sauce",
+    "Larb Gai (ลาบไก่) - Minced Chicken Salad",
+    "Yam Ma Muang (ยำมะม่วง) - Mango Salad",
+    "Yam Nuea Yang (ยำเนื้อย่าง) - Grilled Beef Salad",
+
+    # Appetizers
+    "Satay (สะเต๊ะ) - Grilled Skewers with Peanut Sauce",
+    "Tod Mun Pla (ทอดมันปลา) - Fish Cakes",
+    "Spring Rolls (ปอเปี๊ยะ)",
+    "Fried Wonton (เกี๊ยวทอด)",
+    "Miang Kham (เมี่ยงคำ) - Leaf-Wrapped Bites",
+    "Hoy Tod (หอยทอด) - Crispy Mussel Pancake",
+    "Poh Pia Sod (เปาะเปี๊ยะสด) - Fresh Spring Rolls",
+    "Peek Gai Tod (ปีกไก่ทอด) - Fried Chicken Wings",
+    "Sai Krok Isaan (ไส้กรอกอีสาน) - Northeastern Thai Sausage",
+    "Pla Meuk Yang (ปลาหมึกย่าง) - Grilled Squid",
+
+    # Desserts
+    "Mango Sticky Rice (ข้าวเหนียวมะม่วง) - Khao Niao Mamuang",
+    "Tub Tim Grob (ทับทิมกรอบ) - Water Chestnuts in Coconut Milk",
+    "Khanom Buang (ขนมเบื้อง) - Crispy Pancakes with Sweet and Savory Fillings",
+    "Khao Niao Dam (ข้าวเหนียวดำ) - Black Sticky Rice",
+    "Khanom Krok (ขนมครก) - Coconut Rice Pancakes",
+    "Bua Loy (บัวลอย) - Rice Balls in Coconut Milk",
+    "Lod Chong Nam Kathi (ลอดช่องน้ำกะทิ) - Pandan Jelly in Coconut Milk",
+    "Ruam Mit (รวมมิตร) - Mixed Desserts in Coconut Milk",
+    "Khanom Tuay (ขนมถ้วย) - Coconut Cream Dessert",
+    "Fak Thong Gaeng Buat (ฟักทองแกงบวด) - Pumpkin in Coconut Milk",
+
+    # Regional Specialties
+    "Gaeng Hang Lei (แกงฮังเล) - Northern Thai Pork Curry",
+    "Sai Oua (ไส้อั่ว) - Northern Thai Sausage",
+    "Nam Prik Ong (น้ำพริกอ่อง) - Northern Thai Pork and Tomato Dip",
+    "Nam Prik Noom (น้ำพริกหนุ่ม) - Northern Thai Roasted Chili Dip",
+    "Kaeng Tai Pla (แกงไตปลา) - Southern Thai Fish Kidney Curry",
+    "Kua Kling (คั่วกลิ้ง) - Southern Thai Dry Curry",
+    "Massaman Curry with Chicken (แกงมัสมั่นไก่)",
+    "Tom Yum Goong Nam Khon (ต้มยำกุ้งน้ำข้น) - Creamy Tom Yum Soup",
+    "Gaeng Keow Wan Talay (แกงเขียวหวานทะเล) - Green Curry with Seafood",
+    "Pad Prik King (ผัดพริกขิง) - Stir-Fried Green Beans with Curry Paste"
+],
+    "Mediterranean": [
+    # Greek
+    "Moussaka (Μουσακάς) - Eggplant and Meat Casserole",
+    "Souvlaki (Σουβλάκι) - Grilled Meat Skewers",
+    "Gyros (Γύρος) - Meat Cooked on a Vertical Rotisserie",
+    "Dolmades (Ντολμάδες) - Stuffed Grape Leaves",
+    "Spanakopita (Σπανακόπιτα) - Spinach and Feta Pie",
+    "Pastitsio (Παστίτσιο) - Baked Pasta with Meat Sauce and Béchamel",
+    "Gemista (Γεμιστά) - Stuffed Vegetables (Tomatoes, Peppers)",
+    "Kleftiko (Κλέφτικο) - Slow-Baked Lamb",
+    "Stifado (Στιφάδο) - Beef Stew with Onions",
+    "Fasolada (Φασολάδα) - Greek Bean Soup",
+    "Avgolemono (Αυγολέμονο) - Lemon and Egg Soup",
+    "Tzatziki (Τζατζίκι) - Yogurt and Cucumber Dip",
+    "Taramasalata (Ταραμοσαλάτα) - Fish Roe Dip",
+    "Horiatiki Salata (Χωριάτικη Σαλάτα) - Greek Village Salad",
+    "Keftedes (Κεφτέδες) - Greek Meatballs",
+    "Loukoumades (Λουκουμάδες) - Honey-Dipped Doughnuts",
+    "Baklava (Μπακλαβάς) - Sweet Pastry with Nuts and Syrup",
+    "Galaktoboureko (Γαλακτομπούρεκο) - Custard Pie with Phyllo",
+    "Kataifi (Καταΐφι) - Shredded Phyllo Pastry with Nuts and Syrup",
+    "Saganaki (Σαγανάκι) - Fried Cheese",
+
+    # Italian
+    "Pasta alla Carbonara (with Eggs, Pecorino Romano, Guanciale)",
+    "Lasagna alla Bolognese (with Ragù and Béchamel)",
+    "Fettuccine Alfredo (with Butter and Parmesan)",
+    "Spaghetti al Ragù alla Bolognese (with Meat Sauce)",
+    "Penne all'Arrabbiata (with Spicy Tomato Sauce)",
+    "Linguine alle Vongole (with Clams)",
+    "Risotto alla Milanese (with Saffron)",
+    "Gnocchi alla Sorrentina (Baked Gnocchi with Tomato and Mozzarella)",
+    "Pizza Margherita (Tomato, Mozzarella, Basil)",
+    "Osso Buco alla Milanese (Braised Veal Shanks)",
+    "Saltimbocca alla Romana (Veal with Prosciutto and Sage)",
+    "Minestrone (Vegetable Soup)",
+    "Bruschetta al Pomodoro (with Tomatoes and Garlic)",
+    "Caprese Salad (Tomato, Mozzarella, Basil)",
+    "Pesto alla Genovese (Basil Pesto)",
+    "Tiramisu (Coffee-Flavored Dessert)",
+    "Panna Cotta (Cooked Cream Dessert)",
+    "Cannoli Siciliani (Fried Pastry Shells with Sweet Ricotta)",
+    "Arancini Siciliani (Fried Rice Balls)",
+    "Focaccia (Flatbread)",
+
+    # Spanish
+    "Paella Valenciana (Rice Dish with Seafood and Meat)",
+    "Gazpacho (Cold Tomato Soup)",
+    "Tortilla Española (Spanish Potato and Egg Omelette)",
+    "Tapas (Various Small Savory Dishes)",
+    "Gambas al Ajillo (Garlic Shrimp)",
+    "Patatas Bravas (Spicy Potatoes)",
+    "Pulpo a la Gallega (Galician-Style Octopus)",
+    "Fabada Asturiana (Asturian Bean Stew)",
+    "Cocido Madrileño (Madrid-Style Chickpea Stew)",
+    "Pisto (Spanish Vegetable Stew)",
+    "Salmorejo (Thick Cold Tomato Soup)",
+    "Churros con Chocolate (Fried Dough with Chocolate Sauce)",
+    "Crema Catalana (Catalan Custard Dessert)",
+    "Tarta de Santiago (Almond Cake from Santiago)",
+    "Sangria (Spanish Wine Punch)",
+    "Albondigas (Spanish Meatballs)",
+    "Calamares a la Romana (Fried Squid)",
+    "Croquetas (Spanish Croquettes)",
+    "Empanadas (Spanish Empanadas)",
+    "Flan (Spanish Custard Dessert)",
+
+    # Turkish
+    "Kebab (Various Grilled Meat Dishes)",
+    "Şiş Kebap (Shish Kebab)",
+    "Döner Kebap (Meat Cooked on a Vertical Rotisserie)",
+    "Köfte (Meatballs or Patties)",
+    "Dolma (Stuffed Vegetables or Leaves)",
+    "Mantı (Turkish Dumplings)",
+    "İskender Kebap (Meat with Tomato Sauce and Yogurt)",
+    "Lahmacun (Turkish Pizza)",
+    "Pide (Turkish Flatbread with Toppings)",
+    "Meze (Various Small Dishes Served as Appetizers)",
+    "Hummus (Chickpea Dip)",
+    "Baba Ghanoush (Roasted Eggplant Dip)",
+    "Tabbouleh (Parsley, Mint, Bulgur Salad)",
+    "Baklava (Sweet Pastry with Nuts and Syrup)",
+    "Kunefe (Sweet Cheese Pastry Soaked in Syrup)",
+    "Sarma (Stuffed Cabbage Rolls)",
+    "Imam Bayildi (Stuffed Eggplant)",
+    "Mercimek Köftesi (Lentil Patties)",
+    "Ezme Salata (Spicy Tomato Salad)",
+    "Sütlaç (Rice Pudding)",
+
+    # Levantine
+    "Falafel (Fried Chickpea Balls)",
+    "Shawarma (Grilled Meat in Pita)",
+    "Kibbeh (Minced Meat and Bulgur Shells)",
+    "Mujadara (Lentils and Rice with Fried Onions)",
+    "Fattoush (Levantine Bread Salad)",
+    "Ful Medames (Stewed Fava Beans)",
+    "Shakshuka (Eggs Poached in Tomato Sauce)",
+    "Maqluba (Upside-Down Rice and Meat Dish)",
+    "Labneh (Strained Yogurt)",
+    "Manakish (Levantine Flatbread with Toppings)",
+    "Tabbouleh (Parsley, Mint, Bulgur Salad)",
+    "Hummus (Chickpea Dip)",
+    "Baba Ghanoush (Roasted Eggplant Dip)",
+    "Knafeh (Sweet Cheese Pastry Soaked in Syrup)",
+    "Kibbeh Nayeh (Raw Kibbeh)",
+    "Fatteh (Layered Dish with Bread, Chickpeas, and Yogurt)",
+    "Muhammara (Roasted Red Pepper Dip)",
+    "Za'atar Bread (Flatbread with Sesame and Thyme)",
+    "Halva (Sweet Confectionery)",
+    "Arak (Levantine Distilled Alcoholic Drink - often enjoyed with Meze)",
+
+    # North African
+    "Tagine (Slow-Cooked Stew)",
+    "Couscous (Steamed Semolina Dish)",
+    "Pastilla (Moroccan Sweet and Savory Pie)",
+    "Harira (Moroccan Tomato and Lentil Soup)",
+    "Brik (Tunisian Thin Pastry with Filling)",
+    "Mechoui (Roasted Lamb or Mutton)",
+    "Rfissa (Moroccan Chicken and Lentil Dish)",
+    "Chorba (North African Soup)",
+    "Makroudh (Algerian Semolina Cookies)",
+    "Tajine Mrouzia (Moroccan Sweet and Savory Tagine)",
+    "Couscous Tfaya (Moroccan Sweet and Savory Couscous)",
+    "Bastilla (Moroccan Savory Pie)",
+    "Tagine Kefta (Moroccan Meatball Tagine)",
+    "Bissara (Moroccan Bean Soup)",
+    "Zaalouk (Moroccan Eggplant Dip)",
+    "Merguez Tagine (North African Sausage Tagine)",
+    "Pastilla au Pigeon (Moroccan Pigeon Pie)",
+    "Harira Soup (Moroccan Lentil Soup)",
+    "Briouats (Moroccan Stuffed Pastries)",
+    "Baghrir (Moroccan Pancakes)"
+],
+    "Korean": [
+    # Main Courses (Meat & Seafood)
+    "Bulgogi (불고기) - Marinated Grilled Beef",
+    "Galbi (갈비) - Marinated Beef Short Ribs",
+    "Samgyeopsal (삼겹살) - Grilled Pork Belly",
+    "Dakgalbi (닭갈비) - Spicy Stir-Fried Chicken",
+    "Jeyuk Bokkeum (제육볶음) - Spicy Stir-Fried Pork",
+    "Galbi Jjim (갈비찜) - Braised Beef Short Ribs",
+    "Andong Jjimdak (안동찜닭) - Braised Chicken with Vegetables",
+    "Haemul Jjim (해물찜) - Braised Seafood",
+    "Agujjim (아귀찜) - Braised Monkfish",
+    "Maeuntang (매운탕) - Spicy Fish Stew",
+    "Hoe (회) - Raw Fish",
+    "Sannakji (산낙지) - Live Octopus",
+    "Jangeo Gui (장어구이) - Grilled Eel",
+    "Godeungeo Jorim (고등어조림) - Braised Mackerel",
+    "Ojingeo Bokkeum (오징어볶음) - Spicy Stir-Fried Squid",
+    "Bulgogi Jeongol (불고기전골) - Bulgogi Hot Pot",
+    "Dak Bulgogi (닭불고기) - Grilled Marinated Chicken",
+    "Tteokgalbi (떡갈비) - Grilled Short Rib Patties",
+    "Bossam (보쌈) - Boiled Pork Wraps",
+    "Gamjatang (감자탕) - Spicy Pork Bone Stew",
+
+    # Main Courses (Vegetarian)
+    "Bibimbap (비빔밥) - Mixed Rice with Meat and Vegetables",
+    "Dolsot Bibimbap (돌솥 비빔밥) - Hot Stone Pot Bibimbap",
+    "Japchae (잡채) - Glass Noodles with Vegetables and Meat",
+    "Tteokbokki (떡볶이) - Spicy Rice Cakes",
+    "Rabokki (라볶이) - Tteokbokki with Ramen",
+    "Sundubu Jjigae (순두부찌개) - Soft Tofu Stew",
+    "Doenjang Jjigae (된장찌개) - Soybean Paste Stew",
+    "Kimchi Jjigae (김치찌개) - Kimchi Stew",
+    "Kongbiji Jjigae (콩비지찌개) - Soybean Pulp Stew",
+    "Bibim Guksu (비빔국수) - Spicy Mixed Noodles",
+    "Jjajangmyeon (짜장면) - Black Bean Noodles",
+    "Naengmyeon (냉면) - Cold Buckwheat Noodles",
+    "Kalguksu (칼국수) - Knife-Cut Noodles",
+    "Janchi Guksu (잔치국수) - Feast Noodles",
+    "Kong Guksu (콩국수) - Cold Soybean Noodle Soup",
+    "Kimchi Fried Rice (김치볶음밥) - Kimchi Bokkeumbap",
+    "Gimbap (김밥) - Seaweed Rice Rolls",
+    "Yubu Gimbap (유부김밥) - Fried Tofu Skin Gimbap",
+    "Bibim Naengmyeon (비빔냉면) - Spicy Cold Buckwheat Noodles",
+    "Ramyeon (라면) - Korean Ramen",
+
+    # Appetizers & Side Dishes
+    "Kimchi (김치) - Fermented Cabbage",
+    "Pajeon (파전) - Scallion Pancake",
+    "Haemul Pajeon (해물파전) - Seafood Pancake",
+    "Kimchi Pajeon (김치파전) - Kimchi Pancake",
+    "Goguma Mattang (고구마 맛탕) - Candied Sweet Potatoes",
+    "Tteok Kkochi (떡꼬치) - Skewered Rice Cakes",
+    "Odeng Tang (어묵탕) - Fish Cake Soup",
+    "Gyeran Jjim (계란찜) - Steamed Eggs",
+    "Hobakjeon (호박전) - Zucchini Pancakes",
+    "Dubu Kimchi (두부김치) - Tofu with Kimchi",
+    "Kongnamul Muchim (콩나물무침) - Seasoned Soybean Sprouts",
+    "Sigeumchi Namul (시금치나물) - Seasoned Spinach",
+    "Musaengchae (무생채) - Spicy Radish Salad",
+    "Oi Sobagi (오이소박이) - Stuffed Cucumber Kimchi",
+    "Gyeran Mari (계란말이) - Rolled Omelette",
+    "Japchae Bap (잡채밥) - Japchae with Rice",
+    "Yachae Jeon (야채전) - Vegetable Pancakes",
+    "Gamja Jorim (감자조림) - Braised Potatoes",
+    "Miyeok Guk (미역국) - Seaweed Soup",
+    "Yukgaejang (육개장) - Spicy Beef Soup",
+
+    # Desserts & Snacks
+    "Bingsu (빙수) - Shaved Ice Dessert",
+    "Patbingsu (팥빙수) - Shaved Ice with Red Beans",
+    "Hotteok (호떡) - Sweet Pancakes",
+    "Hoddeok (호떡) - Sweet Filled Pancakes",
+    "Yakgwa (약과) - Honey Cookies",
+    "Yaksik (약식) - Sweet Rice with Nuts and Jujubes",
+    "Gangjeong (강정) - Fried Rice Puffs",
+    "Dasik (다식) - Tea Cookies",
+    "Sujeonggwa (수정과) - Cinnamon Ginger Drink",
+    "Sikhye (식혜) - Sweet Rice Drink",
+    "Tteok (떡) - Rice Cakes",
+    "Injeolmi (인절미) - Rice Cakes with Soybean Powder",
+    "Songpyeon (송편) - Half-Moon Rice Cakes",
+    "Jeungpyeon (증편) - Steamed Rice Cakes",
+    "Ggul Tteok (꿀떡) - Honey Rice Cakes",
+    "Bungeoppang (붕어빵) - Fish-Shaped Pastries",
+    "Gyeranppang (계란빵) - Egg Bread",
+    "Hwangnamppang (황남빵) - Red Bean Pastries",
+    "Chalboribbang (찰보리빵) - Barley Bread",
+    "Mandu Guk (만두국) - Dumpling Soup"
+],
+    "Vietnamese": [
+    # Noodles
+    "Pho Bo (Phở Bò) - Beef Noodle Soup",
+    "Pho Ga (Phở Gà) - Chicken Noodle Soup",
+    "Bun Cha (Bún Chả) - Grilled Pork with Vermicelli Noodles",
+    "Bun Bo Hue (Bún Bò Huế) - Spicy Beef Noodle Soup",
+    "Bun Rieu (Bún Riêu) - Tomato-Based Crab Noodle Soup",
+    "Cao Lau (Cao Lầu) - Hoi An Noodles with Pork and Greens",
+    "Mi Quang (Mì Quảng) - Turmeric Noodles with Meat and Herbs",
+    "Bun Thit Nuong (Bún Thịt Nướng) - Grilled Pork with Vermicelli Noodles",
+    "Bun Mang Vit (Bún Măng Vịt) - Duck and Bamboo Shoot Noodle Soup",
+    "Banh Canh (Bánh Canh) - Thick Noodle Soup",
+    "Hu Tieu (Hủ Tiếu) - Pork and Seafood Noodle Soup",
+    "My Quang (Mỳ Quảng) - Turmeric Noodles",
+    "Bun Ca (Bún Cá) - Fish Noodle Soup",
+    "Bun Moc (Bún Mọc) - Pork Ball Noodle Soup",
+    "Banh Da Cua (Bánh Đa Cua) - Crab Noodle Soup",
+    "Mien Ga (Miến Gà) - Glass Noodle Soup with Chicken",
+    "Mien Xao Cua (Miến Xào Cua) - Stir-Fried Glass Noodles with Crab",
+    "Banh Hoi Thit Nuong (Bánh Hỏi Thịt Nướng) - Fine Vermicelli Noodles with Grilled Pork",
+    "Bun Thang (Bún Thang) - Hanoi Noodle Soup",
+    "Bun Moc Chao (Bún Mọc Cháo) - Pork Ball Noodle Soup",
+
+    # Rice Dishes
+    "Com Tam (Cơm Tấm) - Broken Rice with Grilled Pork",
+    "Com Ga (Cơm Gà) - Chicken Rice",
+    "Com Suon Nuong (Cơm Sườn Nướng) - Grilled Pork Chop Rice",
+    "Com Chien Duong Chau (Cơm Chiên Dương Châu) - Yangzhou Fried Rice",
+    "Com Nieu (Cơm Niêu) - Clay Pot Rice",
+    "Xoi Ga (Xôi Gà) - Sticky Rice with Chicken",
+    "Xoi Xeo (Xôi Xéo) - Sticky Rice with Mung Bean and Fried Onion",
+    "Com Chay (Cơm Cháy) - Crispy Rice",
+    "Com Lam (Cơm Lam) - Rice Cooked in Bamboo Tubes",
+    "Com Hen (Cơm Hến) - Clam Rice",
+
+    # Sandwiches & Rolls
+    "Banh Mi (Bánh Mì) - Vietnamese Sandwich",
+    "Goi Cuon (Gỏi Cuốn) - Fresh Spring Rolls",
+    "Banh Cuon (Bánh Cuốn) - Steamed Rice Rolls",
+    "Banh Trang Nuong (Bánh Tráng Nướng) - Grilled Rice Paper",
+    "Banh Xeo (Bánh Xèo) - Crispy Savory Crepes",
+    "Banh Khot (Bánh Khọt) - Mini Savory Pancakes",
+    "Banh Trang Tron (Bánh Tráng Trộn) - Mixed Rice Paper Salad",
+    "Nem Nuong Cuon (Nem Nướng Cuốn) - Grilled Pork Sausage Rolls",
+    "Bo La Lot (Bò Lá Lốt) - Grilled Beef in Betel Leaf Rolls",
+    "Cha Gio (Chả Giò) - Fried Spring Rolls",
+
+    # Soups & Stews
+    "Canh Chua (Canh Chua) - Sour Fish Soup",
+    "Canh Ga La Giang (Canh Gà Lá Giang) - Chicken Sour Soup",
+    "Canh Bi Dao (Canh Bí Đao) - Winter Melon Soup",
+    "Canh Bun (Canh Bún) - Thick Noodle Soup with Crab Paste",
+    "Lau (Lẩu) - Hot Pot",
+    "Lau Ca Keo (Lẩu Cá Kèo) - Dwarf Goby Hot Pot",
+    "Lau Mam (Lẩu Mắm) - Fermented Fish Hot Pot",
+    "Bo Kho (Bò Kho) - Beef Stew",
+    "Ca Kho To (Cá Kho Tộ) - Braised Fish in Clay Pot",
+    "Thit Kho Trung (Thịt Kho Trứng) - Braised Pork with Eggs",
+
+    # Salads & Appetizers
+    "Goi Ga (Gỏi Gà) - Chicken Salad",
+    "Goi Du Du (Gỏi Đu Đủ) - Green Papaya Salad",
+    "Goi Cuon Tom Thit (Gỏi Cuốn Tôm Thịt) - Shrimp and Pork Spring Rolls",
+    "Goi Ngo Sen (Gỏi Ngó Sen) - Lotus Stem Salad",
+    "Nom Bo Kho (Nộm Bò Khô) - Beef Jerky Salad",
+    "Goi Ca Trich (Gỏi Cá Trích) - Herring Salad",
+    "Banh Trang Cuon Thit Heo (Bánh Tráng Cuốn Thịt Heo) - Rice Paper Rolls with Pork",
+    "Goi Cuon Chay (Gỏi Cuốn Chay) - Vegetarian Spring Rolls",
+    "Goi Ca Mai (Gỏi Cá Mai) - Sardine Salad",
+    "Goi Bap Chuoi (Gỏi Bắp Chuối) - Banana Flower Salad",
+
+    # Grilled & Roasted
+    "Ga Nuong Sa (Gà Nướng Sả) - Lemongrass Grilled Chicken",
+    "Thit Nuong (Thịt Nướng) - Grilled Pork",
+    "Bo Nuong La Lot (Bò Nướng Lá Lốt) - Grilled Beef in Betel Leaf",
+    "Ca Nuong Giay Bac (Cá Nướng Giấy Bạc) - Grilled Fish in Foil",
+    "Vit Quay (Vịt Quay) - Roast Duck",
+    "Heo Quay (Heo Quay) - Roast Pork",
+    "Ga Roti (Gà Roti) - Roast Chicken",
+    "Bo Ne (Bò Né) - Sizzling Beef Steak",
+    "Ca Loc Nuong Trui (Cá Lóc Nướng Trui) - Grilled Snakehead Fish",
+    "Muc Nuong Sa Te (Mực Nướng Sa Tế) - Grilled Squid with Satay Sauce",
+
+    # Desserts & Drinks
+    "Che Ba Mau (Chè Ba Màu) - Three-Color Dessert",
+    "Che Chuoi Nuong (Chè Chuối Nướng) - Grilled Banana Dessert",
+    "Che Dau Xanh (Chè Đậu Xanh) - Mung Bean Dessert",
+    "Banh Flan (Bánh Flan) - Vietnamese Caramel Custard",
+    "Rau Cau (Rau Câu) - Jelly Dessert",
+    "Che Thai (Chè Thái) - Thai Dessert",
+    "Sinh To Bo (Sinh Tố Bơ) - Avocado Smoothie",
+    "Ca Phe Sua Da (Cà Phê Sữa Đá) - Vietnamese Iced Coffee with Milk",
+    "Tra Da (Trà Đá) - Iced Tea",
+    "Nuoc Mia (Nước Mía) - Sugarcane Juice",
+
+    # Regional Specialties
+    "Bun Bo Giong (Bún Bò Giò Heo) - Hue Beef Noodle Soup with Pork Knuckle",
+    "Banh Can (Bánh Căn) - Mini Savory Pancakes",
+    "Banh Trang Cuon Thit Heo (Bánh Tráng Cuốn Thịt Heo) - Rice Paper Rolls with Pork",
+    "Com Ga Hoi An (Cơm Gà Hội An) - Hoi An Chicken Rice",
+    "My Quang Ech (Mỳ Quảng Ếch) - Quang Noodles with Frog",
+    "Banh Dap (Bánh Đập) - Crispy Rice Paper with Wet Rice Paper",
+    "Bun Mam (Bún Mắm) - Fermented Fish Noodle Soup",
+    "Banh Trang Me (Bánh Tráng Mè) - Sesame Rice Crackers",
+    "Banh Tet (Bánh Tét) - Savory Sticky Rice Cake",
+    "Banh It Tran (Bánh Ít Trần) - Savory Rice Dumplings"
+],
+    "Middle Eastern": [
+    # Appetizers & Meze
+    "Hummus (حمص) - Chickpea Dip",
+    "Baba Ghanoush (بابا غنوج) - Roasted Eggplant Dip",
+    "Tabbouleh (تبولة) - Parsley, Mint, Bulgur Salad",
+    "Fattoush (فتوش) - Levantine Bread Salad",
+    "Muhammara (محمرة) - Roasted Red Pepper Dip",
+    "Labneh (لبنة) - Strained Yogurt",
+    "Kibbeh Nayeh (كبة نيئة) - Raw Kibbeh",
+    "Sambusak (سمبوسك) - Savory Pastries",
+    "Falafel (فلافل) - Fried Chickpea Balls",
+    "Dolma (دولمة) - Stuffed Grape Leaves or Vegetables",
+    "Waraq Enab (ورق عنب) - Stuffed Grape Leaves",
+    "Mezze Platter (مزة) - Assortment of Small Dishes",
+    "Moutabal (متبل) - Eggplant Dip",
+    "Tzatziki (تزاتزيكي) - Yogurt and Cucumber Dip",
+    "Olives and Pickles (زيتون ومخلل)",
+    "Feta Cheese (جبنة فيتا)",
+    "Halloumi Cheese (جبنة حلوم)",
+    "Stuffed Vine Leaves (محشي ورق عنب)",
+    "Spicy Potatoes (بطاطا حارة)",
+    "Foul Medames (فول مدمس) - Stewed Fava Beans",
+
+    # Main Courses (Meat & Poultry)
+    "Shawarma (شاورما) - Grilled Meat in Pita or Wrap",
+    "Kebab (كباب) - Grilled Meat Skewers",
+    "Shish Kebab (شيش كباب)",
+    "Kofta Kebab (كفتة كباب)",
+    "Adana Kebab (أضنة كباب)",
+    "Urfa Kebab (أورفة كباب)",
+    "Döner Kebap (دونر كباب) - Meat Cooked on a Vertical Rotisserie",
+    "Mansaf (منسف) - Lamb Cooked in Fermented Dried Yogurt Sauce with Rice",
+    "Kibbeh (كبة) - Minced Meat and Bulgur Shells",
+    "Kofta (كفتة) - Spiced Meatballs or Patties",
+    "Tagine (طاجن) - Slow-Cooked Stew",
+    "Lamb Tagine with Apricots (طاجن لحم بالمشمش)",
+    "Chicken Tagine with Olives and Lemons (طاجن دجاج بالزيتون والليمون)",
+    "Kefta Tagine (طاجن كفتة)",
+    "Maqluba (مقلوبة) - Upside-Down Rice and Meat Dish",
+    "Kabsa (كبسة) - Spiced Rice with Meat",
+    "Biryani (برياني) - Spiced Rice with Meat",
+    "Quzi (قوزي) - Slow-Cooked Lamb with Rice",
+    "Machboos (مجبوس) - Spiced Meat and Rice Dish",
+    "Mandi (مندي) - Pit-Cooked Meat and Rice",
+
+    # Main Courses (Vegetarian)
+    "Mujadara (مجدرة) - Lentils and Rice with Fried Onions",
+    "Falafel (فلافل) - Fried Chickpea Balls",
+    "Tabbouleh (تبولة) - Parsley, Mint, Bulgur Salad",
+    "Fattoush (فتوش) - Levantine Bread Salad",
+    "Ful Medames (فول مدمس) - Stewed Fava Beans",
+    "Shakshuka (شكشوكة) - Eggs Poached in Tomato Sauce",
+    "Kushari (كشري) - Egyptian Lentils, Rice, and Pasta Dish",
+    "Dolma (دولمة) - Stuffed Vegetables or Leaves",
+    "Yalanji (يالنجي) - Vegetarian Stuffed Grape Leaves",
+    "Molokhia (ملوخية) - Jute Leaf Stew",
+    "Bamya (بامية) - Okra Stew",
+    "Fasolia (فاصوليا) - Green Bean Stew",
+    "Makloubeh (مقلوبة خضار) - Vegetarian Upside-Down Rice Dish",
+    "Kibbeh Nabulsieh (كبة نابلسية) - Vegetarian Kibbeh",
+    "Vegetarian Tagine (طاجن خضار)",
+    "Tabbouleh with Quinoa (تبولة بالكينوا)",
+    "Vegetarian Couscous (كسكس بالخضار)",
+    "Lentil Soup (شوربة العدس)",
+    "Chickpea Stew (يخنة حمص)",
+    "Stuffed Peppers (محشي فلفل)",
+
+    # Breads & Grains
+    "Pita Bread (خبز بيتا) - Flatbread",
+    "Lavash (لواش) - Thin Flatbread",
+    "Naan (نان) - Oven-Baked Flatbread",
+    "Taboon Bread (خبز طابون) - Pit-Baked Flatbread",
+    "Barbari Bread (بربری) - Persian Flatbread",
+    "Sangak (سنگک) - Persian Sourdough Flatbread",
+    "Khubz (خبز) - Arabic Flatbread",
+    "Manakish (مناقيش) - Levantine Flatbread with Toppings",
+    "Za'atar Manakish (مناقيش زعتر)",
+    "Cheese Manakish (مناقيش جبنة)",
+    "Lahmacun (لحم عجین) - Turkish Pizza",
+    "Pide (پیده) - Turkish Flatbread with Toppings",
+    "Couscous (كسكس) - Steamed Semolina Dish",
+    "Bulgur Pilaf (برغل بيلاف)",
+    "Freekeh Pilaf (فريكة بيلاف)",
+    "Rice Pilaf (رز بيلاف)",
+    "Ma'amoul (معمول) - Shortbread Cookies",
+    "Qatayef (قطايف) - Sweet Dumplings",
+    "Kanafeh (كنافة) - Sweet Cheese Pastry Soaked in Syrup",
+    "Baklava (بقلاوة) - Sweet Pastry with Nuts and Syrup",
+
+    # Desserts
+    "Baklava (بقلاوة)",
+    "Kanafeh (كنافة)",
+    "Basbousa (بسبوسة) - Semolina Cake Soaked in Syrup",
+    "Qatayef (قطايف)",
+    "Ma'amoul (معمول)",
+    "Halva (حلاوة)",
+    "Muhalabia (مهلبية) - Milk Pudding",
+    "Umm Ali (ام علي) - Egyptian Bread Pudding",
+    "Luqaimat (لقيمات) - Sweet Dumplings",
+    "Zalabia (زلابية) - Fried Sweet Dough",
+    "Faloodeh (فالوده) - Persian Frozen Dessert",
+    "Rosewater Pudding (مهلبية بماء الورد)",
+    "Orange Blossom Cake (كعكة ماء الزهر)",
+    "Date Cookies (كعك بالتمر)",
+    "Semolina Halva (حلاوة سميد)",
+    "Rice Pudding (رز بلبن)",
+    "Turkish Delight (راحة الحلقوم)",
+    "Ghorayebah (غريبة) - Shortbread Cookies",
+    "Barazek (برازق) - Sesame and Pistachio Cookies",
+    "Mamoul with Pistachios (معمول بالفستق)"
+],
+    
+    "African": [
+    # West African
+    "Jollof Rice (West African One-Pot Rice Dish)",
+    "Egusi Soup (West African Melon Seed Soup)",
+    "Fufu with Groundnut Soup (West African Staple with Peanut Soup)",
+    "Suya (West African Grilled Spicy Skewers)",
+    "Thieboudienne (Senegalese Fish and Rice Dish)",
+    "Yassa Poulet (Senegalese Lemon Chicken)",
+    "Maafe (West African Peanut Stew)",
+    "Akara (West African Bean Fritters)",
+    "Banku and Tilapia (Ghanaian Fermented Corn and Cassava Dough with Fish)",
+    "Kenkey (Ghanaian Fermented Corn Dough)",
+    "Waakye (Ghanaian Rice and Beans)",
+    "Jollof Rice with Chicken (Nigerian)",
+    "Egusi Soup with Fufu (Nigerian)",
+    "Pepper Soup (Nigerian)",
+    "Nkwobi (Nigerian Spiced Cow Foot)",
+    "Banga Soup (Nigerian Palm Fruit Soup)",
+    "Efo Riro (Nigerian Spinach Stew)",
+    "Moi Moi (Nigerian Bean Pudding)",
+    "Chin Chin (West African Fried Dough)",
+    "Zobo Drink (West African Hibiscus Tea)",
+
+    # East African
+    "Injera with Wat (Ethiopian Flatbread with Stew)",
+    "Doro Wat (Ethiopian Chicken Stew with Berbere Spice)",
+    "Kitfo (Ethiopian Minced Raw Beef)",
+    "Gored Gored (Ethiopian Cubed Raw Beef)",
+    "Tibs (Ethiopian Stir-Fried Meat)",
+    "Shiro (Ethiopian Chickpea Stew)",
+    "Ful Medames (Sudanese Stewed Fava Beans)",
+    "Kachumbari (East African Fresh Salad)",
+    "Ugali with Sukuma Wiki (East African Cornmeal Staple with Collard Greens)",
+    "Nyama Choma (East African Grilled Meat)",
+    "Pilau (East African Spiced Rice)",
+    "Chapati (East African Flatbread)",
+    "Mandazi (East African Sweet Doughnut)",
+    "Maharagwe (East African Coconut Beans)",
+    "Matoke (East African Steamed Plantains)",
+    "Irio (Kenyan Mashed Potatoes and Peas)",
+    "Mukimo (Kenyan Mashed Potatoes, Corn, and Beans)",
+    "Githeri (Kenyan Corn and Beans Stew)",
+    "Kuku Paka (Kenyan Coconut Chicken)",
+    "Uji (East African Porridge)",
+
+    # North African
+    "Tagine with Lamb and Apricots (North African Stew)",
+    "Couscous (North African Steamed Semolina Dish)",
+    "Pastilla (Moroccan Sweet and Savory Pie)",
+    "Harira (Moroccan Tomato and Lentil Soup)",
+    "Brik (Tunisian Thin Pastry with Filling)",
+    "Mechoui (North African Roasted Lamb or Mutton)",
+    "Rfissa (Moroccan Chicken and Lentil Dish)",
+    "Chorba (North African Soup)",
+    "Makroudh (Algerian Semolina Cookies)",
+    "Tajine Mrouzia (Moroccan Sweet and Savory Tagine)",
+    "Couscous Tfaya (Moroccan Sweet and Savory Couscous)",
+    "Bastilla au Pigeon (Moroccan Pigeon Pie)",
+    "Tagine Kefta (Moroccan Meatball Tagine)",
+    "Zaalouk (Moroccan Eggplant Dip)",
+    "Couscous with Seven Vegetables (Moroccan)",
+    "Chermoula (North African Marinade)",
+    "Msemen (Moroccan Flatbread)",
+    "Sfenj (Moroccan Doughnuts)",
+    "Ma'amoul (North African Date-Filled Cookies)",
+    "Mint Tea (North African)",
+
+    # Southern African
+    "Bobotie (South African Spiced Minced Meat Casserole)",
+    "Bunny Chow (South African Bread Bowl Curry)",
+    "Piri Piri Chicken (Mozambican/South African Spicy Grilled Chicken)",
+    "Biltong (South African Dried Cured Meat)",
+    "Boerewors (South African Farmer's Sausage)",
+    "Chakalaka (South African Spicy Vegetable Relish)",
+    "Pap (South African Maize Porridge)",
+    "Samp and Beans (South African Crushed Corn and Bean Dish)",
+    "Malva Pudding (South African Spongy Caramel Pudding)",
+    "Koeksisters (South African Syrup-Soaked Dough Twists)",
+    "Melktert (South African Milk Tart)",
+    "Vetkoek (South African Fried Dough Cakes)",
+    "Sosaties (South African Meat Skewers)",
+    "Potjiekos (South African Stew Cooked in a Pot)",
+    "Bredie (South African Meat and Vegetable Stew)",
+    "Umngqusho (South African Samp and Beans)",
+    "Amagwinya (South African Fat Cakes)",
+    "Koesisters (Cape Malay Spiced Doughnuts)",
+    "Waterblommetjie Bredie (Cape Malay Waterblommetjie Stew)",
+    "Peppermint Crisp Tart (South African Dessert)",
+
+    # Central African
+    "Moambe Chicken (Congolese Palm Butter Chicken)",
+    "Fufu with Moambe Sauce (Congolese)",
+    "Saka Saka (Congolese Cassava Leaf Stew)",
+    "Poulet DG (Cameroonian Plantain and Chicken Dish)",
+    "Ndolé (Cameroonian Bitter Leaf Stew)",
+    "Egusi Soup (Cameroonian Melon Seed Soup)",
+    "Eru (Cameroonian Vegetable Soup)",
+    "Mbongo Tchobi (Cameroonian Black Stew)",
+    "Kanda (Congolese Maize Bread)",
+    "Mikate (Congolese Fried Bread)",
+    "Beignets (Central African Doughnuts)",
+    "Plantains (Central African)",
+    "Cassava (Central African)",
+    "Palm Wine (Central African)",
+    "Peanut Stew (Central African)",
+    "Fish Stew (Central African)",
+    "Spiced Rice (Central African)",
+    "Sweet Potato Leaves (Central African)",
+    "Okra Stew (Central African)",
+    "Groundnut Soup (Central African)"
+],
+    "Nordic / Scandinavian": [
+    # Danish
+    "Smørrebrød (Danish Open-Faced Sandwiches)",
+    "Frikadeller (Danish Meatballs)",
+    "Stegt Flæsk med Persillesovs (Danish Fried Pork with Parsley Sauce)",
+    "Hakkebøf med Løg (Danish Chopped Steak with Onions)",
+    "Boller i Karry (Danish Meatballs in Curry Sauce)",
+    "Æbleskiver (Danish Apple Fritters)",
+    "Rødgrød med fløde (Danish Red Berry Pudding with Cream)",
+    "Risengrød (Danish Rice Pudding)",
+    "Koldskål (Danish Cold Buttermilk Soup)",
+    "Kartoffelsuppe (Danish Potato Soup)",
+    "Fiskefrikadeller (Danish Fish Cakes)",
+    "Skipperlabskovs (Danish Sailor's Stew)",
+    "Kransekage (Danish Marzipan Ring Cake)",
+    "Fastelavnsboller (Danish Shrove Buns)",
+    "Brunede Kartofler (Danish Caramelized Potatoes)",
+    "Gravad Laks (Danish Cured Salmon)",
+    "Sild (Danish Pickled Herring)",
+    "Rugbrød (Danish Rye Bread)",
+    "Wienerbrød (Danish Pastries)",
+    "Flæskesteg (Danish Roast Pork)",
+
+    # Swedish
+    "Köttbullar (Swedish Meatballs)",
+    "Pyttipanna (Swedish Hash)",
+    "Gravlax (Swedish Cured Salmon)",
+    "Inlagd Sill (Swedish Pickled Herring)",
+    "Janssons Frestelse (Swedish Potato and Anchovy Casserole)",
+    "Ärtsoppa med Pannkakor (Swedish Pea Soup with Pancakes)",
+    "Semla (Swedish Cream-Filled Cardamom Bun)",
+    "Kanelbullar (Swedish Cinnamon Buns)",
+    "Prinsesstårta (Swedish Princess Cake)",
+    "Kladdkaka (Swedish Sticky Chocolate Cake)",
+    "Raggmunk (Swedish Potato Pancakes)",
+    "Kroppkakor (Swedish Potato Dumplings)",
+    "Surströmming (Swedish Fermented Herring)",
+    "Pepparkakor (Swedish Gingerbread Cookies)",
+    "Lussebullar (Swedish Saffron Buns)",
+    "Smörgåstårta (Swedish Sandwich Cake)",
+    "Toast Skagen (Swedish Shrimp Toast)",
+    "Pickled Beetroot (Swedish)",
+    "Pickled Cucumber (Swedish)",
+    "Lingonberry Jam (Swedish)",
+
+    # Norwegian
+    "Fårikål (Norwegian Lamb and Cabbage Stew)",
+    "Lutefisk (Norwegian Dried Whitefish Soaked in Lye)",
+    "Raspeballer (Norwegian Potato Dumplings)",
+    "Rømmegrøt (Norwegian Sour Cream Porridge)",
+    "Lefse (Norwegian Soft Flatbread)",
+    "Brunost (Norwegian Brown Cheese)",
+    "Pinnekjøtt (Norwegian Steamed Ribs)",
+    "Smalahove (Norwegian Sheep's Head)",
+    "Sodd (Norwegian Meat and Dumpling Soup)",
+    "Lapskaus (Norwegian Stew)",
+    "Fiskesuppe (Norwegian Fish Soup)",
+    "Krumkaker (Norwegian Thin Waffles)",
+    "Vaffler (Norwegian Waffles)",
+    "Multekrem (Norwegian Cloudberry Cream)",
+    "Riskrem (Norwegian Rice Cream)",
+    "Solbærtoddy (Norwegian Blackcurrant Toddy)",
+    "Aquavit (Norwegian Spirit)",
+    "Pickled Herring (Norwegian)",
+    "Lox (Norwegian Cured Salmon)",
+    "Lutefisk with Mustard Sauce (Norwegian)",
+
+    # Finnish
+    "Karjalanpiirakka (Finnish Karelian Pies)",
+    "Kalakukko (Finnish Fish Pie)",
+    "Lihapullat (Finnish Meatballs)",
+    "Lohikeitto (Finnish Salmon Soup)",
+    "Hernekeitto (Finnish Pea Soup)",
+    "Mämmi (Finnish Easter Pudding)",
+    "Ruisleipä (Finnish Rye Bread)",
+    "Korvapuustit (Finnish Cinnamon Buns)",
+    "Pulla (Finnish Sweet Bread)",
+    "Mustikkapiirakka (Finnish Blueberry Pie)",
+    "Leipäjuusto (Finnish Bread Cheese)",
+    "Sillisalaatti (Finnish Herring Salad)",
+    "Graavilohi (Finnish Cured Salmon)",
+    "Lanttulaatikko (Finnish Rutabaga Casserole)",
+    "Maksalaatikko (Finnish Liver Casserole)",
+    "Kalakeitto (Finnish Fish Soup)",
+    "Karjalanpaisti (Finnish Karelian Stew)",
+    "Rönttönen (Finnish Rye Pastry)",
+    "Sultsina (Finnish Rice Pastry)",
+    "Vispipuuro (Finnish Whipped Berry Porridge)",
+
+    # Icelandic
+    "Hangikjöt (Icelandic Smoked Lamb)",
+    "Skyr (Icelandic Cultured Dairy Product)",
+    "Harðfiskur (Icelandic Dried Fish)",
+    "Plokkfiskur (Icelandic Fish Stew)",
+    "Rúgbrauð (Icelandic Hot Spring Bread)",
+    "Kleinur (Icelandic Twisted Doughnuts)",
+    "Vinarterta (Icelandic Layer Cake)",
+    "Brennivín (Icelandic Spirit)",
+    "Lamb Soup (Icelandic)",
+    "Fish Soup (Icelandic)",
+    "Saltfiskur (Icelandic Salted Fish)",
+    "Hákarl (Icelandic Fermented Shark)",
+    "Hangikjöt with Bechamél (Icelandic)",
+    "Skyr Cake (Icelandic)",
+    "Pönnukökur (Icelandic Pancakes)",
+    "Rúgbrauð with Butter (Icelandic)",
+    "Laufabrauð (Icelandic Thin Fried Bread)",
+    "Slátur (Icelandic Blood Pudding and Liver Sausage)",
+    "Svið (Icelandic Singed Sheep's Head)",
+    "Hangikjöt with Flatkaka (Icelandic)"
+],
+    "Eastern European": [
+    # Polish
+    "Pierogi (Polish Dumplings)",
+    "Bigos (Polish Hunter's Stew)",
+    "Golabki (Polish Cabbage Rolls)",
+    "Kielbasa (Polish Sausage)",
+    "Żurek (Polish Sour Rye Soup)",
+    "Barszcz (Polish Beetroot Soup)",
+    "Kotlet Schabowy (Polish Breaded Pork Cutlet)",
+    "Placki Ziemniaczane (Polish Potato Pancakes)",
+    "Pyzy (Polish Potato Dumplings)",
+    "Kaszanka (Polish Blood Sausage)",
+    "Ogórkowa (Polish Pickle Soup)",
+    "Kapuśniak (Polish Cabbage Soup)",
+    "Pierogi Ruskie (Polish Potato and Cheese Pierogi)",
+    "Makowiec (Polish Poppy Seed Roll)",
+    "Sernik (Polish Cheesecake)",
+    "Pączki (Polish Doughnuts)",
+    "Rosół (Polish Chicken Soup)",
+    "Zrazy (Polish Beef Rolls)",
+    "Bigos Staropolski (Old Polish Hunter's Stew)",
+    "Krupnik (Polish Barley Soup)",
+
+    # Russian
+    "Borscht (Russian Beet Soup)",
+    "Pelmeni (Russian Meat Dumplings)",
+    "Blini (Russian Pancakes)",
+    "Pirozhki (Russian Stuffed Buns)",
+    "Solyanka (Russian Sour and Spicy Soup)",
+    "Beef Stroganoff (Russian Beef Dish)",
+    "Golubtsy (Russian Cabbage Rolls)",
+    "Olivier Salad (Russian Potato Salad)",
+    "Kholodets (Russian Meat Jelly)",
+    "Ukha (Russian Fish Soup)",
+    "Kasha (Russian Buckwheat Groats)",
+    "Blinchiki (Thin Russian Crepes)",
+    "Syrniki (Russian Cheese Pancakes)",
+    "Medovik (Russian Honey Cake)",
+    "Napoleon Cake (Layered Pastry Cream Cake)",
+    "Paskha (Russian Easter Dessert)",
+    "Kutia (Russian Sweet Grain Pudding)",
+    "Pelmeni v Gorshochkah (Russian Pelmeni Baked in Pots)",
+    "Vareniki (Russian Dumplings)",
+    "Kisel (Russian Berry Dessert)",
+
+    # Ukrainian
+    "Varenyky (Ukrainian Dumplings)",
+    "Borshch (Ukrainian Beet Soup)",
+    "Holubtsi (Ukrainian Cabbage Rolls)",
+    "Chicken Kyiv (Ukrainian Stuffed Chicken Breast)",
+    "Deruny (Ukrainian Potato Pancakes)",
+    "Salo (Ukrainian Cured Pork Fat)",
+    "Pampushky (Ukrainian Garlic Bread Rolls)",
+    "Nalysnyky (Ukrainian Crepes)",
+    "Kutia (Ukrainian Sweet Grain Pudding)",
+    "Paska (Ukrainian Easter Bread)",
+    "Kapustnyak (Ukrainian Cabbage Soup)",
+    "Pyrizhky (Ukrainian Stuffed Buns)",
+    "Krovyanka (Ukrainian Blood Sausage)",
+    "Verhuny (Ukrainian Fried Pastries)",
+    "Medivnyk (Ukrainian Honey Cake)",
+    "Syrniki (Ukrainian Cheese Pancakes)",
+    "Uzvar (Ukrainian Dried Fruit Drink)",
+    "Lvivskyi Syrnyk (Lviv Cheesecake)",
+    "Banosh (Ukrainian Cornmeal Dish)",
+    "Kovbasa (Ukrainian Sausage)",
+
+    # Hungarian
+    "Goulash (Hungarian Meat Stew)",
+    "Paprikash (Hungarian Stew with Paprika)",
+    "Halászlé (Hungarian Fisherman's Soup)",
+    "Lángos (Hungarian Fried Flatbread)",
+    "Töltött Káposzta (Hungarian Stuffed Cabbage)",
+    "Pörkölt (Hungarian Meat Stew)",
+    "Paprikás Csirke (Hungarian Chicken Paprikash)",
+    "Hortobágyi Palacsinta (Hungarian Savory Crepes)",
+    "Dobos Torta (Hungarian Drum Torte)",
+    "Eszterházy Torta (Hungarian Esterházy Torte)",
+    "Gulyásleves (Hungarian Goulash Soup)",
+    "Lecsó (Hungarian Vegetable Stew)",
+    "Tökfőzelék (Hungarian Zucchini Stew)",
+    "Főzelék (Hungarian Vegetable Stew)",
+    "Somlói Galuska (Hungarian Somló Dumplings)",
+    "Bejgli (Hungarian Poppy Seed or Walnut Roll)",
+    "Kürtőskalács (Hungarian Chimney Cake)",
+    "Pogácsa (Hungarian Scones)",
+    "Túrós Csusza (Hungarian Pasta with Cottage Cheese and Bacon)",
+    "Csirkepaprikás (Hungarian Chicken Paprikash)",
+
+    # Czech & Slovak
+    "Svíčková na Smetaně (Czech Beef Sirloin in Cream Sauce)",
+    "Vepřo-knedlo-zelo (Czech Roast Pork with Dumplings and Cabbage)",
+    "Guláš (Czech and Slovak Goulash)",
+    "Knedlíky (Czech and Slovak Dumplings)",
+    "Trdelník (Czech and Slovak Sweet Pastry)",
+    "Bramboračka (Czech Potato Soup)",
+    "Česnečka (Czech Garlic Soup)",
+    "Kulajda (Czech Creamy Mushroom Soup)",
+    "Rajská omáčka (Czech Tomato Sauce with Meat)",
+    "Moravský vrabec (Czech Roast Pork)",
+    "Tatarák (Czech Steak Tartare)",
+    "Palačinky (Czech and Slovak Crepes)",
+    "Štrúdľa (Czech and Slovak Strudel)",
+    "Medovník (Czech Honey Cake)",
+    "Makové rezance (Slovak Poppy Seed Noodles)",
+    "Bryndzové halušky (Slovak Sheep Cheese Dumplings)",
+    "Kapustnica (Slovak Cabbage Soup)",
+    "Žemľovka (Slovak Bread Pudding)",
+    "Vianočka (Czech and Slovak Christmas Bread)",
+    "Ovocné knedlíky (Czech and Slovak Fruit Dumplings)",
+
+    # Balkan
+    "Ćevapi (Balkan Grilled Minced Meat)",
+    "Burek (Balkan Flaky Pastry with Filling)",
+    "Sarma (Balkan Stuffed Cabbage or Grape Leaves)",
+    "Moussaka (Balkan Layered Dish with Eggplant and Meat)",
+    "Pljeskavica (Balkan Grilled Meat Patty)",
+    "Grah (Balkan Bean Stew)",
+    "Ajvar (Balkan Roasted Red Pepper Relish)",
+    "Baklava (Balkan Sweet Pastry with Nuts and Syrup)",
+    "Tufahije (Balkan Stuffed Apples)",
+    "Ćevapčići (Balkan Grilled Minced Meat)",
+    "Grah sa suvim mesom (Balkan Bean Stew with Smoked Meat)",
+    "Šopska salata (Balkan Shopska Salad)",
+    "Krempita (Balkan Custard Slice)",
+    "Palacinke (Balkan Pancakes)",
+    "Gibanica (Balkan Cheese Pie)",
+    "Sutlijash (Balkan Rice Pudding)",
+    "Tulumbe (Balkan Fried Dough Soaked in Syrup)",
+    "Trilece (Balkan Three Milk Cake)",
+    "Ćevapi sa kajmakom (Balkan Ćevapi with Cream)",
+    "Punjene paprike (Balkan Stuffed Peppers)"
+],
+    "Caribbean": [
+    # Jamaican
+    "Jerk Chicken (Jamaican Spicy Grilled Chicken)",
+    "Ackee and Saltfish (Jamaican National Dish)",
+    "Rice and Peas (Jamaican Coconut Rice and Beans)",
+    "Curry Goat (Jamaican Spiced Goat Stew)",
+    "Escovitch Fish (Jamaican Pickled Fish)",
+    "Bammy (Jamaican Cassava Flatbread)",
+    "Festival (Jamaican Sweet Fried Dough)",
+    "Patties (Jamaican Savory Pastries)",
+    "Callaloo Soup (Jamaican Leafy Green Soup)",
+    "Mannish Water (Jamaican Goat Soup)",
+    "Stamp and Go (Jamaican Saltfish Fritters)",
+    "Oxtail Stew (Jamaican Braised Oxtail)",
+    "Brown Stew Chicken (Jamaican Braised Chicken)",
+    "Run Down (Jamaican Coconut Stew with Fish)",
+    "Gizzada (Jamaican Coconut Tart)",
+    "Toto (Jamaican Coconut Cake)",
+    "Bun and Cheese (Jamaican Easter Treat)",
+    "Sorrel Drink (Jamaican Hibiscus Drink)",
+    "Rum Punch (Jamaican Rum Cocktail)",
+    "Jamaican Fruit Cake (Black Cake)",
+
+    # Trinidadian & Tobagonian
+    "Doubles (Trinidadian Street Food - Fried Flatbread with Chickpea Curry)",
+    "Roti (Trinidadian Flatbread)",
+    "Curry Crab and Dumplings (Trinidadian)",
+    "Oil Down (Grenadian One-Pot Breadfruit Stew)",
+    "Pelau (Trinidadian One-Pot Rice Dish with Meat and Vegetables)",
+    "Callaloo (Trinidadian Leafy Green Stew)",
+    "Bake and Shark (Trinidadian Fried Shark Sandwich)",
+    "Pholourie (Trinidadian Split Pea Fritters)",
+    "Aloo Pie (Trinidadian Potato-Filled Pastry)",
+    "Souse (Trinidadian Pickled Pork)",
+    "Crab and Callaloo (Trinidadian)",
+    "Macaroni Pie (Trinidadian Baked Macaroni and Cheese)",
+    "Dhal and Rice (Trinidadian)",
+    "Saheena (Trinidadian Spinach and Chickpea Fritters)",
+    "Buss Up Shut (Trinidadian Roti with Curry)",
+    "Coconut Bake (Trinidadian Coconut Bread)",
+    "Sweet Bread (Trinidadian)",
+    "Ponche de Creme (Trinidadian Christmas Drink)",
+    "Mauby (Caribbean Bark-Based Drink)",
+    "Trinidadian Rum Cake",
+
+    # Barbadian
+    "Cou-Cou and Flying Fish (Barbadian National Dish)",
+    "Macaroni Pie (Barbadian Baked Macaroni and Cheese)",
+    "Jug Jug (Barbadian Pigeon Peas and Guinea Corn Dish)",
+    "Pudding 'n' Souse (Barbadian Pickled Pork and Sweet Potato)",
+    "Conkies (Barbadian Cornmeal Dumplings)",
+    "Fish Cakes (Barbadian)",
+    "Cutters (Barbadian Sandwiches)",
+    "Sweet Bread (Barbadian)",
+    "Great Cake (Barbadian Fruitcake)",
+    "Bajan Pepperpot (Barbadian Meat Stew)",
+    "Barbadian Sweet Bread Pudding",
+
+    # Puerto Rican
+    "Mofongo (Puerto Rican Mashed Plantains)",
+    "Arroz con Gandules (Puerto Rican Rice with Pigeon Peas)",
+    "Pasteles (Puerto Rican Root Vegetable Tamales)",
+    "Pernil (Puerto Rican Roasted Pork Shoulder)",
+    "Tostones (Puerto Rican Fried Plantains)",
+    "Alcapurrias (Puerto Rican Fritters)",
+    "Bacalaítos (Puerto Rican Codfish Fritters)",
+    "Mojo Criollo (Puerto Rican Garlic Sauce)",
+    "Sancocho (Puerto Rican Stew)",
+    "Asopao (Puerto Rican Rice Soup)",
+    "Habichuelas Guisadas (Puerto Rican Stewed Beans)",
+    "Piononos (Puerto Rican Sweet Plantain Casserole)",
+    "Tembleque (Puerto Rican Coconut Pudding)",
+    "Coquito (Puerto Rican Coconut Drink)",
+    "Piña Colada (Puerto Rican Cocktail)",
+    "Arroz con Dulce (Puerto Rican Rice Pudding)",
+    "Flan de Coco (Puerto Rican Coconut Flan)",
+    "Mallorcas (Puerto Rican Sweet Bread)",
+    "Mamposteao (Puerto Rican Rice and Beans)",
+    "Pastelón (Puerto Rican Sweet Plantain Lasagna)",
+
+    # Dominican Republic
+    "La Bandera Dominicana (Dominican Republic's National Dish)",
+    "Mangu (Dominican Mashed Plantains)",
+    "Tostones (Dominican Republic Fried Plantains)",
+    "Sancocho (Dominican Republic Stew)",
+    "Moro de Guandules (Dominican Republic Rice and Pigeon Peas)",
+    "Habichuelas con Dulce (Dominican Republic Sweet Beans)",
+    "Pasteles en Hoja (Dominican Republic Root Vegetable Tamales)",
+]
+}
 
 def get_budget_constraints(budget_type):
     constraints = {
@@ -3222,7 +2251,189 @@ def get_time_constraints(time_constraint):
     }
     return constraints[time_constraint]
 
-def get_meal_prompt(meal_type, day, user_prefs, health_requirements, cuisine_requirements, available_ingredients=None):
+def filter_authentic_recipes(authentic_recipes, user_prefs, health_requirements):
+    """
+    Filter authentic recipe names based on user preferences and health requirements.
+    Returns a list of suitable recipe names.
+    """
+    filtered_recipes = []
+    
+    # Get dietary restrictions
+    diet_type = user_prefs.get('diet', 'None')
+    allergies = user_prefs.get('allergies', [])
+    health_conditions = user_prefs.get('health_conditions', [])
+    time_constraint = user_prefs.get('time_constraint', 'No Constraints')
+    budget = user_prefs.get('budget', 'No budget constraints ($31+)')
+    
+    # Define restrictions based on diet type
+    diet_restrictions = {
+        "Vegetarian": ["meat", "fish", "poultry", "seafood"],
+        "Vegan": ["meat", "fish", "poultry", "seafood", "dairy", "eggs", "honey"],
+        "Pescatarian": ["meat", "poultry"],
+        "Gluten-Free": ["wheat", "barley", "rye", "flour"],
+        "Dairy-Free": ["milk", "cheese", "butter", "cream", "yogurt"],
+        "Nut-Free": ["nuts", "peanuts", "almonds", "cashews", "walnuts"],
+        "Egg-Free": ["eggs", "egg whites", "egg yolks"],
+        "Soy-Free": ["soy", "soybeans", "tofu", "soy sauce"],
+        "Shellfish-Free": ["shrimp", "crab", "lobster", "shellfish"],
+        "Halal": ["pork", "alcohol", "gelatin"],
+        "Kosher": ["pork", "shellfish", "mixing meat and dairy"],
+        "Low-Carb": ["rice", "pasta", "bread", "potatoes", "sugar"],
+        "Low-Fat": ["butter", "oil", "cream", "fatty meats"],
+        "Low-Sodium": ["salt", "soy sauce", "processed foods"],
+        "Diabetic-Friendly": ["sugar", "honey", "syrup", "white flour"],
+        "Paleo": ["grains", "legumes", "dairy", "processed foods"],
+        "Keto": ["grains", "sugar", "high-carb vegetables", "fruits"],
+        "Whole30": ["grains", "legumes", "dairy", "sugar", "alcohol"],
+        "Mediterranean": ["processed foods", "red meat", "sugar"],
+        "DASH": ["red meat", "sugar", "high-sodium foods"],
+        "Low-FODMAP": ["onions", "garlic", "wheat", "dairy", "certain fruits"],
+        "Anti-Inflammatory": ["processed foods", "sugar", "red meat", "dairy"],
+        "Low-Purine": ["organ meats", "seafood", "red meat", "alcohol"],
+        "Renal": ["high-potassium foods", "high-phosphorus foods", "high-sodium foods"],
+        "Low-Fiber": ["whole grains", "raw vegetables", "nuts", "seeds"],
+        "Low-Residue": ["whole grains", "raw vegetables", "nuts", "seeds", "dairy"],
+        "Low-Oxalate": ["spinach", "rhubarb", "beets", "nuts", "chocolate"],
+        "Low-Histamine": ["fermented foods", "aged cheeses", "processed meats", "alcohol"],
+        "Low-Tyramine": ["aged cheeses", "processed meats", "fermented foods", "alcohol"],
+        "Low-Salicylate": ["berries", "citrus", "tomatoes", "spices"],
+        "Low-Sulfur": ["cruciferous vegetables", "eggs", "meat", "dairy"],
+        "Low-Iodine": ["iodized salt", "seafood", "dairy", "eggs"],
+        "Low-Copper": ["organ meats", "shellfish", "nuts", "chocolate"],
+        "Low-Omega-6": ["vegetable oils", "nuts", "seeds", "processed foods"],
+        "Low-Phytate": ["whole grains", "legumes", "nuts", "seeds"],
+        "Low-Lectin": ["legumes", "grains", "nightshades", "dairy"],
+        "Low-Oxalate": ["spinach", "rhubarb", "beets", "nuts", "chocolate"],
+        "Low-FODMAP": ["onions", "garlic", "wheat", "dairy", "certain fruits"],
+        "Low-Glycemic": ["sugar", "white flour", "processed foods", "high-GI foods"],
+        "Low-Fat": ["butter", "oil", "cream", "fatty meats"],
+        "Low-Protein": ["meat", "fish", "poultry", "dairy", "eggs", "legumes"],
+        "Low-Calorie": ["high-calorie foods", "sugar", "fat", "processed foods"],
+        "Low-Cholesterol": ["egg yolks", "organ meats", "shellfish", "fatty meats"],
+        "Low-Sugar": ["sugar", "honey", "syrup", "processed foods"],
+        "Low-Salt": ["salt", "soy sauce", "processed foods"],
+        "Low-Acid": ["citrus", "tomatoes", "vinegar", "coffee"],
+        "Low-Alkaline": ["dairy", "meat", "fish", "eggs"],
+        "Low-Potassium": ["bananas", "potatoes", "tomatoes", "oranges"],
+        "Low-Phosphorus": ["dairy", "meat", "fish", "nuts", "seeds"],
+        "Low-Magnesium": ["nuts", "seeds", "whole grains", "dark chocolate"],
+        "Low-Calcium": ["dairy", "leafy greens", "fortified foods"],
+        "Low-Iron": ["red meat", "organ meats", "shellfish", "legumes"],
+        "Low-Zinc": ["meat", "shellfish", "nuts", "seeds"],
+        "Low-Selenium": ["seafood", "meat", "nuts", "seeds"],
+        "Low-Vitamin-A": ["liver", "dairy", "eggs", "orange vegetables"],
+        "Low-Vitamin-D": ["fatty fish", "egg yolks", "fortified foods"],
+        "Low-Vitamin-E": ["nuts", "seeds", "vegetable oils"],
+        "Low-Vitamin-K": ["leafy greens", "vegetable oils", "meat"],
+        "Low-Vitamin-C": ["citrus", "berries", "tomatoes", "peppers"],
+        "Low-Vitamin-B12": ["meat", "fish", "dairy", "eggs"],
+        "Low-Folate": ["leafy greens", "legumes", "fortified foods"],
+        "Low-Niacin": ["meat", "fish", "nuts", "seeds"],
+        "Low-Riboflavin": ["dairy", "meat", "eggs", "leafy greens"],
+        "Low-Thiamine": ["whole grains", "meat", "fish", "legumes"],
+        "Low-Pantothenic-Acid": ["meat", "fish", "whole grains", "vegetables"],
+        "Low-Biotin": ["egg yolks", "organ meats", "nuts", "seeds"],
+        "Low-Choline": ["eggs", "meat", "fish", "dairy"],
+        "Low-Copper": ["organ meats", "shellfish", "nuts", "seeds"],
+        "Low-Manganese": ["whole grains", "nuts", "seeds", "leafy greens"],
+        "Low-Molybdenum": ["legumes", "whole grains", "nuts", "seeds"],
+        "Low-Chromium": ["whole grains", "meat", "fish", "vegetables"],
+        "Low-Fluoride": ["tea", "seafood", "fluoridated water"],
+        "Low-Iodine": ["iodized salt", "seafood", "dairy", "eggs"],
+        "Low-Selenium": ["seafood", "meat", "nuts", "seeds"],
+        "Low-Zinc": ["meat", "shellfish", "nuts", "seeds"],
+        "Low-Iron": ["red meat", "organ meats", "shellfish", "legumes"],
+        "Low-Calcium": ["dairy", "leafy greens", "fortified foods"],
+        "Low-Magnesium": ["nuts", "seeds", "whole grains", "dark chocolate"],
+        "Low-Phosphorus": ["dairy", "meat", "fish", "nuts", "seeds"],
+        "Low-Potassium": ["bananas", "potatoes", "tomatoes", "oranges"],
+        "Low-Sodium": ["salt", "soy sauce", "processed foods"],
+        "Low-Chloride": ["salt", "processed foods"],
+        "Low-Sulfur": ["cruciferous vegetables", "eggs", "meat", "dairy"],
+        "Low-Boron": ["fruits", "vegetables", "nuts", "legumes"],
+        "Low-Silicon": ["whole grains", "vegetables", "fruits"],
+        "Low-Vanadium": ["mushrooms", "shellfish", "grains", "vegetables"],
+        "Low-Nickel": ["chocolate", "nuts", "legumes", "whole grains"],
+        "Low-Lithium": ["vegetables", "grains", "meat", "fish"],
+        "Low-Strontium": ["dairy", "seafood", "grains", "vegetables"],
+        "Low-Tin": ["canned foods", "processed foods"],
+        "Low-Aluminum": ["processed foods", "baking powder", "antacids"],
+        "Low-Arsenic": ["rice", "seafood", "poultry"],
+        "Low-Cadmium": ["organ meats", "shellfish", "grains", "vegetables"],
+        "Low-Lead": ["organ meats", "shellfish", "grains", "vegetables"],
+        "Low-Mercury": ["large fish", "shellfish"],
+        "Low-Uranium": ["seafood", "grains", "vegetables"],
+        "Low-Plutonium": ["seafood", "grains", "vegetables"],
+        "Low-Thorium": ["seafood", "grains", "vegetables"],
+        "Low-Radium": ["seafood", "grains", "vegetables"],
+        "Low-Polonium": ["seafood", "grains", "vegetables"],
+        "Low-Actinium": ["seafood", "grains", "vegetables"],
+        "Low-Protactinium": ["seafood", "grains", "vegetables"],
+        "Low-Neptunium": ["seafood", "grains", "vegetables"],
+        "Low-Americium": ["seafood", "grains", "vegetables"],
+        "Low-Curium": ["seafood", "grains", "vegetables"],
+        "Low-Berkelium": ["seafood", "grains", "vegetables"],
+        "Low-Californium": ["seafood", "grains", "vegetables"],
+        "Low-Einsteinium": ["seafood", "grains", "vegetables"],
+        "Low-Fermium": ["seafood", "grains", "vegetables"],
+        "Low-Mendelevium": ["seafood", "grains", "vegetables"],
+        "Low-Nobelium": ["seafood", "grains", "vegetables"],
+        "Low-Lawrencium": ["seafood", "grains", "vegetables"],
+        "Low-Rutherfordium": ["seafood", "grains", "vegetables"],
+        "Low-Dubnium": ["seafood", "grains", "vegetables"],
+        "Low-Seaborgium": ["seafood", "grains", "vegetables"],
+        "Low-Bohrium": ["seafood", "grains", "vegetables"],
+        "Low-Hassium": ["seafood", "grains", "vegetables"],
+        "Low-Meitnerium": ["seafood", "grains", "vegetables"],
+        "Low-Darmstadtium": ["seafood", "grains", "vegetables"],
+        "Low-Roentgenium": ["seafood", "grains", "vegetables"],
+        "Low-Copernicium": ["seafood", "grains", "vegetables"],
+        "Low-Nihonium": ["seafood", "grains", "vegetables"],
+        "Low-Flerovium": ["seafood", "grains", "vegetables"],
+        "Low-Moscovium": ["seafood", "grains", "vegetables"],
+        "Low-Livermorium": ["seafood", "grains", "vegetables"],
+        "Low-Tennessine": ["seafood", "grains", "vegetables"],
+        "Low-Oganesson": ["seafood", "grains", "vegetables"]
+    }
+    
+    # Define time constraints
+    time_restrictions = {
+        "Busy schedule (15 mins)": ["slow-cooked", "roasted", "braised", "simmered", "baked"],
+        "Moderate schedule (30 mins)": ["slow-cooked", "braised", "simmered"],
+        "Busy on some days (45 mins)": ["slow-cooked"],
+        "Flexible Schedule (60 mins)": [],
+        "No Constraints": []
+    }
+    
+    # Define budget constraints
+    budget_restrictions = {
+        "Tight budget ($3-$7)": ["lobster", "caviar", "truffle", "wagyu", "foie gras"],
+        "Moderate budget ($8-$15)": ["lobster", "caviar", "truffle", "wagyu"],
+        "Generous budget ($16-$30)": ["caviar", "truffle"],
+        "No budget constraints ($31+)": []
+    }
+    
+    # Combine all restrictions
+    all_restrictions = []
+    if diet_type in diet_restrictions:
+        all_restrictions.extend(diet_restrictions[diet_type])
+    all_restrictions.extend(allergies)
+    all_restrictions.extend(health_conditions)
+    if time_constraint in time_restrictions:
+        all_restrictions.extend(time_restrictions[time_constraint])
+    if budget in budget_restrictions:
+        all_restrictions.extend(budget_restrictions[budget])
+    
+    # Filter recipes
+    for recipe in authentic_recipes:
+        # Check if recipe contains any restricted ingredients or methods
+        recipe_lower = recipe.lower()
+        if not any(restriction.lower() in recipe_lower for restriction in all_restrictions):
+            filtered_recipes.append(recipe)
+    
+    return filtered_recipes
+
+def get_meal_prompt(meal_type, day, user_prefs, health_requirements, cuisine_requirements, available_ingredients=None, authentic_recipes=None):
     # Get budget and time constraints
     budget_constraints = get_budget_constraints(user_prefs['budget'])
     time_constraints = get_time_constraints(user_prefs['time_constraint'])
@@ -3236,6 +2447,17 @@ Available Ingredients:
 
 Please use only these ingredients in your recipe. If you need additional ingredients, they should be common pantry staples or easily available in Australian supermarkets.
 """
+
+    # Get authentic recipe names for the cuisine
+    if authentic_recipes is None:
+        authentic_recipes = AUTHENTIC_RECIPE_NAMES.get(user_prefs['cuisine'], [])
+    
+    # Filter recipe names based on user preferences
+    filtered_recipes = filter_authentic_recipes(authentic_recipes, user_prefs, health_requirements)
+    
+    # If no recipes remain after filtering, use a default list
+    if not filtered_recipes:
+        filtered_recipes = ["Custom Recipe"]  # Fallback option
 
     prompt = f"""Generate a recipe for {meal_type} for Day {day} that features {user_prefs['cuisine']} cuisine and adheres to the following criteria:
 
@@ -3321,10 +2543,10 @@ Time Constraints:
 The recipe should be formatted as follows:
 
 **RECIPE FORMAT:**
-**Day {day} - {meal_type} - [Generate a fun, unique, and creative name for a recipe based on the details above. The name should be playful, engaging, and make the dish sound irresistible. Use puns, alliteration, or intriguing phrases, but avoid generic or repetitive names. For example: 'Spicy Kimchi Fried Rice Delight' (Korean), 'Tuscan Herb-Crusted Salmon' (Italian)]**
+**Day {day} - {meal_type} - [MUST USE ONE OF THESE EXACT RECIPE NAMES: {', '.join(authentic_recipes)}]**
 
 **Description:**
-[Choose one of the descriptions below as the foundation for the introduction, ensuring it aligns with the recipe without repeating it. Each introduction should be unique, so avoid using the same description style twice. Keep it engaging and concise, maintaining a single captivating paragraph without splitting it into multiple sections. The description should be 400-450 characters. For example: 'Embark on a culinary journey to the heart of Italy with this vibrant pasta dish...' (Italian), 'Experience the bold flavors of Korea with this spicy and savory rice dish...' (Korean)]
+[Choose one of the descriptions below as the foundation for the introduction, ensuring it aligns with the recipe without repeating it. Each introduction should be unique, so avoid using the same description style twice. Keep it engaging and concise, maintaining a single captivating paragraph without splitting it into multiple sections. The description should be 400-450 characters. Check the below descriptions and choose one that is not similar to the ones already used: 
 
 "Start your day with a meal that feels like a warm hug! Rich flavors and wholesome ingredients blend together, delivering the perfect balance of comfort and nutrition. Whether it's a crisp morning or a cozy evening, every bite brings home-cooked goodness that warms the soul. This dish is a reminder that food isn't just fuel—it's a connection to nostalgia, happiness, and the joy of simple pleasures.",
 
@@ -3372,17 +2594,32 @@ The recipe should be formatted as follows:
 **Serves**: {user_prefs['serving_size']}
 
 **Ingredients**:
-[List all ingredients have to use Australian measurements. Do not use US measurements. Also, it has to use Australian terms, such as "capsicum" instead of "bell pepper." Ensure that units of measurement are relevant to the ingredient type and aligned with Australian supermarket packaging. Liquids should be measured in teaspoons, tablespoons, or millilitres (ml); solids should be measured in grams (g) or whole units (e.g., ½ avocado, 1 zucchini, ½ capsicum); garlic should be measured in cloves; and tomatoes should be measured in halves, quarters, etc. Where possible, reference Coles or Woolworths packaging sizes to ensure realistic portioning.]
+[List all ingredients have to use Australian measurements. Do not use US measurements. Also, it has to use Australian terms, such as "capsicum" instead of "bell pepper." Ensure that units of measurement are relevant to the ingredient type and aligned with Australian supermarket packaging. Liquids should be measured in teaspoons, tablespoons, or millilitres (ml); solids should be measured in grams (g) or whole units (e.g., ½ avocado, 1 zucchini, ½ capsicum); garlic should be measured in cloves; and tomatoes should be measured in halves, quarters, etc. Where possible, reference Coles or Woolworths packaging sizes to ensure realistic portioning. List all ingredients in a single list without subheadings]
 
 **Instructions**:
-Write comprehensive and user-friendly recipe instructions in UK English using the metric system. **Each instruction must be between 1350 and 1450 characters and there should be exactly 6 steps (can have 7 if absolutely necessary).** Each steps should flow logically, include practical cooking tips, cater to a basic skill level, use an engaging and conversational style, include sensory details, provide clear explanations. For example:
+Write comprehensive and user-friendly recipe instructions in UK English using the metric system. **IMPORTANT: The total length of all instructions combined must be between 1350 and 1450 characters. There must be exactly 6 steps (7 steps only if absolutely necessary).** Each step should be approximately 200-250 characters long and include:
+- Detailed preparation instructions with specific measurements and timings
+- Exact cooking temperatures and heat levels
+- Visual and sensory cues (e.g., "until golden brown", "when fragrant")
+- Safety tips and common mistakes to avoid
+- Specific ingredient handling instructions
+- Tips for achieving the best results
+- Serving suggestions and presentation tips
+- Explanations of cooking techniques and why they're important
 
-1.  [Set the stage! Begin by prepping your ingredients like a pro. If it's an Italian dish, finely mince the garlic and dice the tomatoes. If it's a Japanese dish, thinly slice the beef or prepare the sushi rice. Remember, no lazy chopping—we want even cuts so everything cooks perfectly. If it's something smells like it's burning, well… act quickly!]
-2.  [Time to bring the magic to life! In a sizzling pan, add your base ingredients in the correct order—think of it as layering flavors like a symphony. If it's an Italian dish, sauté the garlic until fragrant. If it's a Japanese dish, sear the beef until browned. Stir things around, letting the aromas build. If it's something smells like it's burning, well… act quickly!]
-3.  [This is where things get exciting, so pay attention! Add the main ingredients, but not too fast! We want everything to cook evenly, so take your time. If it's an Italian dish, add the cherry tomatoes and let them soften. If it's a Japanese dish, add the udon noodles and give it a gentle stir. Taste as you go—this is your dish, your masterpiece! Need a bit more salt? A squeeze of lemon? Make those flavor tweaks like a true kitchen artist.]
-4.  [The multitasking challenge begins! If there's a side dish, now's the time to start. While your main dish simmers, prep your salad, toast your bread, or just take a victory sip of tea (or wine, I won't judge). Keep an eye on both elements—timing is everything! If something smells like it's burning, well… act quickly! If something smells like it's burning, well… act quickly!]
-5.  [Final touch, the grand finale! Your dish is nearly done, so savor this moment. Maybe an extra pinch of herbs for freshness? A final drizzle of olive oil for that perfect finish? Plate it up like you're on a cooking show, and don't forget the garnish. Presentation matters—because we eat with our eyes first!]
-6.  [Serving time! Arrange everything beautifully (or just dig in, I won't tell). Take a moment to appreciate your masterpiece before taking that first bite. And hey, if you snap a photo before eating, I totally understand—it's hard to resist when your food looks this good.]
+Example format (each step should be similar in length and detail):
+
+1. Begin by preparing your mise en place - this French term means having all your ingredients prepped and ready to go. Heat 2 tablespoons of extra virgin olive oil in a large, heavy-bottomed pan over medium heat. While the oil warms, finely dice 1 large brown onion and mince 3 cloves of garlic. When the oil shimmers and a small piece of onion sizzles upon contact, add the diced onion and sauté, stirring frequently with a wooden spoon, until it turns translucent and begins to soften, about 3-4 minutes. Add the minced garlic and continue cooking for another 30 seconds until fragrant, being careful not to let it burn as this will make the dish bitter.
+
+2. Now it's time to build the base flavors of your paella. Add 1 diced red capsicum to the pan along with 1 teaspoon of smoked paprika. Stir continuously for about 1 minute to toast the spices and release their aromatic oils. The kitchen should fill with the warm, smoky scent of the paprika. If the mixture starts to stick to the bottom of the pan, add a splash of water or vegetable broth to deglaze, scraping up any browned bits with your wooden spoon as these add depth of flavor to the dish.
+
+3. The main ingredients come together now. Add 200g of Arborio rice to the pan, stirring to coat each grain with the flavorful oil and spices. This toasting step helps the rice maintain its structure during cooking. Next, add 400g of drained and rinsed chickpeas, distributing them evenly throughout the pan. Sprinkle in a generous pinch of saffron threads (about ½ teaspoon) and pour in 500ml of warm vegetable broth. Gently stir to combine all ingredients, then increase the heat to bring the mixture to a simmer. The liquid should bubble gently around the edges of the pan.
+
+4. Once the paella reaches a simmer, reduce the heat to low and cover the pan with a tight-fitting lid. Set your timer for 15 minutes and resist the temptation to lift the lid - this steam is crucial for even cooking. While the paella simmers, prepare your garnishes: finely chop a generous handful of fresh flat-leaf parsley and set aside. You can also prepare a simple green salad or slice some crusty bread to serve alongside the paella.
+
+5. After 15 minutes, carefully remove the lid and check the rice for doneness. The grains should be tender but still have a slight bite (al dente), and all the liquid should be absorbed. If the rice needs more time, cover and cook for an additional 2-3 minutes. If you notice the rice sticking to the bottom, don't worry - this is normal and actually desirable in traditional paella, creating the prized "socarrat" or crispy bottom layer.
+
+6. The final touches make all the difference. Remove the pan from heat and let it rest, covered, for 5 minutes. This allows the flavors to meld and the rice to settle. When ready to serve, fluff the paella gently with a fork, being careful not to break the rice grains. Sprinkle the chopped parsley over the top for a fresh, vibrant finish. Serve the paella directly from the pan at the table, allowing everyone to admire the beautiful presentation before digging in. The combination of smoky paprika, aromatic saffron, and hearty chickpeas creates a dish that's both comforting and sophisticated.
 
 """
     return prompt
