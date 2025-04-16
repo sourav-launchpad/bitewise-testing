@@ -7,7 +7,7 @@ import os
 from dotenv import load_dotenv
 import asyncio
 import aiohttp
-import faiss
+#import faiss
 import numpy as np
 import os
 import pickle
@@ -25,46 +25,50 @@ import random
 import re
 from difflib import SequenceMatcher
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
+# from sklearn.feature_extraction.text import TfidfVectorizer
+# from sklearn.metrics.pairwise import cosine_similarity
 
 # Load environment variables
 load_dotenv()
 
 # Set OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
+#openai.api_key = os.getenv("OPENAI_API_KEY")
+
+#from openai import AsyncOpenAI
+
+# Use secrets from Streamlit Cloud
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 from openai import AsyncOpenAI
+client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
+# RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
 # ========== FAISS Embedding Index Setup ==========
-EMBEDDING_DIM = 1536
-INDEX_FILE = "recipe_index.faiss"
-NAMES_FILE = "recipe_names.pkl"
+# EMBEDDING_DIM = 1536
+# INDEX_FILE = "recipe_index.faiss"
+# NAMES_FILE = "recipe_names.pkl"
 
-if RESET_FAISS_ON_START:
-    recipe_index = faiss.IndexFlatL2(EMBEDDING_DIM)
-    recipe_names = []
-    if os.path.exists(INDEX_FILE):
-        os.remove(INDEX_FILE)
-    if os.path.exists(NAMES_FILE):
-        os.remove(NAMES_FILE)
-else:
-    if os.path.exists(INDEX_FILE):
-        recipe_index = faiss.read_index(INDEX_FILE)
-    else:
-        recipe_index = faiss.IndexFlatL2(EMBEDDING_DIM)
+# if RESET_FAISS_ON_START:
+#     recipe_index = faiss.IndexFlatL2(EMBEDDING_DIM)
+#     recipe_names = []
+#     if os.path.exists(INDEX_FILE):
+#         os.remove(INDEX_FILE)
+#     if os.path.exists(NAMES_FILE):
+#         os.remove(NAMES_FILE)
+# else:
+#     if os.path.exists(INDEX_FILE):
+#         recipe_index = faiss.read_index(INDEX_FILE)
+#     else:
+#         recipe_index = faiss.IndexFlatL2(EMBEDDING_DIM)
 
-    if os.path.exists(NAMES_FILE):
-        with open(NAMES_FILE, "rb") as f:
-            recipe_names = pickle.load(f)
-    else:
-        recipe_names = []
+#     if os.path.exists(NAMES_FILE):
+#         with open(NAMES_FILE, "rb") as f:
+#             recipe_names = pickle.load(f)
+#     else:
+#         recipe_names = []
 
-stored_embeddings = []  # (name, ingredients, embedding)
+# stored_embeddings = []  # (name, ingredients, embedding)
 
 def parse_list(value):
     if isinstance(value, str):
