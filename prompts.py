@@ -181,6 +181,7 @@ DIET_RESTRICTIONS = {
 }
 
 # Important Rules
+
 IMPORTANT_RULES = """
 **IMPORTANT RULES:**
 1. NEVER use salt in recipes for users with hypertension
