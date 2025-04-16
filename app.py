@@ -28,14 +28,16 @@ from difflib import SequenceMatcher
 # from sklearn.feature_extraction.text import TfidfVectorizer
 # from sklearn.metrics.pairwise import cosine_similarity
 
+openai.api_key = st.secrets["OPENAI_API_KEY"]
+
 # Load environment variables
 # load_dotenv()
 
 # Set OpenAI API key
 #openai.api_key = os.getenv("OPENAI_API_KEY")
 
-from openai import AsyncOpenAI
-client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+# from openai import AsyncOpenAI
+# client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
@@ -526,7 +528,7 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
     try:
         async with aiohttp.ClientSession() as session:
             data = {
-                "model": "gpt-4.1-mini", #gpt-4o-mini
+                "model": "gpt-4.1-mini",
                 "messages": [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": prompt}
