@@ -576,10 +576,10 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
 
                         return None
 
-                    # 🔥 FIX HERE: check similarity BEFORE saving embedding
-                    if await is_similar_recipe(recipe["name"], recipe["ingredients"]):
-                        st.warning(f"Duplicate recipe detected for {meal_type} on Day {day}, regenerating...")
-                        return None
+                    # # 🔥 FIX HERE: check similarity BEFORE saving embedding
+                    # if await is_similar_recipe(recipe["name"], recipe["ingredients"]):
+                    #     st.warning(f"Duplicate recipe detected for {meal_type} on Day {day}, regenerating...")
+                    #     return None
 
                     # ✅ NOW safe to save after confirmed not a duplicate
                     await save_recipe_embedding(recipe["name"], recipe["ingredients"])
