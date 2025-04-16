@@ -34,7 +34,7 @@ load_dotenv()
 # Set OpenAI API key
 #openai.api_key = os.getenv("OPENAI_API_KEY")
 
-#from openai import AsyncOpenAI
+from openai import AsyncOpenAI
 
 # Use secrets from Streamlit Cloud
 openai.api_key = st.secrets["OPENAI_API_KEY"]
