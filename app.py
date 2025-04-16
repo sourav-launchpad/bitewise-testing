@@ -1274,10 +1274,10 @@ def main():
                         # recipe_names.clear()
 
                         # Optional disk reset for FAISS files (safe for testing)
-                        if os.path.exists(INDEX_FILE):
-                            os.remove(INDEX_FILE)
-                        if os.path.exists(NAMES_FILE):
-                            os.remove(NAMES_FILE)
+                        # if os.path.exists(INDEX_FILE):
+                        #     os.remove(INDEX_FILE)
+                        # if os.path.exists(NAMES_FILE):
+                        #     os.remove(NAMES_FILE)
 
                         # 🔁 Generate
                         start_time = time.time()
