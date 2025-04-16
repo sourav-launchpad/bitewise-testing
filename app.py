@@ -35,10 +35,7 @@ load_dotenv()
 #openai.api_key = os.getenv("OPENAI_API_KEY")
 
 from openai import AsyncOpenAI
-
-# Use secrets from Streamlit Cloud
-openai.api_key = st.secrets["OPENAI_API_KEY"]
-client = AsyncOpenAI()
+client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 # RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
