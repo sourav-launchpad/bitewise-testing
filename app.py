@@ -7,6 +7,10 @@ import os
 from dotenv import load_dotenv
 import asyncio
 import aiohttp
+import faiss
+import numpy as np
+import os
+import pickle
 from prompts import (
     get_meal_prompt, 
     SYSTEM_PROMPT,
@@ -14,64 +18,122 @@ from prompts import (
     IMPORTANT_RULES,
     AUTHENTIC_RECIPE_NAMES
 )
+
+from prompts import HEALTH_RESTRICTIONS, ALLERGEN_KEYWORDS, DIET_RESTRICTIONS
+
 import random
 import re
 from difflib import SequenceMatcher
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Load environment variables
 load_dotenv()
 
 # Set OpenAI API key
-# openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+from openai import AsyncOpenAI
+
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
+
+# ========== FAISS Embedding Index Setup ==========
+EMBEDDING_DIM = 1536
+INDEX_FILE = "recipe_index.faiss"
+NAMES_FILE = "recipe_names.pkl"
+
+if RESET_FAISS_ON_START:
+    recipe_index = faiss.IndexFlatL2(EMBEDDING_DIM)
+    recipe_names = []
+    if os.path.exists(INDEX_FILE):
+        os.remove(INDEX_FILE)
+    if os.path.exists(NAMES_FILE):
+        os.remove(NAMES_FILE)
+else:
+    if os.path.exists(INDEX_FILE):
+        recipe_index = faiss.read_index(INDEX_FILE)
+    else:
+        recipe_index = faiss.IndexFlatL2(EMBEDDING_DIM)
+
+    if os.path.exists(NAMES_FILE):
+        with open(NAMES_FILE, "rb") as f:
+            recipe_names = pickle.load(f)
+    else:
+        recipe_names = []
+
+stored_embeddings = []  # (name, ingredients, embedding)
+
+def parse_list(value):
+    if isinstance(value, str):
+        value = value.strip()
+        if value.startswith("[") and value.endswith("]"):
+            try:
+                return eval(value)
+            except:
+                return [value]
+        return [value]
+    return value
 
 # Common household measurements with focus on Australian staples
 COMMON_MEASUREMENTS = {
-    "can": ["chickpeas", "tomatoes", "coconut milk", "lentils", "beans", "tuna"],  # 400g standard
-    "bunch": ["green onions", "parsley", "coriander", "mint"],  # Common fresh herbs
-    "head": ["garlic", "lettuce", "cabbage"],  # Whole vegetables
-    "whole": ["lemon", "lime", "orange", "potato", "onion", "carrot"],  # Individual items
-    "package": ["frozen vegetables", "frozen peas", "frozen corn", "mixed vegetables"],  # Frozen options
-    "kg": ["chicken thighs", "beef mince", "pork shoulder", "potatoes", "rice", "onions", "carrots"],  # Bulk items
-    "gram": ["cheese", "greek yogurt", "butter"],  # Dairy products
-    "slice": ["bread", "toast"],  # Bread products
-    "dozen": ["eggs"],  # Eggs
-    "unit": ["zucchini", "cucumber", "capsicum", "eggplant"]  # Individual vegetables
+    "can": ["chickpeas", "tomatoes", "coconut milk", "lentils", "beans", "tuna", "corn", "baked beans", "diced tomatoes"],
+    "bunch": ["green onions", "parsley", "coriander", "mint", "rocket"],
+    "head": ["garlic", "lettuce", "cabbage"],
+    "whole": ["lemon", "lime", "orange", "potato", "onion", "carrot", "tomato", "zucchini", "capsicum", "mushroom"],
+    "package": ["frozen vegetables", "frozen peas", "frozen corn", "mixed vegetables"],
+    "kg": ["chicken thighs", "chicken breasts", "prawn", "beef mince", "pork shoulder", "potatoes", "rice", "onions", "carrots", "kale", "spinach", "mushroom"],
+    "gram": ["cheese", "greek yogurt", "butter", "feta", "ricotta"],
+    "slice": ["bread", "toast", "rye bread"],
+    "dozen": ["eggs"],
+    "unit": ["zucchini", "cucumber", "capsicum", "eggplant", "avocado", "mushroom", "bagel"]
 }
 
-# Categories focused on Australian budget-friendly options
 CATEGORIES = {
     "Fresh & Frozen Produce": [
-        # Budget-friendly fresh vegetables
         "potato", "onion", "carrot", "cabbage", "pumpkin", "sweet potato",
-        # Seasonal vegetables
-        "zucchini", "cucumber", "capsicum", "eggplant", "broccoli", 
-        # Frozen vegetables
-        "frozen vegetables", "frozen peas", "frozen corn", "mixed vegetables"
+        "zucchini", "cucumber", "capsicum", "eggplant", "broccoli", "kale",
+        "spinach", "rocket", "mushroom", "tomato", "lemon", "lime", "avocado",
+        "lettuce", "spring onion", "garlic", "ginger", "chilli", "radish", "daikon",
+        "bok choy", "snow pea", "bean sprout", "turnip", "turnip leaves",
+        "perilla leaves", "seaweed", "beetroot", "corn", "asparagus", "frozen peas",
+        "frozen corn", "mixed vegetables", "frozen spinach", "frozen berries", "frozen edamame"
     ],
     "Budget Proteins": [
-        # Affordable meats
-        "chicken thigh", "beef mince", "pork shoulder", "whole chicken",
-        # Budget-friendly proteins
-        "egg", "lentil", "chickpea", "black bean", "tuna", "sardine"
+        "chicken thighs", "chicken breasts", "prawn", "beef mince", "pork shoulder", "whole chicken",
+        "turkey mince", "salmon", "tuna", "sardine", "haddock", "egg", "tofu", "tempeh", "lentil",
+        "chickpea", "black bean", "white bean", "kidney bean", "edamame", "anchovy", "pollock", "mackerel",
+        "smoked tofu", "soft tofu", "firm tofu", "silken tofu", "canned tuna", "canned salmon"
     ],
     "Dairy & Eggs": [
-        "greek yogurt", "cheese", "milk", "butter", "egg"
+        "greek yogurt", "cheese", "milk", "butter", "egg", "feta", "ricotta", "yogurt",
+        "parmesan", "mozzarella", "cottage cheese", "plant-based milk", "plant-based yogurt"
     ],
     "Affordable Grains": [
-        "rice", "pasta", "oat", "couscous", "bread", "noodle"
+        "rice", "brown rice", "wild rice", "basmati rice", "jasmine rice",
+        "pasta", "spelt pasta", "barley", "bulgur", "millet", "oat", "rolled oats", "steel-cut oats",
+        "quinoa", "couscous", "bread", "wholegrain bread", "rye bread", "sourdough", "bagel",
+        "tortilla", "cornbread", "noodle", "soba noodle", "vermicelli", "udon", "ramen", "glass noodle"
     ],
     "Pantry Essentials": [
-        "tomato paste", "canned tomato", "stock cube", "flour", "sugar"
+        "tomato paste", "canned tomato", "canned corn", "canned beans", "canned chickpeas",
+        "baked beans", "stock cube", "vegetable stock", "chicken stock", "beef stock",
+        "flour", "wholemeal flour", "cornstarch", "sugar", "brown sugar", "honey", "maple syrup",
+        "mustard", "bbq sauce", "dijon mustard", "gochujang", "doenjang", "miso paste",
+        "rice vinegar", "apple cider vinegar", "white vinegar", "coconut milk", "canned coconut milk"
     ],
     "Herbs & Spices": [
-        # Common herbs
-        "parsley", "coriander", "mint", "basil",
-        # Essential spices
-        "cumin", "coriander", "paprika", "curry powder", "mixed herbs"
+        "parsley", "coriander", "mint", "basil", "thyme", "paprika", "smoked paprika",
+        "cumin", "oregano", "dill", "chives", "black pepper", "white pepper",
+        "mustard powder", "turmeric", "fenugreek", "cinnamon", "clove", "nutmeg",
+        "star anise", "bay leaf", "rosemary", "chilli flakes", "cardamom", "curry powder"
     ],
     "Sauces & Condiments": [
-        "oil", "soy sauce", "vinegar", "tomato sauce", "bbq sauce", "mayonnaise"
+        "oil", "olive oil", "vegetable oil", "sesame oil", "soy sauce", "tamari", "fish sauce",
+        "mayonnaise", "vegan mayo", "tomato sauce", "bbq sauce", "yogurt sauce", "lemon juice",
+        "lime juice", "vinegar", "sambal oelek", "sriracha", "hoisin sauce", "tahini", "nut butter"
     ]
 }
 
@@ -303,7 +365,7 @@ def get_user_preferences():
                     "Cancer-related weight loss / Cachexia", "Neutropenic diet (immunosuppressed)",
                     "Low-residue diet (during flare-ups or treatment)",
                     # Autoimmune & Immune Conditions
-                    "Lupus", "Rheumatoid Arthritis", "Psoriasis", "Multiple Sclerosis", "Eczema",
+                    "Lupus", "Rheumatoid Arthritis", "Multiple Sclerosis",
                     "Chronic hives / urticaria", "Mast Cell Activation Syndrome (MCAS)",
                     # Neurological & Mental Health
                     "Epilepsy (Keto for seizures)", "ADHD", "Autism Spectrum Disorder", "Depression / Anxiety",
@@ -422,91 +484,52 @@ def get_user_preferences():
         st.error(f"Error getting user preferences: {str(e)}")
         return None
 
+def build_diet_rules_block(diet_type):
+    diet_rules = ""
+    if diet_type != "None":
+        if isinstance(diet_type, list):
+            for diet in diet_type:
+                if diet in DIET_RESTRICTIONS:
+                    restricted_items = DIET_RESTRICTIONS[diet]
+                    diet_rules += f"\nIMPORTANT - {diet} Diet Rules:\n"
+                    diet_rules += f"- DO NOT include any of the following: {', '.join(restricted_items)}.\n"
+                    diet_rules += f"- These ingredients are strictly forbidden and GPT must never include or mention them.\n"
+        else:
+            if diet_type in DIET_RESTRICTIONS:
+                restricted_items = DIET_RESTRICTIONS[diet_type]
+                diet_rules += f"\nIMPORTANT - {diet_type} Diet Rules:\n"
+                diet_rules += f"- DO NOT include any of the following: {', '.join(restricted_items)}.\n"
+                diet_rules += f"- These ingredients are strictly forbidden and GPT must never include or mention them.\n"
+    return diet_rules
+
+def build_health_restrictions_block(health_conditions):
+    rules = ""
+    for condition in health_conditions:
+        condition_clean = condition.strip()
+        if condition_clean in HEALTH_RESTRICTIONS:
+            restricted = HEALTH_RESTRICTIONS[condition_clean]
+            rules += f"\nHEALTH: {condition_clean}\n"
+            rules += f"- Avoid: {', '.join(restricted)}\n"
+    return rules.strip()
+
+def build_allergy_block(allergies):
+    rules = ""
+    for allergy in allergies:
+        allergy_clean = allergy.strip()
+        if allergy_clean.lower() not in ["no allergies", "no allergies or intolerances"]:
+            keywords = ALLERGEN_KEYWORDS.get(allergy_clean, [])
+            if keywords:
+                rules += f"\nALLERGY: {allergy_clean}\n"
+                rules += f"- STRICTLY AVOID: {', '.join(keywords)}\n"
+    return rules.strip()
+
 async def generate_meal(meal_type, day, prompt, cuisine="All"):
     try:
-        # Create a session for concurrent requests
         async with aiohttp.ClientSession() as session:
-            # Prepare the request data with full system prompt
             data = {
-                "model": "gpt-3.5-turbo-0125",
+                "model": "gpt-4.1-mini", #gpt-4o-mini
                 "messages": [
-                    {"role": "system", "content": """You are an expert Australian nutritionist and chef specializing in practical, flavorful home cooking. Follow dietary requirements, health conditions, and cultural preferences while maintaining authenticity and practicality. Prioritize generating distinct recipes. Avoid repeating the same or very similar recipes unless absolutely unavoidable. Ensure recipes differ significantly in ingredients, preparation, and flavor profiles. You create meals that:
-                     
-                    **IMPORTANT - RECIPE NAMES:**
-                     
-                    Generate a list of creative and original recipe names based on the given dish description or ingredients. *Recipe name must be over 5 words*. DO NOT use Recipe Names that starts with Aussie Brekkie. Avoid generic or overused words like: *Fragrant*, *Oceanic*, *Zesty*, *Stir-Fry*, *Delight*, *Aussie*,  *Brekkie*, *Lemony*, *Outback*
-                     
-                    - The names should feel fun, fresh, and inviting — but avoid being overly playful, exaggerated, or cliché. Aim for subtle creativity that sounds natural and appetizing. Keep titles clear, concise (5-8 words), and reflective of the key ingredients or style of the dish.  
-
-                    **Guidelines:**
-                    - Use clear, descriptive language.  
-                    - Avoid generic or overused words like: *Fragrant*, *Oceanic*, *Zesty*, *Stir-Fry*, *Delight*, *Aussie*, *Brekkie*, *Lemony* 
-                    - Subtle wordplay, alliteration, or sensory imagery is encouraged — only where it feels organic.  
-                    - Focus on the key ingredient(s), cooking method, or regional influence.  
-                    - The name should feel modern, refined, and not overly "foodie" or forced.
-                     
-                    **IMPORTANT - CUISINE REQUIREMENTS:**
-                    - When a specific cuisine is selected, ALL meals MUST strictly follow that cuisine
-                    - Use authentic ingredients, cooking methods, and flavor combinations
-                    - Breakfast, lunch, and dinner must all reflect the chosen cuisine
-                    - Only use ingredients and techniques traditional to that cuisine
-                    - Adapt traditional dishes to meet dietary restrictions while maintaining authenticity
-                    - Never mix cuisines unless "All" is selected
-                    - Research and include authentic dishes for each meal type
-                    - Use traditional cooking methods and equipment
-                    - Include authentic garnishes and presentation styles
-                    - Maintain cultural authenticity while meeting dietary needs
-                    
-                    **IMPORTANT - MEAL PLAN LENGTH:**
-                    - Generate a complete day of meals with all required meal types (breakfast, lunch, dinner)
-                    - Maintain consistency with previous days
-                    - Ensure variety across the entire plan
-                    - Each day MUST include all requested meal types
-                    - Keep track of ingredient usage across the entire plan
-                    
-                    ** IMPORTANT RULES: Australian Dietary Guidelines Compliance**   
-                    "Create a meal that strictly follows the **Australian Dietary Guidelines**. Ensure it includes:  
-                    - A **protein source** (meat, fish, chicken, eggs, legumes, beans, etc.).  
-                    - A **carbohydrate source**, preferably **whole grains** (wholegrain bread, rice, noodles, pasta, oats, quinoa, etc.).  
-                    - A **healthy fat source** (dairy, olive oil, nuts, seeds, etc.).  
-                    - At least **two different vegetables** for a balanced meal."  
-
-                    ** IMPORTANT RULES: Ingredient Diversity**  
-                    "Design a weekly meal plan that ensures **diversity in ingredients**. Avoid using the same proteins, carbohydrates, and vegetables repeatedly unless necessary to reduce food waste. Each meal should incorporate a variety of nutrient-dense ingredients."  
-
-                    ** IMPORTANT RULES: Cooking Methods & Texture**  
-                    "Generate a meal with **varied and interesting cooking methods** to enhance flavor and texture. Avoid plain techniques like steaming or baking without enhancements. Instead, use methods such as:  
-                    - Sautéing  
-                    - Air-frying  
-                    - Roasting  
-                    - Grilling  
-                    - Charring  
-                    Incorporate a mix of textures (e.g., **crispy, crunchy, creamy, or tender**) to create a satisfying dish."  
-
-                    ** IMPORTANT RULES: Herbs & Spices Usage**  
-                    "Ensure every meal includes **at least 2-3 herbs and spices**, excluding salt and pepper. Use both fresh and dried herbs where appropriate to enhance flavor. **Do not list salt or pepper as ingredients**—instead, mention 'season to taste' in the instructions."  
-
-                    ** IMPORTANT RULES: Complete & Well-Rounded Meals**  
-                    "Meals should be **nutritionally complete and well-balanced**, so be sure to include suitable sides with each main dish. Examples:  
-                    - A stir-fry must include **rice or noodles** rather than just vegetables and protein.  
-                    - A grilled protein should have complementary sides to enhance flavor and texture, such as **crispy sweet potato wedges or sautéed mixed greens**."  
-
-                    ** IMPORTANT RULES: Measurement Units & Packaging Relevance**  
-                    "Use **Australian supermarket measurement units** for all ingredients. Ensure:  
-                    - **Liquids** are measured in teaspoons, tablespoons, or millilitres (ml).  
-                    - **Solids** are measured in grams (g) or whole units (e.g., ½ avocado, 1 zucchini, ½ capsicum).  
-                    - **Garlic** is measured in cloves, and **tomatoes** in halves or quarters.  
-                    Reference **Coles or Woolworths packaging sizes** where possible to ensure accurate portioning."  
-
-                    ** IMPORTANT RULES: Recipe Instructions Formatting**  
-                    "Write clear, structured recipe instructions in **UK English** using the **metric system**. Ensure:  
-                    - Steps flow logically and include **practical cooking tips**.  
-                    - Instructions are easy to follow, catering to a **basic skill level**.  
-                    - The format remains **concise yet detailed**, making recipes accessible for all users."
-                    
-                    **REMINDER**:  
-                    - **Follow all the rules strictly. Do not ignore any points from the instructions above.**
-                    - **Every recipe must include all necessary instructions** and adhere to the specific guidelines listed."""},
+                    {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": prompt}
                 ],
                 "max_tokens": 4096,
@@ -515,12 +538,11 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
                 "frequency_penalty": 0.1
             }
 
-            # Make the API request
             headers = {
                 "Authorization": f"Bearer {openai.api_key}",
                 "Content-Type": "application/json"
             }
-            
+
             async with session.post(
                 "https://api.openai.com/v1/chat/completions",
                 json=data,
@@ -528,7 +550,41 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
             ) as response:
                 if response.status == 200:
                     result = await response.json()
-                    return (meal_type, day, result['choices'][0]['message']['content'])
+                    response_text = result['choices'][0]['message']['content']
+
+                    # 🔍 DEBUG: Save raw GPT output to file
+                    with open(f"debug_day{day}_{meal_type.lower()}.txt", "w", encoding="utf-8") as f:
+                        f.write(response_text)
+
+                    # Parse and validate structure
+                    recipe = parse_recipe(response_text)
+                    if recipe is None or not recipe.get("name") or not recipe.get("ingredients"):
+                        st.warning(f"{meal_type} for Day {day} had invalid structure. Skipping...")
+                        return None
+
+                    # Allergy/Diet/Health validation
+                    if not is_recipe_safe(recipe["ingredients"], st.session_state.user_preferences):
+                        st.warning(f"{meal_type} for Day {day} was rejected due to allergy/diet/health violation.")
+                        return None
+
+                    # 🔥 Strict title check for restricted diet keywords
+                    if not is_title_allowed_for_diet(recipe["name"], st.session_state.user_preferences.get("diet", [])):
+                        # st.warning(f"{meal_type} for Day {day} was rejected because title includes restricted food for the selected diet.")
+
+                        print(f"[TITLE REJECTED] {meal_type} for Day {day} - Title violates diet restrictions.")
+
+                        return None
+
+                    # 🔥 FIX HERE: check similarity BEFORE saving embedding
+                    if await is_similar_recipe(recipe["name"], recipe["ingredients"]):
+                        st.warning(f"Duplicate recipe detected for {meal_type} on Day {day}, regenerating...")
+                        return None
+
+                    # ✅ NOW safe to save after confirmed not a duplicate
+                    await save_recipe_embedding(recipe["name"], recipe["ingredients"])
+
+                    return (meal_type, day, response_text)
+
                 else:
                     error_text = await response.text()
                     raise Exception(f"API request failed with status {response.status}: {error_text}")
@@ -548,6 +604,152 @@ def clean_recipe_text(text):
     # Remove extra spaces and convert to lowercase
     text = ' '.join(text.split()).lower()
     return text
+
+from prompts import DIETARY_REQUIREMENTS
+
+def is_recipe_safe(ingredients_text, user_prefs):
+    ingredients_text = ingredients_text.lower()
+
+    # 1. Allergy Check
+    allergies = user_prefs.get("allergies", "")
+    if "no allergies or intolerances" not in allergies.lower():
+        for allergy in allergies.split(","):
+            allergy = allergy.strip().lower()
+            keywords = ALLERGEN_KEYWORDS.get(allergy, [])
+            for keyword in keywords:
+                if re.search(rf"\b{re.escape(keyword)}\b", ingredients_text):
+                    print(f"[ALLERGY VIOLATION] Matched '{keyword}' for allergy '{allergy}'")
+                    return False
+
+    # 2. Diet Restriction Check
+    diet = user_prefs.get("diet", "none")
+    if diet != "None":
+        if isinstance(diet, str):
+            diet = eval(diet) if diet.startswith("[") else [diet]
+
+        # Tokenize ingredients for exact match
+        words = set(re.findall(r'\b\w+\b', ingredients_text))
+
+        for d in diet:
+            if d in DIET_RESTRICTIONS:
+                for keyword in DIET_RESTRICTIONS[d]:
+                    if keyword in words:
+                        print(f"[DIET VIOLATION] Matched '{keyword}' for diet '{d}'")
+                        print(f">>> Ingredients being checked: {ingredients_text}")
+                        print(f">>> Forbidden keyword: {keyword} for diet: {d}")
+                        return False
+
+    # 3. Health Condition Check
+    health_conditions = user_prefs.get("health_conditions", "")
+    if "none" not in health_conditions.lower():
+        for condition in health_conditions.split(","):
+            condition = condition.strip().lower()
+            keywords = HEALTH_RESTRICTIONS.get(condition, [])
+            for keyword in keywords:
+                if re.search(rf"\b{re.escape(keyword)}\b", ingredients_text):
+                    print(f"[HEALTH VIOLATION] Matched '{keyword}' for condition '{condition}'")
+                    return False
+
+    return True
+
+from openai import AsyncOpenAI  # NEW: for async calls
+
+# Initialize OpenAI Async client globally (best practice)
+client = AsyncOpenAI()
+
+# ========== FAISS Embedding Utils ==========
+async def get_embedding(text):
+    response = await client.embeddings.create(
+        model="text-embedding-ada-002",
+        input=[text]
+    )
+    return response.data[0].embedding
+
+async def get_recipe_embedding(name, ingredients):
+    combined_text = f"{name}\n{ingredients}"
+    return await get_embedding(combined_text)
+
+async def save_recipe_embedding(name, ingredients):
+    embedding = await get_recipe_embedding(name, ingredients)
+
+    if embedding is None or len(embedding) != 1536:
+        print("❌ Invalid embedding, skipping save.")
+        return
+
+    recipe_index.add(np.array([embedding], dtype="float32"))
+    recipe_names.append(name)
+
+    # Save index and names to disk
+    faiss.write_index(recipe_index, INDEX_FILE)
+    with open(NAMES_FILE, "wb") as f:
+        pickle.dump(recipe_names, f)
+
+    print(f"✅ Saved recipe embedding for '{name}'")
+
+def is_title_allowed_for_diet(recipe_name, diet_list):
+    restricted_keywords = set()
+    for diet in diet_list:
+        if diet in DIET_RESTRICTIONS:
+            restricted_keywords.update(DIET_RESTRICTIONS[diet])
+
+    recipe_name_lower = recipe_name.lower()
+    for keyword in restricted_keywords:
+        if re.search(rf"\b{re.escape(keyword)}\b", recipe_name_lower):
+            print(f"[TITLE REJECTION] Matched '{keyword}' in recipe title for diet: {diet_list}")
+            return False
+    return True
+
+import re
+
+def parse_recipe(recipe_text):
+    try:
+        # Strip markdown formatting and clean whitespace
+        cleaned_text = recipe_text.replace("**", "").replace("__", "").strip()
+
+        # Match title pattern flexibly (e.g., "Day 1 - Breakfast - Name | Breakfast")
+        title_match = re.search(
+            r"(?:Day\s*\d+\s*-\s*)?(?:Breakfast|Lunch|Dinner)?\s*-\s*(.*?)\s*\|", 
+            cleaned_text, 
+            re.IGNORECASE
+        )
+        name = title_match.group(1).strip() if title_match else None
+
+        # Match Ingredients section robustly (accepts "Ingredients", "Ingredient list", case-insensitive)
+        ingredients_match = re.search(
+            r"(?i)(?:ingredients|ingredient list)\s*[:\-]?\s*(.*?)(?:\n\s*(instructions|description|total time|serves)\b|$)", 
+            cleaned_text, 
+            re.DOTALL
+        )
+        ingredients_raw = ingredients_match.group(1).strip() if ingredients_match else None
+
+        if not name or not ingredients_raw:
+            print("❌ parse_recipe() failed: Missing recipe name or ingredients.")
+            print("----- RAW TEXT BEGIN -----")
+            print(recipe_text)
+            print("----- RAW TEXT END -------")
+            return None
+
+        # Extract each line, remove bullets, hyphens, etc.
+        lines = [line.strip("-• ").strip() for line in ingredients_raw.splitlines() if line.strip()]
+        ingredients = ", ".join(lines)
+
+        return {
+            "name": name,
+            "ingredients": ingredients
+        }
+
+    except Exception as e:
+        print(f"[parse_recipe] Exception: {e}")
+        return None
+
+async def is_similar_recipe(name, ingredients):
+    if recipe_index.ntotal == 0:
+        return False
+
+    combined_text = f"{name}\n{ingredients}"
+    embedding = await get_embedding(combined_text)
+    D, _ = recipe_index.search(np.array([embedding], dtype="float32"), k=1)
+    return D[0][0] < 0.1
 
 def calculate_similarity(recipe1, recipe2):
     """Calculate similarity between two recipes using multiple criteria."""
@@ -603,15 +805,15 @@ async def generate_meal_plan(user_prefs):
         st.session_state.generated_recipes = []
         st.session_state.meal_types_used = set()
         st.session_state.cuisines_used = set()
-        st.session_state.cuisine_distribution = {}  # Initialize cuisine distribution
-        
+        st.session_state.cuisine_distribution = {}
+        st.session_state.used_recipe_names = set()
+
         if not isinstance(user_prefs, dict):
             raise ValueError("user_prefs must be a dictionary")
 
-        # Access values from dictionary with error handling
-        required_keys = ['num_days', 'diet', 'allergies', 'health_conditions', 
-                        'meal_type', 'cuisine', 'budget', 'time_constraint', 'serving_size']
-        
+        required_keys = ['num_days', 'diet', 'allergies', 'health_conditions',
+                         'meal_type', 'cuisine', 'budget', 'time_constraint', 'serving_size']
+
         for key in required_keys:
             if key not in user_prefs:
                 raise KeyError(f"Missing required preference: {key}")
@@ -626,8 +828,12 @@ async def generate_meal_plan(user_prefs):
         budget = user_prefs['budget']
         cooking_time = user_prefs['time_constraint']
         servings = user_prefs['serving_size']
-        
-        # Create a formatted preferences dictionary for get_meal_prompt
+
+        # Clean lists from strings
+        diet_list = [d.strip().lower() for d in parse_list(diet_type)]
+        allergy_list = [a.strip().lower() for a in parse_list(allergies)]
+        health_list = [h.strip().lower() for h in parse_list(health_conditions)]
+
         formatted_prefs = {
             'num_days': num_days,
             'diet': diet_type,
@@ -637,47 +843,49 @@ async def generate_meal_plan(user_prefs):
             'cuisine': cuisine,
             'budget': budget,
             'time_constraint': cooking_time,
-            'serving_size': servings
+            'serving_size': servings,
+            'diet_list': diet_list,
+            'allergy_list': allergy_list,
+            'health_list': health_list
         }
 
-        # Pre-compute common requirements
         health_requirements = IMPORTANT_RULES if health_conditions != "None" else ""
-        
-        # Get specific dietary requirements based on diet type
+
         diet_rules = ""
         if diet_type != "None":
-            # Handle multiple diet types if selected
             if isinstance(diet_type, list):
                 for diet in diet_type:
-                    if diet in DIETARY_REQUIREMENTS:
-                        diet_info = DIETARY_REQUIREMENTS[diet]
-                        diet_rules += f"\n{diet} Requirements:\n"
-                        diet_rules += f"- Allowed: {', '.join(diet_info['allowed'])}\n"
-                        diet_rules += f"- Restricted: {', '.join(diet_info['restricted'])}\n"
-                        diet_rules += f"- Notes: {diet_info['notes']}\n"
+                    if diet in DIET_RESTRICTIONS:
+                        restricted_items = DIET_RESTRICTIONS[diet]
+                        diet_rules += f"\nIMPORTANT - {diet} Diet Rules:\n"
+                        diet_rules += f"- DO NOT include: {', '.join(restricted_items)}.\n"
             else:
-                if diet_type in DIETARY_REQUIREMENTS:
-                    diet_info = DIETARY_REQUIREMENTS[diet_type]
-                    diet_rules = f"\n{diet_type} Requirements:\n"
-                    diet_rules += f"- Allowed: {', '.join(diet_info['allowed'])}\n"
-                    diet_rules += f"- Restricted: {', '.join(diet_info['restricted'])}\n"
-                    diet_rules += f"- Notes: {diet_info['notes']}\n"
-        
+                if diet_type in DIET_RESTRICTIONS:
+                    restricted_items = DIET_RESTRICTIONS[diet_type]
+                    diet_rules += f"\nIMPORTANT - {diet_type} Diet Rules:\n"
+                    diet_rules += f"- DO NOT include: {', '.join(restricted_items)}.\n"
+
         dietary_requirements = f"""
+
+        IMPORTANT: Strict dietary filtering enabled.
+
         {diet_rules}
-        
+
+        DO NOT include restricted ingredients even in small amounts.
+        GPT must never hallucinate or bypass restrictions.
+        Use culturally appropriate alternatives only if necessary.
+
         Additional Requirements:
         - Allergies/Intolerances: {allergies}
         - Health Conditions: {health_conditions}
         - Budget: {budget}
         - Time Constraint: {cooking_time}
         - Serving Size: {servings} people
-        
+
         IMPORTANT: The recipe MUST strictly follow all dietary requirements listed above.
         If there are conflicts between different diet types, prioritize the most restrictive requirements.
         """
 
-        # Pre-compute budget requirements
         budget_requirements = {
             "Tight budget": """
             Use these budget-friendly ingredients:
@@ -688,7 +896,7 @@ async def generate_meal_plan(user_prefs):
             """,
             "Moderate budget": """
             Use these moderately priced ingredients:
-            - Proteins: chicken thighs, ground beef, tofu, eggs
+            - Proteins: chicken thighs, chicken breasts, ground beef, tofu, eggs
             - Vegetables: seasonal vegetables, frozen vegetables
             - Grains: rice, pasta, bread
             - Include some fresh herbs and spices
@@ -702,7 +910,6 @@ async def generate_meal_plan(user_prefs):
             """
         }.get(budget, "")
 
-        # Pre-compute measurement requirements
         measurement_requirements = """
         Use these standard measurements:
         - 1 cup = 250ml
@@ -712,181 +919,129 @@ async def generate_meal_plan(user_prefs):
         - Use standard household measurements for solids
         """
 
-        # Pre-compute available ingredients based on budget
         available_ingredients = []
         for category, items in CATEGORIES.items():
             if any(budget.lower() in category.lower() for budget in ["Budget", "Affordable"]):
                 available_ingredients.extend(items)
 
-        # Pre-compute cuisine preferences
         cuisine_prefs = eval(user_prefs['cuisine'])
         if not cuisine_prefs or "All" in cuisine_prefs:
             available_cuisines = [
-                "Mediterranean", "Mexican", "Indian", "Japanese",
+                "Mediterranean", "Latin American / Mexican", "Indian", "Japanese",
                 "Chinese", "Middle Eastern", "Vietnamese",
-                "Korean", "American", "British", "Australian", "African"
+                "Korean", "Traditional Australian / British / American", "African"
             ]
             available_cuisines = [c for c in available_cuisines if c != "Thai"]
             random.shuffle(available_cuisines)
         else:
             available_cuisines = cuisine_prefs.copy()
             random.shuffle(available_cuisines)
-        
-        # Create tasks for all meals
+
+        semaphore = asyncio.Semaphore(10)
+
+        async def limited_generate(meal_type, day, prompt, cuisine):
+            async with semaphore:
+                return await generate_meal(meal_type, day, prompt, cuisine)
+
         tasks = []
         used_cuisines = set()
         cuisine_index = 0
-        
+
         for day in range(1, num_days + 1):
             st.session_state.cuisine_distribution[day] = {
                 'breakfast': None,
                 'lunch': None,
                 'dinner': None
             }
-            
-            meal_types = []
-            if "All" in user_prefs['meal_type']:
+
+            if "All" in meal_type:
                 meal_types = ["Breakfast", "Lunch", "Dinner"]
             else:
-                meal_types = [meal for meal in ["Breakfast", "Lunch", "Dinner"] 
-                            if meal in user_prefs['meal_type']]
-            
-            if not meal_types:
-                meal_types = ["Breakfast", "Lunch", "Dinner"]
-            
+                meal_types = [m for m in ["Breakfast", "Lunch", "Dinner"] if m in meal_type]
+
             for meal in meal_types:
                 selected_cuisine = available_cuisines[cuisine_index % len(available_cuisines)]
                 cuisine_index += 1
-                
                 st.session_state.cuisine_distribution[day][meal.lower()] = selected_cuisine
                 used_cuisines.add(selected_cuisine)
-                
-                # Get authentic recipe names for the selected cuisine
+
                 authentic_recipes = AUTHENTIC_RECIPE_NAMES.get(selected_cuisine, [])
-                recipe_inspiration = "\n".join([f"- {recipe}" for recipe in authentic_recipes])
+                if not authentic_recipes:
+                    st.warning(f"No authentic recipes found for {selected_cuisine} cuisine.")
+                    continue
 
-                # Add cuisine-specific ingredients
-                cuisine_ingredients = [item for item in available_ingredients 
-                                    if selected_cuisine.lower() in item.lower()]
-                current_ingredients = available_ingredients + cuisine_ingredients
+                meal_recipes = [
+                    r for r in authentic_recipes
+                    if meal.lower() in r.lower() and is_title_allowed_for_diet(r, diet_list)
+                ]
 
-                # Create a more specific prompt that emphasizes using authentic recipe names
-                prompt = get_meal_prompt(
-                    meal_type=meal,
-                    day=day,
-                    user_prefs=formatted_prefs,
-                    health_requirements=health_requirements,
-                    cuisine_requirements=f"""
-                    {selected_cuisine} Cuisine Requirements:
-                    - Use authentic {selected_cuisine} ingredients and methods
-                    - Follow {selected_cuisine} cultural traditions
-                    - Use traditional {selected_cuisine} dishes
-                    - Include {selected_cuisine} specific ingredients
-                    - Avoid mixing with other cuisines
-                    - Use authentic {selected_cuisine} cooking techniques
-                    - Follow {selected_cuisine} plating styles
-                    - Use proper {selected_cuisine} terminology
-                    - Ensure dish is recognizably {selected_cuisine}
-                    - The recipe MUST explicitly mention "{selected_cuisine}" in its description or title
-                    
-                    Authentic {selected_cuisine} Recipe Examples:
-                    {recipe_inspiration}
-                    
-                    IMPORTANT: When generating the recipe:
-                    1. Choose one of the authentic recipe names above as inspiration
-                    2. Adapt it to meet dietary requirements while maintaining authenticity
-                    3. Use traditional ingredients and methods from the chosen recipe
-                    4. Keep the core concept and flavors of the original dish
-                    5. Make necessary adjustments for health conditions and allergies
-                    6. Ensure the recipe name reflects the authentic dish while being unique
-                    
-                    The generated recipe should:
-                    - Be inspired by one of the authentic recipes listed above
-                    - Maintain cultural authenticity
-                    - Use traditional ingredients and methods
-                    - Have a distinct {selected_cuisine} flavor profile
-                    - Be appropriate for {meal}
-                    """ + dietary_requirements + budget_requirements + measurement_requirements,
-                    available_ingredients=current_ingredients,
-                    authentic_recipes=authentic_recipes
-                )
-                tasks.append(generate_meal(meal, day, prompt, selected_cuisine))
+                adaptive_generation = False
 
-        # Process all tasks concurrently with maximum parallelization
-        semaphore = asyncio.Semaphore(10)  # Increased to allow more concurrent requests
-        
-        async def generate_with_semaphore(task):
-            async with semaphore:
-                try:
-                    return await task
-                except Exception as e:
-                    if "rate limit" in str(e).lower():
-                        await asyncio.sleep(1)  # Reduced from 5 to 2 seconds
-                        return await task
-                    st.error(f"Error in meal generation: {str(e)}")
-                    return None
+                if not meal_recipes:
+                    if any(
+                        d in DIET_RESTRICTIONS and
+                        not any(is_title_allowed_for_diet(r, [d]) for r in authentic_recipes)
+                        for d in diet_list
+                    ):
+                        st.warning(f"⚠️ No authentic titles matched the {diet_list} diet for {selected_cuisine} {meal}. Forcing GPT to generate a compliant custom recipe.")
+                        recipe_name = f"Custom {selected_cuisine} {meal} (Diet-Compliant)"
+                        meal_recipes = [recipe_name]
+                        adaptive_generation = True
+                    else:
+                        st.info(f"💡 No diet-compliant titles found for {selected_cuisine} {meal}. Entering adaptive generation mode.")
+                        recipe_name = f"{selected_cuisine} {meal} - GPT Generated Fallback"
+                        meal_recipes = [recipe_name]
+                        adaptive_generation = True
 
-        # Process all tasks in parallel
-        results = await asyncio.gather(*[generate_with_semaphore(task) for task in tasks])
-        results = [r for r in results if r and isinstance(r, tuple) and len(r) == 3]
+                random.shuffle(meal_recipes)
 
-        if not results:
-            raise ValueError("No valid meals were generated")
+                for recipe_name in meal_recipes:
+                    if recipe_name in st.session_state.used_recipe_names:
+                        continue
 
-        # Verify all selected cuisines are represented if specific cuisines were selected
-        if cuisine_prefs:
-            generated_cuisines = set()
-            for result in results:
-                meal_type, day, recipe = result
-                assigned_cuisine = st.session_state.cuisine_distribution[day][meal_type.lower()]
-                if assigned_cuisine:
-                    generated_cuisines.add(assigned_cuisine)
+                    prompt = get_meal_prompt(
+                        meal_type=meal,
+                        day=day,
+                        user_prefs=formatted_prefs,
+                        health_requirements=health_requirements,
+                        cuisine_requirements=f"""
+                        {selected_cuisine} Cuisine Requirements:
+                        - Use authentic {selected_cuisine} ingredients and methods
+                        - Follow {selected_cuisine} cultural traditions
+                        - Use traditional {selected_cuisine} dishes
+                        - Include {selected_cuisine} specific ingredients
+                        - Avoid mixing with other cuisines
+                        - Use authentic {selected_cuisine} cooking techniques
+                        - Follow {selected_cuisine} plating styles
+                        - Use proper {selected_cuisine} terminology
+                        - Ensure dish is recognizably {selected_cuisine}
+                        - The recipe MUST explicitly mention \"{selected_cuisine}\" in its description or title
 
-            if len(generated_cuisines) < len(cuisine_prefs):
-                missing_cuisines = set(cuisine_prefs) - generated_cuisines
-                raise ValueError(f"Not all selected cuisines were represented. Missing: {', '.join(missing_cuisines)}")
+                        IMPORTANT: When generating the recipe:
+                        1. GPT MUST use the exact recipe name: \"{recipe_name}\" and not change or rephrase it.
+                        2. The recipe title in the output must exactly match this string, including punctuation and word order.
+                        3. GPT must NOT add any extra prefix (e.g. Day 1 - Lunch -) unless explicitly instructed.
+                        """ + dietary_requirements + budget_requirements + measurement_requirements,
+                        available_ingredients=available_ingredients,
+                        authentic_recipes=[recipe_name]
+                    )
 
-        # Process and sort results
-        processed_results = []
+                    task = limited_generate(meal, day, prompt, selected_cuisine)
+                    tasks.append(task)
+                    break
+
+        results = await asyncio.gather(*tasks)
+
         for result in results:
-            meal_type, day, recipe = result
-            processed_results.append({
-                "day": day,
-                "meal_type": meal_type,
-                "recipe": recipe
-            })
+            if result:
+                meal_type, day, recipe_text = result
+                st.session_state.generated_recipes.append({
+                    "day": day,
+                    "meal_type": meal_type,
+                    "recipe": recipe_text
+                })
 
-        # Sort results by day and meal type
-        meal_type_order = {"Breakfast": 0, "Lunch": 1, "Dinner": 2}
-        processed_results.sort(key=lambda x: (x['day'], meal_type_order[x['meal_type']]))
-
-        # Check for recipe uniqueness in batches
-        unique_recipes = []
-        for meal in processed_results:
-            recipe = meal['recipe']
-            if is_recipe_unique(recipe, st.session_state.generated_recipes):
-                unique_recipes.append(recipe)
-            else:
-                st.warning(f"Regenerating {meal['meal_type']} for Day {meal['day']} to ensure uniqueness...")
-                # Add specific requirements for uniqueness
-                prompt = get_meal_prompt(
-                    meal_type=meal['meal_type'],
-                    day=meal['day'],
-                    user_prefs=formatted_prefs,
-                    health_requirements=health_requirements,
-                    cuisine_requirements="" + dietary_requirements + budget_requirements + measurement_requirements,
-                    available_ingredients=available_ingredients
-                )
-                new_recipe = await generate_meal(meal['meal_type'], meal['day'], prompt, cuisine)
-                if new_recipe:
-                    unique_recipes.append(new_recipe)
-                else:
-                    raise ValueError(f"Failed to generate unique {meal['meal_type']} for Day {meal['day']}")
-
-        # Update session state with unique recipes
-        st.session_state.generated_recipes.extend(unique_recipes)
-
-        return processed_results
+        return st.session_state.generated_recipes
 
     except Exception as e:
         st.error(f"Error generating meal plan: {str(e)}")
@@ -1083,14 +1238,12 @@ def extract_grains(recipe_text):
 
 def main():
     try:
-        # Get user preferences
         user_prefs = get_user_preferences()
-        
+
         if user_prefs is None:
             st.error("Failed to get user preferences. Please try again.")
             return
-        
-        # Inject custom CSS to center the spinner and text
+
         st.markdown(
             """
             <style>
@@ -1099,73 +1252,54 @@ def main():
                 justify-content: center;
                 align-items: center;
             }
-            /* TEMPORARILY COMMENTED OUT: Generation time CSS
-            .generation-time {
-                position: fixed;
-                bottom: 20px;
-                right: 20px;
-                background-color: rgba(0, 0, 0, 0.7);
-                color: white;
-                padding: 10px 20px;
-                border-radius: 5px;
-                font-size: 14px;
-                z-index: 1000;
-            }
-            */
             </style>
             """,
             unsafe_allow_html=True,
         )
-        
-        # Generate meal plan button
+
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             if st.button("Generate Meal Plan"):
-                # Use the standard spinner
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
-                        # Start timing
-                        start_time = time.time()
-                        
-                        # Use asyncio to run the async function
-                        meal_plan = asyncio.run(generate_meal_plan(user_prefs))
-                        
-                        # TEMPORARILY COMMENTED OUT: Generation time calculation
-                        # generation_time = time.time() - start_time
-                        # st.session_state.generation_time = generation_time
-                        
-                        if meal_plan:  # Only show success if we actually got a meal plan
-                            st.session_state.meal_plan = meal_plan
+                        # ✅ FULL RESET (session + in-memory + optional disk)
+                        st.session_state.used_recipe_names = set()
+                        st.session_state.generated_recipes = []
+                        st.session_state.meal_types_used = set()
+                        st.session_state.cuisines_used = set()
+                        st.session_state.cuisine_distribution = {}
 
-                            # Using markdown to mimic st.success() with centered alignment
+                        recipe_index.reset()
+                        recipe_names.clear()
+
+                        # Optional disk reset for FAISS files (safe for testing)
+                        if os.path.exists(INDEX_FILE):
+                            os.remove(INDEX_FILE)
+                        if os.path.exists(NAMES_FILE):
+                            os.remove(NAMES_FILE)
+
+                        # 🔁 Generate
+                        start_time = time.time()
+                        meal_plan = asyncio.run(generate_meal_plan(user_prefs))
+                        st.session_state.meal_plan = meal_plan
+
+                        if meal_plan:
                             st.markdown(
                                 "<div style='text-align: center; background-color: #d4edda; padding: 10px; border-radius: 5px; color: #155724; font-weight: bold;'>"
                                 "Meal Plan Generated Successfully!"
                                 "</div>",
                                 unsafe_allow_html=True
                             )
-                            
-                            # TEMPORARILY COMMENTED OUT: Generation time display
-                            # st.markdown(
-                            #     f"<div class='generation-time'>Generation Time: {generation_time:.2f} seconds</div>",
-                            #     unsafe_allow_html=True
-                            # )
                         else:
                             st.error("Failed to Generate Meal Plan. Please Try Again")
+
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
                         st.session_state.meal_plan = None
-        
-        # Display meal plan if available
+
         if st.session_state.meal_plan:
             display_meal_plan(st.session_state.meal_plan)
-            
-            # TEMPORARILY COMMENTED OUT: Generation time display at bottom
-            # if hasattr(st.session_state, 'generation_time'):
-            #     st.markdown(
-            #         f"<div class='generation-time'>Generation Time: {st.session_state.generation_time:.2f} seconds</div>",
-            #         unsafe_allow_html=True
-            #     )
+
     except Exception as e:
         st.error(f"An unexpected error occurred: {str(e)}")
 
