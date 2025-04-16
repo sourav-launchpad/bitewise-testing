@@ -670,20 +670,20 @@ async def get_recipe_embedding(name, ingredients):
     combined_text = f"{name}\n{ingredients}"
     return await get_embedding(combined_text)
 
-async def save_recipe_embedding(name, ingredients):
-    embedding = await get_recipe_embedding(name, ingredients)
+# async def save_recipe_embedding(name, ingredients):
+#     embedding = await get_recipe_embedding(name, ingredients)
 
-    if embedding is None or len(embedding) != 1536:
-        print("❌ Invalid embedding, skipping save.")
-        return
+#     if embedding is None or len(embedding) != 1536:
+#         print("❌ Invalid embedding, skipping save.")
+#         return
 
-    recipe_index.add(np.array([embedding], dtype="float32"))
-    recipe_names.append(name)
+#     recipe_index.add(np.array([embedding], dtype="float32"))
+#     recipe_names.append(name)
 
     # Save index and names to disk
-    faiss.write_index(recipe_index, INDEX_FILE)
-    with open(NAMES_FILE, "wb") as f:
-        pickle.dump(recipe_names, f)
+    # faiss.write_index(recipe_index, INDEX_FILE)
+    # with open(NAMES_FILE, "wb") as f:
+    #     pickle.dump(recipe_names, f)
 
     print(f"✅ Saved recipe embedding for '{name}'")
 
@@ -743,14 +743,14 @@ def parse_recipe(recipe_text):
         print(f"[parse_recipe] Exception: {e}")
         return None
 
-async def is_similar_recipe(name, ingredients):
-    if recipe_index.ntotal == 0:
-        return False
+# async def is_similar_recipe(name, ingredients):
+#     if recipe_index.ntotal == 0:
+#         return False
 
-    combined_text = f"{name}\n{ingredients}"
-    embedding = await get_embedding(combined_text)
-    D, _ = recipe_index.search(np.array([embedding], dtype="float32"), k=1)
-    return D[0][0] < 0.1
+    # combined_text = f"{name}\n{ingredients}"
+    # embedding = await get_embedding(combined_text)
+    # D, _ = recipe_index.search(np.array([embedding], dtype="float32"), k=1)
+    # return D[0][0] < 0.1
 
 def calculate_similarity(recipe1, recipe2):
     """Calculate similarity between two recipes using multiple criteria."""
@@ -1270,8 +1270,8 @@ def main():
                         st.session_state.cuisines_used = set()
                         st.session_state.cuisine_distribution = {}
 
-                        recipe_index.reset()
-                        recipe_names.clear()
+                        # recipe_index.reset()
+                        # recipe_names.clear()
 
                         # Optional disk reset for FAISS files (safe for testing)
                         if os.path.exists(INDEX_FILE):
