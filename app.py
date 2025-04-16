@@ -582,7 +582,7 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
                     #     return None
 
                     # ✅ NOW safe to save after confirmed not a duplicate
-                    await save_recipe_embedding(recipe["name"], recipe["ingredients"])
+                    # await save_recipe_embedding(recipe["name"], recipe["ingredients"])
 
                     return (meal_type, day, response_text)
 
