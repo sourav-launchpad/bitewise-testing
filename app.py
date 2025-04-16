@@ -656,7 +656,7 @@ def is_recipe_safe(ingredients_text, user_prefs):
 from openai import AsyncOpenAI  # NEW: for async calls
 
 # Initialize OpenAI Async client globally (best practice)
-client = AsyncOpenAI()
+# client = AsyncOpenAI()
 
 # ========== FAISS Embedding Utils ==========
 async def get_embedding(text):
