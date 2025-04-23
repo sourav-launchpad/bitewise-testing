@@ -1023,8 +1023,8 @@ async def generate_meal_plan(user_prefs):
                         success = True
                         break
 
-                    if title_attempts >= 3:
-                        print(f"[SKIP] No valid {meal} for Day {day} after 3 attempts.")
+                    if title_attempts >= 5:
+                        print(f"[SKIP] No valid {meal} for Day {day} after 5 attempts.")
                         break
 
                 # If one succeeded, store it
