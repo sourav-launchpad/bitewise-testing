@@ -705,27 +705,31 @@ import re
 
 def parse_recipe(recipe_text):
     try:
-        # Clean markdown
         cleaned = recipe_text.replace("**", "").replace("__", "").strip()
 
-        # ✅ More flexible title match
-        title_match = re.search(r"(?:(?:Day\s*\d+\s*-\s*)?(?:Breakfast|Lunch|Dinner)\s*-\s*)?(.*?)\s*\|", cleaned)
+        # ✅ Step 1: Match title before the first "|"
+        title_match = re.search(
+            r"(?:(?:Day\s*\d+\s*-\s*)?(?:Breakfast|Lunch|Dinner)?\s*-\s*)?(.*?)\s*\|", 
+            cleaned
+        )
         name = title_match.group(1).strip() if title_match else None
 
-        # ✅ Match ingredients (multi-line or inline after "Ingredients:")
+        # ✅ Step 2: Extract ingredients block — match inline or multiline
         ingredients_match = re.search(
-            r"(?i)(?:ingredients|ingredient list)\s*[:\-]?\s*(.*?)(?:\n\s*(instructions|description|total time|serves)\b|$)",
-            cleaned,
+            r"(?i)(ingredients|ingredient list)\s*[:\-]?\s*(.*?)(?:\n{2,}|(?:\n\s*(instructions|description|total time|serves)\b)|$)", 
+            cleaned, 
             re.DOTALL
         )
 
-        if ingredients_match:
-            raw = ingredients_match.group(1).strip()
-            if "\n" in raw:  # multiline
-                lines = [line.strip("-• ").strip() for line in raw.splitlines() if line.strip()]
+        ingredients_raw = ingredients_match.group(2).strip() if ingredients_match else None
+
+        # ✅ Step 3: Process inline or multi-line ingredients
+        if ingredients_raw:
+            if "\n" in ingredients_raw:
+                lines = [line.strip("-• ").strip() for line in ingredients_raw.splitlines() if line.strip()]
                 ingredients = ", ".join(lines)
-            else:  # inline format
-                ingredients = raw
+            else:
+                ingredients = ingredients_raw
         else:
             ingredients = None
 
