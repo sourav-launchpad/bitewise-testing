@@ -706,20 +706,19 @@ import re
 def parse_recipe(recipe_text):
     try:
         # Strip markdown formatting and clean whitespace
-        cleaned_text = recipe_text.replace("**", "").replace("__", "").strip()
+        cleaned_text = recipe_text.replace("__", "").strip()
 
-        # Match title pattern flexibly (e.g., "Day 1 - Breakfast - Name | Breakfast")
-        title_match = re.search(
-            r"(?:Day\s*\d+\s*-\s*)?(?:Breakfast|Lunch|Dinner)?\s*-\s*(.*?)\s*\|", 
-            cleaned_text, 
-            re.IGNORECASE
-        )
+        # Match title: "**Recipe Name | MealType**"
+        title_match = re.search(r"\*\*(.*?)\s*\|\s*(Breakfast|Lunch|Dinner)\*\*", recipe_text, re.IGNORECASE)
+        if not title_match:
+            # Fallback: try any bold line with a pipe
+            title_match = re.search(r"\*\*(.*?)\|", recipe_text)
         name = title_match.group(1).strip() if title_match else None
 
-        # Match Ingredients section robustly (accepts "Ingredients", "Ingredient list", case-insensitive)
+        # Match ingredients section (robust against bullet styles and spacing)
         ingredients_match = re.search(
-            r"(?i)(?:ingredients|ingredient list)\s*[:\-]?\s*(.*?)(?:\n\s*(instructions|description|total time|serves)\b|$)", 
-            cleaned_text, 
+            r"(?i)\*\*Ingredients\*\*\s*[:\-]?\s*(.*?)(?:\n\s*\*\*(Instructions|Description|Total Time|Serves)\*\*|$)",
+            recipe_text,
             re.DOTALL
         )
         ingredients_raw = ingredients_match.group(1).strip() if ingredients_match else None
@@ -731,7 +730,7 @@ def parse_recipe(recipe_text):
             print("----- RAW TEXT END -------")
             return None
 
-        # Extract each line, remove bullets, hyphens, etc.
+        # Clean and normalize ingredient lines
         lines = [line.strip("-• ").strip() for line in ingredients_raw.splitlines() if line.strip()]
         ingredients = ", ".join(lines)
 
