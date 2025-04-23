@@ -4,10 +4,10 @@ import pandas as pd
 import time
 from datetime import datetime
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 import asyncio
 import aiohttp
-#import faiss
+import faiss
 import numpy as np
 import os
 import pickle
@@ -25,47 +25,46 @@ import random
 import re
 from difflib import SequenceMatcher
 
-# from sklearn.feature_extraction.text import TfidfVectorizer
-# from sklearn.metrics.pairwise import cosine_similarity
-
-openai.api_key = st.secrets["OPENAI_API_KEY"]
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Load environment variables
-# load_dotenv()
+load_dotenv()
 
 # Set OpenAI API key
-#openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 from openai import AsyncOpenAI
-client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
-# RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
 # ========== FAISS Embedding Index Setup ==========
-# EMBEDDING_DIM = 1536
-# INDEX_FILE = "recipe_index.faiss"
-# NAMES_FILE = "recipe_names.pkl"
+EMBEDDING_DIM = 1536
+INDEX_FILE = "recipe_index.faiss"
+NAMES_FILE = "recipe_names.pkl"
 
-# if RESET_FAISS_ON_START:
-#     recipe_index = faiss.IndexFlatL2(EMBEDDING_DIM)
-#     recipe_names = []
-#     if os.path.exists(INDEX_FILE):
-#         os.remove(INDEX_FILE)
-#     if os.path.exists(NAMES_FILE):
-#         os.remove(NAMES_FILE)
-# else:
-#     if os.path.exists(INDEX_FILE):
-#         recipe_index = faiss.read_index(INDEX_FILE)
-#     else:
-#         recipe_index = faiss.IndexFlatL2(EMBEDDING_DIM)
+if RESET_FAISS_ON_START:
+    recipe_index = faiss.IndexFlatL2(EMBEDDING_DIM)
+    recipe_names = []
+    if os.path.exists(INDEX_FILE):
+        os.remove(INDEX_FILE)
+    if os.path.exists(NAMES_FILE):
+        os.remove(NAMES_FILE)
+else:
+    if os.path.exists(INDEX_FILE):
+        recipe_index = faiss.read_index(INDEX_FILE)
+    else:
+        recipe_index = faiss.IndexFlatL2(EMBEDDING_DIM)
 
-#     if os.path.exists(NAMES_FILE):
-#         with open(NAMES_FILE, "rb") as f:
-#             recipe_names = pickle.load(f)
-#     else:
-#         recipe_names = []
+    if os.path.exists(NAMES_FILE):
+        with open(NAMES_FILE, "rb") as f:
+            recipe_names = pickle.load(f)
+    else:
+        recipe_names = []
 
-# stored_embeddings = []  # (name, ingredients, embedding)
+stored_embeddings = []  # (name, ingredients, embedding)
 
 def parse_list(value):
     if isinstance(value, str):
@@ -242,6 +241,13 @@ st.markdown("""
 # Initialize session state
 if 'meal_plan' not in st.session_state:
     st.session_state.meal_plan = None
+
+def replace_tomato_sauce(text):
+    """
+    Replaces 'tomato sauce' with 'tomato-based' only when it's used generically,
+    not referring to actual bottled/pasta sauces.
+    """
+    return re.sub(r'\btomato sauce\b', 'tomato-based', text, flags=re.IGNORECASE)
 
 def get_user_preferences():
     try:
@@ -428,7 +434,7 @@ def get_user_preferences():
                     "Eastern European",
                     "Caribbean"
                 ],
-                default=[],  # Start with empty selection
+                default=["Traditional Australian / British / American"],  # Set default to Traditional Australian / British / American
                 placeholder="Choose an option"
             )
             
@@ -446,15 +452,31 @@ def get_user_preferences():
                         "Generous budget ($16-$30)", "No budget constraints ($31+)"],
                 index=1  # Default to "Moderate budget"
             )
-            
-            time_constraint = st.selectbox(
+                        
+            time_constraint = st.selectbox( 
                 "**Available Time for Cooking**",
-                options=["Busy schedule (15 mins)", "Moderate schedule (30 mins)", 
-                        "Busy on some days (45 mins)", "Flexible Schedule (60 mins)", 
-                        "No Constraints (Any duration)"],
-                index=1  # Default to "Busy on some days"
+                options=[
+                    "Busy schedule (less than 15 minutes)",  
+                    "Moderate schedule (15 to 30 minutes)",  
+                    "Busy on some days (30 to 45 minutes)",  
+                    "Flexible schedule (45 to 60 minutes)",  
+                    "No constraints (more than 60 minutes)"
+                ],
+                index=1
             )
-            
+
+            # Map UI values to standardized cooking time ranges
+            time_mapping = {
+                "Busy schedule (less than 15 minutes)": "no more than 15 minutes",
+                "Moderate schedule (15 to 30 minutes)": "between 15 and 30 minutes",
+                "Busy on some days (30 to 45 minutes)": "between 30 and 45 minutes",
+                "Flexible schedule (45 to 60 minutes)": "between 45 and 60 minutes",
+                "No constraints (more than 60 minutes)": "no time limit"
+            }
+
+            # Convert to standardized format immediately
+            time_constraint = time_mapping.get(time_constraint, "between 15 and 30 minutes")
+                        
             # Changed from selectbox to number_input for serving size
             serving_size = st.number_input(
                 "**Number of Servings per Meal**",
@@ -472,7 +494,7 @@ def get_user_preferences():
             "meal_type": str(meal_type),  # Ensure it's a string
             "cuisine": str(cuisine),  # Ensure it's a string
             "budget": str(budget),  # Ensure it's a string
-            "time_constraint": str(time_constraint),  # Ensure it's a string
+            "time_constraint": time_constraint,  # Already in standardized format
             "serving_size": int(serving_size),  # Ensure it's an integer
             "allergies": str(allergies)  # Ensure it's a string
         }
@@ -528,7 +550,7 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
     try:
         async with aiohttp.ClientSession() as session:
             data = {
-                "model": "gpt-4.1-mini",
+                "model": "gpt-4.1-mini", #gpt-4o-mini
                 "messages": [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": prompt}
@@ -553,7 +575,10 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
                     result = await response.json()
                     response_text = result['choices'][0]['message']['content']
 
-                    # 🔍 DEBUG: Save raw GPT output to file
+                    # 🔧 Fix tomato naming
+                    response_text = replace_tomato_sauce(response_text)
+
+                    # 🔍 DEBUG
                     with open(f"debug_day{day}_{meal_type.lower()}.txt", "w", encoding="utf-8") as f:
                         f.write(response_text)
 
@@ -576,13 +601,13 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
 
                         return None
 
-                    # # 🔥 FIX HERE: check similarity BEFORE saving embedding
-                    # if await is_similar_recipe(recipe["name"], recipe["ingredients"]):
-                    #     st.warning(f"Duplicate recipe detected for {meal_type} on Day {day}, regenerating...")
-                    #     return None
+                    # 🔥 FIX HERE: check similarity BEFORE saving embedding
+                    if await is_similar_recipe(recipe["name"], recipe["ingredients"]):
+                        st.warning(f"Duplicate recipe detected for {meal_type} on Day {day}, regenerating...")
+                        return None
 
                     # ✅ NOW safe to save after confirmed not a duplicate
-                    # await save_recipe_embedding(recipe["name"], recipe["ingredients"])
+                    await save_recipe_embedding(recipe["name"], recipe["ingredients"])
 
                     return (meal_type, day, response_text)
 
@@ -656,7 +681,7 @@ def is_recipe_safe(ingredients_text, user_prefs):
 from openai import AsyncOpenAI  # NEW: for async calls
 
 # Initialize OpenAI Async client globally (best practice)
-# client = AsyncOpenAI()
+client = AsyncOpenAI()
 
 # ========== FAISS Embedding Utils ==========
 async def get_embedding(text):
@@ -670,20 +695,20 @@ async def get_recipe_embedding(name, ingredients):
     combined_text = f"{name}\n{ingredients}"
     return await get_embedding(combined_text)
 
-# async def save_recipe_embedding(name, ingredients):
-#     embedding = await get_recipe_embedding(name, ingredients)
+async def save_recipe_embedding(name, ingredients):
+    embedding = await get_recipe_embedding(name, ingredients)
 
-#     if embedding is None or len(embedding) != 1536:
-#         print("❌ Invalid embedding, skipping save.")
-#         return
+    if embedding is None or len(embedding) != 1536:
+        print("❌ Invalid embedding, skipping save.")
+        return
 
-#     recipe_index.add(np.array([embedding], dtype="float32"))
-#     recipe_names.append(name)
+    recipe_index.add(np.array([embedding], dtype="float32"))
+    recipe_names.append(name)
 
     # Save index and names to disk
-    # faiss.write_index(recipe_index, INDEX_FILE)
-    # with open(NAMES_FILE, "wb") as f:
-    #     pickle.dump(recipe_names, f)
+    faiss.write_index(recipe_index, INDEX_FILE)
+    with open(NAMES_FILE, "wb") as f:
+        pickle.dump(recipe_names, f)
 
     print(f"✅ Saved recipe embedding for '{name}'")
 
@@ -743,14 +768,14 @@ def parse_recipe(recipe_text):
         print(f"[parse_recipe] Exception: {e}")
         return None
 
-# async def is_similar_recipe(name, ingredients):
-#     if recipe_index.ntotal == 0:
-#         return False
+async def is_similar_recipe(name, ingredients):
+    if recipe_index.ntotal == 0:
+        return False
 
-    # combined_text = f"{name}\n{ingredients}"
-    # embedding = await get_embedding(combined_text)
-    # D, _ = recipe_index.search(np.array([embedding], dtype="float32"), k=1)
-    # return D[0][0] < 0.1
+    combined_text = f"{name}\n{ingredients}"
+    embedding = await get_embedding(combined_text)
+    D, _ = recipe_index.search(np.array([embedding], dtype="float32"), k=1)
+    return D[0][0] < 0.15
 
 def calculate_similarity(recipe1, recipe2):
     """Calculate similarity between two recipes using multiple criteria."""
@@ -827,7 +852,7 @@ async def generate_meal_plan(user_prefs):
         meal_type = user_prefs['meal_type']
         cuisine = user_prefs['cuisine']
         budget = user_prefs['budget']
-        cooking_time = user_prefs['time_constraint']
+        cooking_time = user_prefs['time_constraint']  # Already in standardized format
         servings = user_prefs['serving_size']
 
         # Clean lists from strings
@@ -843,7 +868,7 @@ async def generate_meal_plan(user_prefs):
             'meal_type': meal_type,
             'cuisine': cuisine,
             'budget': budget,
-            'time_constraint': cooking_time,
+            'time_constraint': cooking_time,  # Use the standardized format directly
             'serving_size': servings,
             'diet_list': diet_list,
             'allergy_list': allergy_list,
@@ -880,7 +905,7 @@ async def generate_meal_plan(user_prefs):
         - Allergies/Intolerances: {allergies}
         - Health Conditions: {health_conditions}
         - Budget: {budget}
-        - Time Constraint: {cooking_time}
+        - Time Constraint: {cooking_time}  # Use the standardized format directly
         - Serving Size: {servings} people
 
         IMPORTANT: The recipe MUST strictly follow all dietary requirements listed above.
@@ -1270,14 +1295,14 @@ def main():
                         st.session_state.cuisines_used = set()
                         st.session_state.cuisine_distribution = {}
 
-                        # recipe_index.reset()
-                        # recipe_names.clear()
+                        recipe_index.reset()
+                        recipe_names.clear()
 
                         # Optional disk reset for FAISS files (safe for testing)
-                        # if os.path.exists(INDEX_FILE):
-                        #     os.remove(INDEX_FILE)
-                        # if os.path.exists(NAMES_FILE):
-                        #     os.remove(NAMES_FILE)
+                        if os.path.exists(INDEX_FILE):
+                            os.remove(INDEX_FILE)
+                        if os.path.exists(NAMES_FILE):
+                            os.remove(NAMES_FILE)
 
                         # 🔁 Generate
                         start_time = time.time()
