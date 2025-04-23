@@ -28,15 +28,9 @@ from difflib import SequenceMatcher
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load environment variables
-load_dotenv()
-
-# Set OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
 from openai import AsyncOpenAI
 
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = AsyncOpenAI(api_key=st.secrets("OPENAI_API_KEY"))
 
 RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
