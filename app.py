@@ -1016,8 +1016,8 @@ async def generate_meal_plan(user_prefs):
 
                     retry_prompts.append(prompt)
 
-                    if len(retry_prompts) == 3:
-                        break  # ✅ Only try 3 titles max
+                    if len(retry_prompts) == 2:
+                        break  # ✅ Only try 2 titles max
 
                 # Run all 2–3 retry prompts in parallel
                 retry_tasks = [
