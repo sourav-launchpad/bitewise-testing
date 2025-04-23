@@ -962,75 +962,91 @@ async def generate_meal_plan(user_prefs):
                 meal_types = [m for m in ["Breakfast", "Lunch", "Dinner"] if m in meal_type]
 
             for meal in meal_types:
-                try:
-                    selected_cuisine = available_cuisines[cuisine_index % len(available_cuisines)]
-                    cuisine_index += 1
-                    st.session_state.cuisine_distribution[day][meal.lower()] = selected_cuisine
-                    used_cuisines.add(selected_cuisine)
-            
-                    authentic_recipes = AUTHENTIC_RECIPE_NAMES.get(selected_cuisine, [])
-                    if not authentic_recipes:
+                selected_cuisine = available_cuisines[cuisine_index % len(available_cuisines)]
+                cuisine_index += 1
+                st.session_state.cuisine_distribution[day][meal.lower()] = selected_cuisine
+                used_cuisines.add(selected_cuisine)
+
+                authentic_recipes = AUTHENTIC_RECIPE_NAMES.get(selected_cuisine, [])
+                if not authentic_recipes:
+                    #st.warning(f"No authentic recipes found for {selected_cuisine} cuisine.")
+                    continue
+
+                meal_recipes = [
+                    r for r in authentic_recipes
+                    if meal.lower() in r.lower() and is_title_allowed_for_diet(r, diet_list)
+                ]
+
+                adaptive_generation = False
+
+                if not meal_recipes:
+                    if any(
+                        d in DIET_RESTRICTIONS and
+                        not any(is_title_allowed_for_diet(r, [d]) for r in authentic_recipes)
+                        for d in diet_list
+                    ):
+                        #st.warning(f"⚠️ No authentic titles matched the {diet_list} diet for {selected_cuisine} {meal}. Forcing GPT to generate a compliant custom recipe.")
+                        recipe_name = f"Custom {selected_cuisine} {meal} (Diet-Compliant)"
+                        meal_recipes = [recipe_name]
+                        adaptive_generation = True
+                    else:
+                        st.info(f"💡 No diet-compliant titles found for {selected_cuisine} {meal}. Entering adaptive generation mode.")
+                        recipe_name = f"{selected_cuisine} {meal} - GPT Generated Fallback"
+                        meal_recipes = [recipe_name]
+                        adaptive_generation = True
+
+                random.shuffle(meal_recipes)
+
+                for recipe_name in meal_recipes:
+                    if recipe_name in st.session_state.used_recipe_names:
                         continue
-            
-                    meal_recipes = [
-                        r for r in authentic_recipes
-                        if meal.lower() in r.lower() and is_title_allowed_for_diet(r, diet_list)
-                    ]
-            
-                    successful = False  # ✅ MUST BE INSIDE try
-            
-                    for recipe_name in meal_recipes:
-                        if recipe_name in st.session_state.used_recipe_names:
-                            continue
-            
-                        st.session_state.used_recipe_names.add(recipe_name)
-            
-                        prompt = get_meal_prompt(
-                            meal_type=meal,
-                            day=day,
-                            user_prefs=formatted_prefs,
-                            health_requirements=health_requirements,
-                            cuisine_requirements=f"""
-                            {selected_cuisine} Cuisine Requirements:
-                            - Use authentic {selected_cuisine} ingredients and methods
-                            - Follow {selected_cuisine} cultural traditions
-                            - Use traditional {selected_cuisine} dishes
-                            - Include {selected_cuisine} specific ingredients
-                            - Avoid mixing with other cuisines
-                            - Use authentic {selected_cuisine} cooking techniques
-                            - Follow {selected_cuisine} plating styles
-                            - Use proper {selected_cuisine} terminology
-                            - Ensure dish is recognizably {selected_cuisine}
-                            - The recipe MUST explicitly mention \"{selected_cuisine}\" in its description or title
-                        
-                            IMPORTANT: When generating the recipe:
-                            1. GPT MUST use the exact recipe name: \"{recipe_name}\" and not change or rephrase it.
-                            2. The recipe title in the output must exactly match this string, including punctuation and word order.
-                            3. GPT must NOT add any extra prefix (e.g. Day 1 - Lunch -) unless explicitly instructed.
-                            """ + dietary_requirements + budget_requirements + measurement_requirements,
-                            available_ingredients=available_ingredients,
-                            authentic_recipes=[recipe_name]
-                        )
-            
-                        result = await limited_generate(meal, day, prompt, selected_cuisine)
-            
-                        if result:
-                            meal_type, day, recipe_text = result
-                            st.session_state.generated_recipes.append({
-                                "day": day,
-                                "meal_type": meal_type,
-                                "recipe": recipe_text
-                            })
-                            successful = True
-                            break
-            
-                    if not successful:
-                        print(f"[SKIP] All {meal} options failed for Day {day} - {selected_cuisine}")
-            
-                except Exception as e:
-                    print(f"⚠️ Error in meal generation for {meal} on Day {day}: {e}")
-        
-    # ✅ FINAL except for the main try block
+
+                    st.session_state.used_recipe_names.add(recipe_name)  # ✅ Mark it as used IMMEDIATELY
+
+                    prompt = get_meal_prompt(
+                        meal_type=meal,
+                        day=day,
+                        user_prefs=formatted_prefs,
+                        health_requirements=health_requirements,
+                        cuisine_requirements=f"""
+                        {selected_cuisine} Cuisine Requirements:
+                        - Use authentic {selected_cuisine} ingredients and methods
+                        - Follow {selected_cuisine} cultural traditions
+                        - Use traditional {selected_cuisine} dishes
+                        - Include {selected_cuisine} specific ingredients
+                        - Avoid mixing with other cuisines
+                        - Use authentic {selected_cuisine} cooking techniques
+                        - Follow {selected_cuisine} plating styles
+                        - Use proper {selected_cuisine} terminology
+                        - Ensure dish is recognizably {selected_cuisine}
+                        - The recipe MUST explicitly mention \"{selected_cuisine}\" in its description or title
+
+                        IMPORTANT: When generating the recipe:
+                        1. GPT MUST use the exact recipe name: \"{recipe_name}\" and not change or rephrase it.
+                        2. The recipe title in the output must exactly match this string, including punctuation and word order.
+                        3. GPT must NOT add any extra prefix (e.g. Day 1 - Lunch -) unless explicitly instructed.
+                        """ + dietary_requirements + budget_requirements + measurement_requirements,
+                        available_ingredients=available_ingredients,
+                        authentic_recipes=[recipe_name]
+                    )
+
+                    task = limited_generate(meal, day, prompt, selected_cuisine)
+                    tasks.append(task)
+                    break
+
+        results = await asyncio.gather(*tasks)
+
+        for result in results:
+            if result:
+                meal_type, day, recipe_text = result
+                st.session_state.generated_recipes.append({
+                    "day": day,
+                    "meal_type": meal_type,
+                    "recipe": recipe_text
+                })
+
+        return st.session_state.generated_recipes
+
     except Exception as e:
         st.error(f"Error generating meal plan: {str(e)}")
         return []
