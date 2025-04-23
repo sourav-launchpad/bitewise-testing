@@ -547,7 +547,7 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
     try:
         # Use OpenAI client directly instead of aiohttp
         response = await client.chat.completions.create(
-            model="gpt-4o-mini",  # or "gpt-4o-mini" if preferred
+            model="gpt-4.1-mini",  # or "gpt-4o-mini" if preferred
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
