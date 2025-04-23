@@ -17,6 +17,8 @@ import faiss
 import numpy as np
 import os
 import pickle
+import nest_asyncio
+nest_asyncio.apply()
 from prompts import (
     get_meal_prompt, 
     SYSTEM_PROMPT,
@@ -1298,6 +1300,9 @@ def extract_grains(recipe_text):
     
     return grains
 
+import nest_asyncio
+nest_asyncio.apply()
+
 def main():
     try:
         user_prefs = get_user_preferences()
@@ -1334,15 +1339,14 @@ def main():
                         recipe_index.reset()
                         recipe_names.clear()
 
-                        # Optional disk reset for FAISS files (safe for testing)
                         if os.path.exists(INDEX_FILE):
                             os.remove(INDEX_FILE)
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
 
-                        # 🔁 Generate
+                        # 🔁 Generate (this is the fix!)
                         start_time = time.time()
-                        meal_plan = await generate_meal_plan(user_prefs)
+                        meal_plan = asyncio.run(generate_meal_plan(user_prefs))  # ✅ FIXED
                         st.session_state.meal_plan = meal_plan
 
                         if meal_plan:
