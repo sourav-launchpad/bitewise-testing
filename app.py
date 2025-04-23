@@ -29,7 +29,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from openai import AsyncOpenAI
-
 client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
@@ -687,9 +686,6 @@ def is_recipe_safe(ingredients_text, user_prefs, recipe_name=None):
     return True
 
 from openai import AsyncOpenAI  # NEW: for async calls
-
-# Initialize OpenAI Async client globally (best practice)
-client = AsyncOpenAI()
 
 # ========== FAISS Embedding Utils ==========
 async def get_embedding(text):
