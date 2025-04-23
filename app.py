@@ -1276,12 +1276,11 @@ async def main():
 
 import streamlit.runtime.scriptrunner.script_run_context as script_run_context
 
-# FINAL async-safe block — handles Streamlit and CLI both
+# FINAL async-safe block — handles both Streamlit and CLI
 if script_run_context.get_script_run_ctx():
-    # Inside Streamlit
     import asyncio
 
-    # Must use a new event loop manually to avoid "never awaited" issue
+    # Only start once to avoid multiple executions
     if not st.session_state.get("main_task_started", False):
         st.session_state["main_task_started"] = True
 
@@ -1289,7 +1288,7 @@ if script_run_context.get_script_run_ctx():
         asyncio.set_event_loop(loop)
         loop.run_until_complete(main())
 else:
-    # CLI testing only
     import asyncio
     asyncio.run(main())
+
 
