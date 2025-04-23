@@ -70,6 +70,19 @@ else:
 
 stored_embeddings = []  # (name, ingredients, embedding)
 
+session = None
+
+async def init_http_session():
+    global session
+    if session is None:
+        session = aiohttp.ClientSession()
+
+async def close_http_session():
+    global session
+    if session:
+        await session.close()
+        session = None
+        
 def parse_list(value):
     if isinstance(value, str):
         value = value.strip()
@@ -543,57 +556,135 @@ def build_allergy_block(allergies):
                 rules += f"- STRICTLY AVOID: {', '.join(keywords)}\n"
     return rules.strip()
 
-async def generate_meal(meal_type, day, prompt, cuisine="All"):
+async def is_similar_recipe_with_embedding(embedding):
+    if recipe_index.ntotal == 0:
+        return False
+    D, _ = recipe_index.search(np.array([embedding], dtype="float32"), k=1)
+    return D[0][0] < 0.15
+
+async def save_recipe_embedding_with_embedding(name, ingredients, embedding):
+    if embedding is None or len(embedding) != 1536:
+        print("❌ Invalid embedding, skipping save.")
+        return
+
+    recipe_index.add(np.array([embedding], dtype="float32"))
+    recipe_names.append(name)
+
+    # Don't write to disk here
+    print(f"✅ Saved recipe embedding in-memory for '{name}'")
+
+import time
+
+async def generate_meal(meal_type, day, prompt, cuisine="All", recipe_name=""):
     try:
-        # Use OpenAI client directly instead of aiohttp
-        response = await client.chat.completions.create(
-            model="gpt-4o-mini",  # or "gpt-4o-mini" if preferred
-            messages=[
+        await init_http_session()
+        t_start = time.time()
+
+        data = {
+            "model": "gpt-4.1-mini",
+            "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=4096,
-            temperature=0.7,
-            presence_penalty=0.1,
-            frequency_penalty=0.1
-        )
+            "max_tokens": 4096,
+            "temperature": 0.7,
+            "presence_penalty": 0.1,
+            "frequency_penalty": 0.1
+        }
 
-        # Get the generated content
-        response_text = response.choices[0].message.content
+        headers = {
+            "Authorization": f"Bearer {openai.api_key}",
+            "Content-Type": "application/json"
+        }
 
-        # 🔧 Fix tomato naming
-        response_text = replace_tomato_sauce(response_text)
+        t_api_call = time.time()
+        async with session.post(
+            "https://api.openai.com/v1/chat/completions",
+            json=data,
+            headers=headers
+        ) as response:
+            t_api_done = time.time()
 
-        # 🔍 DEBUG: Save raw text for inspection
-        with open(f"debug_day{day}_{meal_type.lower()}.txt", "w", encoding="utf-8") as f:
-            f.write(response_text)
+            if response.status == 200:
+                result = await response.json()
+                response_text = result['choices'][0]['message']['content']
 
-        # Parse recipe
-        recipe = parse_recipe(response_text)
-        if recipe is None or not recipe.get("name") or not recipe.get("ingredients"):
-            return None
+                # Replace tomato sauce wording
+                response_text = replace_tomato_sauce(response_text)
 
-        # Allergy/Diet/Health validation
-        if not is_recipe_safe(recipe["ingredients"], st.session_state.user_preferences):
-            return None
+                # Save raw output for debugging
+                with open(f"debug_day{day}_{meal_type.lower()}.txt", "w", encoding="utf-8") as f:
+                    f.write(response_text)
 
-        # Strict title check for restricted diet keywords
-        if not is_title_allowed_for_diet(recipe["name"], st.session_state.user_preferences.get("diet", [])):
-            print(f"[TITLE REJECTED] {meal_type} for Day {day} - Title violates diet restrictions.")
-            return None
+                # Parse recipe
+                t_parse = time.time()
+                recipe = parse_recipe(response_text)
+                t_parse_done = time.time()
 
-        # Similarity check before saving
-        if await is_similar_recipe(recipe["name"], recipe["ingredients"]):
-            return None
+                if recipe is None or not recipe.get("name") or not recipe.get("ingredients"):
+                    print(f"❌ Invalid structure for {meal_type} on Day {day}")
+                    return None
 
-        # Save the recipe embedding only if it's safe and unique
-        await save_recipe_embedding(recipe["name"], recipe["ingredients"])
+                # Run safety checks
+                t_valid_start = time.time()
+                if not is_recipe_safe(recipe["name"], recipe["ingredients"], st.session_state.user_preferences):
+                    print(f"🚫 Rejected due to allergy/diet/health: {recipe['name']}")
+                    return None
 
-        return (meal_type, day, response_text)
+                if not is_title_allowed_for_diet(recipe["name"], st.session_state.user_preferences.get("diet", [])):
+                    print(f"[TITLE REJECTED] {meal_type} for Day {day} - Title violates diet restrictions.")
+                    return None
+                t_valid_end = time.time()
+
+                # Batch save for embedding later
+                if "recipes_to_embed" in st.session_state:
+                    st.session_state.recipes_to_embed.append({
+                        "name": recipe["name"],
+                        "ingredients": recipe["ingredients"]
+                    })
+
+                t_done = time.time()
+                print(
+                    f"✅ {meal_type} (Day {day}, '{recipe['name']}') timings:"
+                    f" API: {t_api_done - t_api_call:.2f}s |"
+                    f" Parse: {t_parse_done - t_parse:.2f}s |"
+                    f" Validation: {t_valid_end - t_valid_start:.2f}s |"
+                    f" Total: {t_done - t_start:.2f}s"
+                )
+
+                return (meal_type, day, response_text)
+
+            else:
+                error_text = await response.text()
+                raise Exception(f"API request failed with status {response.status}: {error_text}")
 
     except Exception as e:
-        st.error(f"Error generating {meal_type}: {str(e)}")
+        print(f"[ERROR] {meal_type} on Day {day} failed: {str(e)}")
         return None
+
+async def save_all_embeddings():
+    recipes = st.session_state.recipes_to_embed
+    if not recipes:
+        return
+
+    texts = [f"{r['name']}\n{r['ingredients']}" for r in recipes]
+
+    start_embed = time.time()
+    response = await client.embeddings.create(
+        model="text-embedding-ada-002",
+        input=texts
+    )
+    print(f"🧠 Embedding generation time: {time.time() - start_embed:.2f} seconds")
+
+    for i, recipe in enumerate(recipes):
+        embedding = response.data[i].embedding
+        if len(embedding) == 1536:
+            recipe_index.add(np.array([embedding], dtype="float32"))
+            recipe_names.append(recipe["name"])
+        else:
+            print(f"⚠️ Invalid embedding for {recipe['name']}")
+
+    print(f"✅ Batch-saved {len(recipes)} recipe embeddings.")
 
 def clean_recipe_text(text):
     """Clean recipe text for comparison."""
@@ -609,8 +700,8 @@ def clean_recipe_text(text):
 
 from prompts import DIETARY_REQUIREMENTS
 
-def is_recipe_safe(full_text, user_prefs):
-    full_text = full_text.lower()
+def is_recipe_safe(recipe_name, ingredients_text, user_prefs):
+    text_to_check = f"{recipe_name.lower()}\n{ingredients_text.lower()}"
 
     # 1. Allergy Check
     allergies = user_prefs.get("allergies", "")
@@ -619,30 +710,20 @@ def is_recipe_safe(full_text, user_prefs):
             allergy = allergy.strip().lower()
             keywords = ALLERGEN_KEYWORDS.get(allergy, [])
             for keyword in keywords:
-                if re.search(rf"\b{re.escape(keyword)}\b", full_text):
+                if re.search(rf"\b{re.escape(keyword)}\b", text_to_check):
                     print(f"[ALLERGY VIOLATION] Matched '{keyword}' for allergy '{allergy}'")
                     return False
 
-    # 2. Diet Restriction Check (avoid false matches like "sugar-free")
+    # 2. Diet Restriction Check
     diet = user_prefs.get("diet", "none")
     if diet != "None":
         if isinstance(diet, str):
             diet = eval(diet) if diet.startswith("[") else [diet]
 
-        words = set(re.findall(r'\b\w+\b', full_text))
-
         for d in diet:
             if d in DIET_RESTRICTIONS:
                 for keyword in DIET_RESTRICTIONS[d]:
-                    # Skip if it's used in safe context
-                    if re.search(rf"\b{re.escape(keyword)}\b", full_text):
-                        # Don't reject if it's part of "no X", "without X", "sugar-free", etc.
-                        safe_context = re.search(
-                            rf"(no|without|free\s*of|sugar-free|keto-friendly)\s+{re.escape(keyword)}",
-                            full_text
-                        )
-                        if safe_context:
-                            continue
+                    if re.search(rf"\b{re.escape(keyword)}\b", text_to_check):
                         print(f"[DIET VIOLATION] Matched '{keyword}' for diet '{d}'")
                         return False
 
@@ -653,7 +734,7 @@ def is_recipe_safe(full_text, user_prefs):
             condition = condition.strip().lower()
             keywords = HEALTH_RESTRICTIONS.get(condition, [])
             for keyword in keywords:
-                if re.search(rf"\b{re.escape(keyword)}\b", full_text):
+                if re.search(rf"\b{re.escape(keyword)}\b", text_to_check):
                     print(f"[HEALTH VIOLATION] Matched '{keyword}' for condition '{condition}'")
                     return False
 
@@ -810,6 +891,12 @@ async def generate_meal_plan(user_prefs):
         st.session_state.cuisine_distribution = {}
         st.session_state.used_recipe_names = set()
 
+        # ✅ FIX: Initialize or clear recipe embedding list at the start of generation
+        if 'recipes_to_embed' not in st.session_state:
+            st.session_state.recipes_to_embed = []
+        else:
+            st.session_state.recipes_to_embed.clear()
+
         if not isinstance(user_prefs, dict):
             raise ValueError("user_prefs must be a dictionary")
 
@@ -939,11 +1026,11 @@ async def generate_meal_plan(user_prefs):
             available_cuisines = cuisine_prefs.copy()
             random.shuffle(available_cuisines)
 
-        semaphore = asyncio.Semaphore(21)
-
-        async def limited_generate(meal_type, day, prompt, cuisine):
+        semaphore = asyncio.Semaphore(10)
+            
+        async def limited_generate(meal_type, day, prompt, cuisine, recipe_name):
             async with semaphore:
-                return await generate_meal(meal_type, day, prompt, cuisine)
+                return await generate_meal(meal_type, day, prompt, cuisine, recipe_name)
 
         tasks = []
 
@@ -961,6 +1048,9 @@ async def generate_meal_plan(user_prefs):
             else:
                 meal_types = [m for m in ["Breakfast", "Lunch", "Dinner"] if m in meal_type]
 
+            day_meal_prompts = []  # [(meal_type, prompt, cuisine, recipe_name)]
+            meal_title_map = {}    # {meal_type: [titles]}
+
             for meal in meal_types:
                 selected_cuisine = available_cuisines[cuisine_index % len(available_cuisines)]
                 cuisine_index += 1
@@ -973,22 +1063,19 @@ async def generate_meal_plan(user_prefs):
                 ]
 
                 if not meal_recipes:
-                    recipe_name = f"{selected_cuisine} {meal} - GPT Generated Fallback"
-                    meal_recipes = [recipe_name]
+                    fallback = f"{selected_cuisine} {meal} - GPT Generated Fallback"
+                    meal_recipes = [fallback]
 
                 random.shuffle(meal_recipes)
-
-                title_attempts = 0
-                success = False
-                valid_task = None
-                valid_metadata = None
+                retry_titles = []
+                retry_prompts = []
 
                 for recipe_name in meal_recipes:
                     if recipe_name in st.session_state.used_recipe_names:
                         continue
 
                     st.session_state.used_recipe_names.add(recipe_name)
-                    title_attempts += 1
+                    retry_titles.append(recipe_name)
 
                     prompt = get_meal_prompt(
                         meal_type=meal,
@@ -1000,7 +1087,6 @@ async def generate_meal_plan(user_prefs):
                         - Use authentic {selected_cuisine} ingredients and methods
                         - Follow {selected_cuisine} cultural traditions
                         - Use traditional {selected_cuisine} dishes
-                        - Include {selected_cuisine} specific ingredients
                         - Avoid mixing with other cuisines
                         - Ensure dish is recognizably {selected_cuisine}
 
@@ -1010,32 +1096,53 @@ async def generate_meal_plan(user_prefs):
                         authentic_recipes=[recipe_name]
                     )
 
-                    # Run meal generation
-                    result = await limited_generate(meal, day, prompt, selected_cuisine)
+                    retry_prompts.append(prompt)
 
-                    if result:
-                        valid_task = result
-                        valid_metadata = {
+                    if len(retry_prompts) == 2:
+                        break
+
+                meal_title_map[meal] = retry_titles
+                for i, prompt in enumerate(retry_prompts):
+                    day_meal_prompts.append((meal, prompt, selected_cuisine, retry_titles[i]))
+
+            # 🔁 Run all retries for this day in parallel (up to 15 tasks max)
+            meal_tasks = [
+                limited_generate(meal_type, day, prompt, cuisine, recipe_name)
+                for (meal_type, prompt, cuisine, recipe_name) in day_meal_prompts
+            ]
+
+            results = await asyncio.gather(*meal_tasks)
+
+            # ✅ Pick only the first successful result per meal
+            completed_meals = set()
+            for result in results:
+                if isinstance(result, tuple):
+                    meal_type = result[0]
+                    if meal_type not in completed_meals:
+                        st.session_state.generated_recipes.append({
                             "day": day,
-                            "meal_type": meal,
+                            "meal_type": meal_type,
                             "recipe": result[2]
-                        }
-                        success = True
-                        break
+                        })
+                        completed_meals.add(meal_type)
 
-                    if title_attempts >= 3:
-                        print(f"[SKIP] No valid {meal} for Day {day} after 3 attempts.")
-                        break
-
-                # If one succeeded, store it
-                if success and valid_metadata:
-                    st.session_state.generated_recipes.append(valid_metadata)
+            # ❌ Log missing meals
+            for meal in meal_types:
+                if meal not in completed_meals:
+                    print(f"[SKIP] No valid {meal} for Day {day}")
 
         return st.session_state.generated_recipes
 
     except Exception as e:
-        st.error(f"Error generating meal plan: {str(e)}")
+        #st.error(f"Error generating meal plan: {str(e)}")
         return []
+
+    finally:
+        await save_all_embeddings()
+        faiss.write_index(recipe_index, INDEX_FILE)
+        with open(NAMES_FILE, "wb") as f:
+            pickle.dump(recipe_names, f)
+        print("✅ FAISS index and names saved to disk at end.")
 
 def display_meal_plan(meal_plan):
     st.title("Your Personalized Meal Plan")
@@ -1226,7 +1333,9 @@ def extract_grains(recipe_text):
     
     return grains
 
-def main():
+import streamlit as st
+
+async def main():
     try:
         user_prefs = get_user_preferences()
 
@@ -1234,8 +1343,7 @@ def main():
             st.error("Failed to get user preferences. Please try again.")
             return
 
-        st.markdown(
-            """
+        st.markdown("""
             <style>
             div.stSpinner > div {
                 display: flex;
@@ -1243,16 +1351,13 @@ def main():
                 align-items: center;
             }
             </style>
-            """,
-            unsafe_allow_html=True,
-        )
+        """, unsafe_allow_html=True)
 
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
-                        # ✅ FULL RESET (session + in-memory + optional disk)
                         st.session_state.used_recipe_names = set()
                         st.session_state.generated_recipes = []
                         st.session_state.meal_types_used = set()
@@ -1262,15 +1367,16 @@ def main():
                         recipe_index.reset()
                         recipe_names.clear()
 
-                        # Optional disk reset for FAISS files (safe for testing)
                         if os.path.exists(INDEX_FILE):
                             os.remove(INDEX_FILE)
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
 
-                        # 🔁 Generate
                         start_time = time.time()
-                        meal_plan = asyncio.run(generate_meal_plan(user_prefs))
+                        meal_plan = await generate_meal_plan(user_prefs)
+                        end_time = time.time()
+                        print(f"⏱️ Total generation time: {end_time - start_time:.2f} seconds")
+
                         st.session_state.meal_plan = meal_plan
 
                         if meal_plan:
@@ -1283,9 +1389,12 @@ def main():
                         else:
                             st.error("Failed to Generate Meal Plan. Please Try Again")
 
+                        await close_http_session()
+
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
                         st.session_state.meal_plan = None
+                        await close_http_session()
 
         if st.session_state.meal_plan:
             display_meal_plan(st.session_state.meal_plan)
@@ -1293,5 +1402,9 @@ def main():
     except Exception as e:
         st.error(f"An unexpected error occurred: {str(e)}")
 
+def run_app():
+    asyncio.run(main())  # TEMPORARY fix for local dev (only works if you're running outside Streamlit Cloud)
+
+# But for Streamlit:
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())  # ✅ works locally, but NOT on Streamlit Cloud
