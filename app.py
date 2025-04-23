@@ -1258,7 +1258,6 @@ async def main():
                     if os.path.exists(NAMES_FILE):
                         os.remove(NAMES_FILE)
 
-                    # ✅ Use await inside Streamlit's async-safe context
                     meal_plan = await generate_meal_plan(user_prefs)
                     st.session_state.meal_plan = meal_plan
 
@@ -1274,21 +1273,14 @@ async def main():
     if st.session_state.meal_plan:
         display_meal_plan(st.session_state.meal_plan)
 
+# ========== ✅ SAFE ASYNC ENTRYPOINT ==========
+
 import streamlit.runtime.scriptrunner.script_run_context as script_run_context
-
-# FINAL async-safe block — handles both Streamlit and CLI
 if script_run_context.get_script_run_ctx():
-    import asyncio
-
-    # Only start once to avoid multiple executions
+    # Only schedule once
     if not st.session_state.get("main_task_started", False):
         st.session_state["main_task_started"] = True
+        asyncio.create_task(main())  # ✅ This is the CORRECT way
 
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(main())
-else:
-    import asyncio
-    asyncio.run(main())
 
 
