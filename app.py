@@ -547,72 +547,51 @@ def build_allergy_block(allergies):
 
 async def generate_meal(meal_type, day, prompt, cuisine="All"):
     try:
-        async with aiohttp.ClientSession() as session:
-            data = {
-                "model": "gpt-4.1-mini", #gpt-4o-mini
-                "messages": [
-                    {"role": "system", "content": SYSTEM_PROMPT},
-                    {"role": "user", "content": prompt}
-                ],
-                "max_tokens": 4096,
-                "temperature": 0.7,
-                "presence_penalty": 0.1,
-                "frequency_penalty": 0.1
-            }
+        # Use OpenAI client directly instead of aiohttp
+        response = await client.chat.completions.create(
+            model="gpt-4o",  # or "gpt-4o-mini" if preferred
+            messages=[
+                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=4096,
+            temperature=0.7,
+            presence_penalty=0.1,
+            frequency_penalty=0.1
+        )
 
-            headers = {
-                "Authorization": f"Bearer {openai.api_key}",
-                "Content-Type": "application/json"
-            }
+        # Get the generated content
+        response_text = response.choices[0].message.content
 
-            async with session.post(
-                "https://api.openai.com/v1/chat/completions",
-                json=data,
-                headers=headers
-            ) as response:
-                if response.status == 200:
-                    result = await response.json()
-                    response_text = result['choices'][0]['message']['content']
+        # 🔧 Fix tomato naming
+        response_text = replace_tomato_sauce(response_text)
 
-                    # 🔧 Fix tomato naming
-                    response_text = replace_tomato_sauce(response_text)
+        # 🔍 DEBUG: Save raw text for inspection
+        with open(f"debug_day{day}_{meal_type.lower()}.txt", "w", encoding="utf-8") as f:
+            f.write(response_text)
 
-                    # 🔍 DEBUG
-                    with open(f"debug_day{day}_{meal_type.lower()}.txt", "w", encoding="utf-8") as f:
-                        f.write(response_text)
+        # Parse recipe
+        recipe = parse_recipe(response_text)
+        if recipe is None or not recipe.get("name") or not recipe.get("ingredients"):
+            return None
 
-                    # Parse and validate structure
-                    recipe = parse_recipe(response_text)
-                    if recipe is None or not recipe.get("name") or not recipe.get("ingredients"):
-                        #st.warning(f"{meal_type} for Day {day} had invalid structure. Skipping...")
-                        return None
+        # Allergy/Diet/Health validation
+        if not is_recipe_safe(recipe["ingredients"], st.session_state.user_preferences):
+            return None
 
-                    # Allergy/Diet/Health validation
-                    if not is_recipe_safe(recipe["ingredients"], st.session_state.user_preferences):
-                        #st.warning(f"{meal_type} for Day {day} was rejected due to allergy/diet/health violation.")
-                        return None
+        # Strict title check for restricted diet keywords
+        if not is_title_allowed_for_diet(recipe["name"], st.session_state.user_preferences.get("diet", [])):
+            print(f"[TITLE REJECTED] {meal_type} for Day {day} - Title violates diet restrictions.")
+            return None
 
-                    # 🔥 Strict title check for restricted diet keywords
-                    if not is_title_allowed_for_diet(recipe["name"], st.session_state.user_preferences.get("diet", [])):
-                        # st.warning(f"{meal_type} for Day {day} was rejected because title includes restricted food for the selected diet.")
+        # Similarity check before saving
+        if await is_similar_recipe(recipe["name"], recipe["ingredients"]):
+            return None
 
-                        print(f"[TITLE REJECTED] {meal_type} for Day {day} - Title violates diet restrictions.")
+        # Save the recipe embedding only if it's safe and unique
+        await save_recipe_embedding(recipe["name"], recipe["ingredients"])
 
-                        return None
-
-                    # 🔥 FIX HERE: check similarity BEFORE saving embedding
-                    if await is_similar_recipe(recipe["name"], recipe["ingredients"]):
-                        #st.warning(f"Duplicate recipe detected for {meal_type} on Day {day}, regenerating...")
-                        return None
-
-                    # ✅ NOW safe to save after confirmed not a duplicate
-                    await save_recipe_embedding(recipe["name"], recipe["ingredients"])
-
-                    return (meal_type, day, response_text)
-
-                else:
-                    error_text = await response.text()
-                    raise Exception(f"API request failed with status {response.status}: {error_text}")
+        return (meal_type, day, response_text)
 
     except Exception as e:
         st.error(f"Error generating {meal_type}: {str(e)}")
