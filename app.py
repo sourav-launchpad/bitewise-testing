@@ -542,7 +542,7 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
     try:
         async with aiohttp.ClientSession() as session:
             data = {
-                "model": "gpt-4o-mini", #gpt-4o-mini
+                ""model": "gpt-4.1-mini", #gpt-4o-mini
                 "messages": [
                     {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": prompt}
