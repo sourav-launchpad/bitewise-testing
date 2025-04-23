@@ -1276,10 +1276,21 @@ async def main():
 
 import streamlit.runtime.scriptrunner.script_run_context as script_run_context
 
+# ✅ Schedule main() correctly inside Streamlit's async loop
+import streamlit.runtime.scriptrunner.script_run_context as script_run_context
+
+def run_async_main():
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+
+    if not hasattr(st.session_state, "main_task_started"):
+        st.session_state.main_task_started = True
+        loop.create_task(main())
+
 if script_run_context.get_script_run_ctx():
-    # Inside Streamlit
-    import asyncio
-    asyncio.run(main())  # ❌ DON'T DO THIS IN STREAMLIT
+    run_async_main()  # ✅ Inside Streamlit — schedule task
 else:
-    import asyncio
-    asyncio.run(main())  # ✅ Only for CLI testing
+    asyncio.run(main())  # ✅ CLI testing only
