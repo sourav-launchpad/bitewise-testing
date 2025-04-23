@@ -1342,7 +1342,7 @@ def main():
 
                         # 🔁 Generate
                         start_time = time.time()
-                        meal_plan = asyncio.run(generate_meal_plan(user_prefs))
+                        meal_plan = await generate_meal_plan(user_prefs)
                         st.session_state.meal_plan = meal_plan
 
                         if meal_plan:
