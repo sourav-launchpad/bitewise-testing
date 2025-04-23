@@ -573,18 +573,19 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
                     response_text = replace_tomato_sauce(response_text)
 
                     # 🔍 DEBUG
-                    with open(f"debug_day{day}_{meal_type.lower()}.txt", "w", encoding="utf-8") as f:
-                        f.write(response_text)
+                    if os.getenv("DEBUG_MODE", "false").lower() == "true":
+                        with open(f"debug_day{day}_{meal_type.lower()}.txt", "w", encoding="utf-8") as f:
+                            f.write(response_text)
 
                     # Parse and validate structure
                     recipe = parse_recipe(response_text)
                     if recipe is None or not recipe.get("name") or not recipe.get("ingredients"):
-                        st.warning(f"{meal_type} for Day {day} had invalid structure. Skipping...")
+                        #st.warning(f"{meal_type} for Day {day} had invalid structure. Skipping...")
                         return None
 
                     # Allergy/Diet/Health validation
-                    if not is_recipe_safe(recipe["ingredients"], st.session_state.user_preferences):
-                        st.warning(f"{meal_type} for Day {day} was rejected due to allergy/diet/health violation.")
+                    if not is_recipe_safe(recipe["ingredients"], st.session_state.user_preferences, recipe["name"]):
+                        #st.warning(f"{meal_type} for Day {day} was rejected due to allergy/diet/health violation.")
                         return None
 
                     # 🔥 Strict title check for restricted diet keywords
@@ -596,12 +597,13 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
                         return None
 
                     # 🔥 FIX HERE: check similarity BEFORE saving embedding
-                    if await is_similar_recipe(recipe["name"], recipe["ingredients"]):
-                        st.warning(f"Duplicate recipe detected for {meal_type} on Day {day}, regenerating...")
+                    combined_text = f"{recipe['name']}\n{recipe['ingredients']}"
+                    embedding = await get_embedding(combined_text)
+
+                    if await is_similar_recipe_with_emb(embedding):
                         return None
 
-                    # ✅ NOW safe to save after confirmed not a duplicate
-                    await save_recipe_embedding(recipe["name"], recipe["ingredients"])
+                    await save_recipe_embedding_with_emb(recipe["name"], recipe["ingredients"], embedding)
 
                     return (meal_type, day, response_text)
 
@@ -612,6 +614,19 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
     except Exception as e:
         st.error(f"Error generating {meal_type}: {str(e)}")
         return None
+    
+async def is_similar_recipe_with_emb(embedding):
+    if recipe_index.ntotal == 0:
+        return False
+    D, _ = recipe_index.search(np.array([embedding], dtype="float32"), k=1)
+    return D[0][0] < 0.15
+
+async def save_recipe_embedding_with_emb(name, ingredients, embedding):
+    if embedding is None or len(embedding) != 1536:
+        return
+    recipe_index.add(np.array([embedding], dtype="float32"))
+    stored_embeddings.append((name, embedding))
+    recipe_names.append(name)
 
 def clean_recipe_text(text):
     """Clean recipe text for comparison."""
@@ -627,47 +642,46 @@ def clean_recipe_text(text):
 
 from prompts import DIETARY_REQUIREMENTS
 
-def is_recipe_safe(ingredients_text, user_prefs):
+def is_recipe_safe(ingredients_text, user_prefs, recipe_name=None):
     ingredients_text = ingredients_text.lower()
+    title_text = recipe_name.lower() if recipe_name else ""
 
-    # 1. Allergy Check
+    # 1. Allergy Check (ingredients + title)
     allergies = user_prefs.get("allergies", "")
     if "no allergies or intolerances" not in allergies.lower():
         for allergy in allergies.split(","):
             allergy = allergy.strip().lower()
             keywords = ALLERGEN_KEYWORDS.get(allergy, [])
             for keyword in keywords:
-                if re.search(rf"\b{re.escape(keyword)}\b", ingredients_text):
-                    print(f"[ALLERGY VIOLATION] Matched '{keyword}' for allergy '{allergy}'")
+                if re.search(rf"\b{re.escape(keyword)}\b", ingredients_text) or re.search(rf"\b{re.escape(keyword)}\b", title_text):
+                    print(f"[ALLERGY VIOLATION] Matched '{keyword}' for allergy '{allergy}' (in ingredients or title)")
                     return False
 
-    # 2. Diet Restriction Check
+    # 2. Diet Restriction Check (ingredients + title)
     diet = user_prefs.get("diet", "none")
     if diet != "None":
         if isinstance(diet, str):
             diet = eval(diet) if diet.startswith("[") else [diet]
 
-        # Tokenize ingredients for exact match
         words = set(re.findall(r'\b\w+\b', ingredients_text))
+        title_words = set(re.findall(r'\b\w+\b', title_text))
 
         for d in diet:
             if d in DIET_RESTRICTIONS:
                 for keyword in DIET_RESTRICTIONS[d]:
-                    if keyword in words:
-                        print(f"[DIET VIOLATION] Matched '{keyword}' for diet '{d}'")
-                        print(f">>> Ingredients being checked: {ingredients_text}")
-                        print(f">>> Forbidden keyword: {keyword} for diet: {d}")
+                    if keyword in words or keyword in title_words:
+                        print(f"[DIET VIOLATION] Matched '{keyword}' for diet '{d}' (in ingredients or title)")
                         return False
 
-    # 3. Health Condition Check
+    # 3. Health Condition Check (ingredients + title)
     health_conditions = user_prefs.get("health_conditions", "")
     if "none" not in health_conditions.lower():
         for condition in health_conditions.split(","):
             condition = condition.strip().lower()
             keywords = HEALTH_RESTRICTIONS.get(condition, [])
             for keyword in keywords:
-                if re.search(rf"\b{re.escape(keyword)}\b", ingredients_text):
-                    print(f"[HEALTH VIOLATION] Matched '{keyword}' for condition '{condition}'")
+                if re.search(rf"\b{re.escape(keyword)}\b", ingredients_text) or re.search(rf"\b{re.escape(keyword)}\b", title_text):
+                    print(f"[HEALTH VIOLATION] Matched '{keyword}' for condition '{condition}' (in ingredients or title)")
                     return False
 
     return True
@@ -699,12 +713,22 @@ async def save_recipe_embedding(name, ingredients):
     recipe_index.add(np.array([embedding], dtype="float32"))
     recipe_names.append(name)
 
-    # Save index and names to disk
-    faiss.write_index(recipe_index, INDEX_FILE)
-    with open(NAMES_FILE, "wb") as f:
-        pickle.dump(recipe_names, f)
+    # Save in memory only for now
+    stored_embeddings.append((name, embedding))
+    recipe_names.append(name)
 
     print(f"✅ Saved recipe embedding for '{name}'")
+
+def batch_save_embeddings():
+    if stored_embeddings:
+        vectors = np.array([e[1] for e in stored_embeddings], dtype="float32")
+        recipe_index.add(vectors)
+        faiss.write_index(recipe_index, INDEX_FILE)
+
+        with open(NAMES_FILE, "wb") as f:
+            pickle.dump(recipe_names, f)
+
+        print(f"✅ Saved {len(stored_embeddings)} embeddings to disk.")
 
 def is_title_allowed_for_diet(recipe_name, diet_list):
     restricted_keywords = set()
@@ -957,7 +981,7 @@ async def generate_meal_plan(user_prefs):
             available_cuisines = cuisine_prefs.copy()
             random.shuffle(available_cuisines)
 
-        semaphore = asyncio.Semaphore(10)
+        semaphore = asyncio.Semaphore(14)
 
         async def limited_generate(meal_type, day, prompt, cuisine):
             async with semaphore:
@@ -987,7 +1011,7 @@ async def generate_meal_plan(user_prefs):
 
                 authentic_recipes = AUTHENTIC_RECIPE_NAMES.get(selected_cuisine, [])
                 if not authentic_recipes:
-                    st.warning(f"No authentic recipes found for {selected_cuisine} cuisine.")
+                    #st.warning(f"No authentic recipes found for {selected_cuisine} cuisine.")
                     continue
 
                 meal_recipes = [
@@ -1003,7 +1027,7 @@ async def generate_meal_plan(user_prefs):
                         not any(is_title_allowed_for_diet(r, [d]) for r in authentic_recipes)
                         for d in diet_list
                     ):
-                        st.warning(f"⚠️ No authentic titles matched the {diet_list} diet for {selected_cuisine} {meal}. Forcing GPT to generate a compliant custom recipe.")
+                        #st.warning(f"⚠️ No authentic titles matched the {diet_list} diet for {selected_cuisine} {meal}. Forcing GPT to generate a compliant custom recipe.")
                         recipe_name = f"Custom {selected_cuisine} {meal} (Diet-Compliant)"
                         meal_recipes = [recipe_name]
                         adaptive_generation = True
@@ -1015,11 +1039,14 @@ async def generate_meal_plan(user_prefs):
 
                 random.shuffle(meal_recipes)
 
-                for recipe_name in meal_recipes:
-                    if recipe_name in st.session_state.used_recipe_names:
-                        continue
+                # Shuffle and select up to 3 unused recipe names
+                recipe_candidates = [r for r in meal_recipes if r not in st.session_state.used_recipe_names]
+                random.shuffle(recipe_candidates)
+                recipe_candidates = recipe_candidates[:3]
 
-                    prompt = get_meal_prompt(
+                # Build all prompts for selected candidates
+                candidate_prompts = [
+                    get_meal_prompt(
                         meal_type=meal,
                         day=day,
                         user_prefs=formatted_prefs,
@@ -1045,12 +1072,29 @@ async def generate_meal_plan(user_prefs):
                         available_ingredients=available_ingredients,
                         authentic_recipes=[recipe_name]
                     )
+                    for recipe_name in recipe_candidates
+                ]
 
-                    task = limited_generate(meal, day, prompt, selected_cuisine)
-                    tasks.append(task)
-                    break
+                # Submit up to 3 parallel generation attempts
+                generation_tasks = [
+                    limited_generate(meal, day, prompt, selected_cuisine)
+                    for prompt in candidate_prompts
+                ]
+
+                generation_results = await asyncio.gather(*generation_tasks)
+
+                # Store the first successful result
+                for idx, result in enumerate(generation_results):
+                    if result:
+                        tasks.append(result)
+                        st.session_state.used_recipe_names.add(recipe_candidates[idx])
+                        break  # ✅ Accept the first valid one
+                else:
+                    print(f"⚠️ All {len(recipe_candidates)} attempts failed for {selected_cuisine} {meal} on Day {day}")
 
         results = await asyncio.gather(*tasks)
+
+        batch_save_embeddings()
 
         for result in results:
             if result:
