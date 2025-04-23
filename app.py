@@ -1278,9 +1278,11 @@ def main():
 
                         # 🔁 Generate
                         start_time = time.time()
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                        meal_plan = loop.run_until_complete(generate_meal_plan(user_prefs))
+                        import nest_asyncio
+                        nest_asyncio.apply()
+                        
+                        meal_plan = asyncio.get_event_loop().run_until_complete(generate_meal_plan(user_prefs))
+                        
                         st.session_state.meal_plan = meal_plan
 
                         if meal_plan:
