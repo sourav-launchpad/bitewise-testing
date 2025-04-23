@@ -1260,41 +1260,38 @@ def main():
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
-                        # ✅ FULL RESET (session + in-memory + optional disk)
                         st.session_state.used_recipe_names = set()
                         st.session_state.generated_recipes = []
                         st.session_state.meal_types_used = set()
                         st.session_state.cuisines_used = set()
                         st.session_state.cuisine_distribution = {}
-
+            
                         recipe_index.reset()
                         recipe_names.clear()
-
-                        # Optional disk reset for FAISS files (safe for testing)
                         if os.path.exists(INDEX_FILE):
                             os.remove(INDEX_FILE)
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
-
-                        # 🔁 Generate
-                        start_time = time.time()
-                        meal_plan = asyncio.run(generate_meal_plan(user_prefs))
+            
+                        # ✅ FIXED: Streamlit-safe asyncio execution
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        try:
+                            meal_plan = loop.run_until_complete(generate_meal_plan(user_prefs))
+                        finally:
+                            loop.close()
+            
                         st.session_state.meal_plan = meal_plan
-
+            
                         if meal_plan:
-                            st.markdown(
-                                "<div style='text-align: center; background-color: #d4edda; padding: 10px; border-radius: 5px; color: #155724; font-weight: bold;'>"
-                                "Meal Plan Generated Successfully!"
-                                "</div>",
-                                unsafe_allow_html=True
-                            )
+                            st.success("Meal Plan Generated Successfully!")
                         else:
                             st.error("Failed to Generate Meal Plan. Please Try Again")
-
+            
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
                         st.session_state.meal_plan = None
-
+            
         if st.session_state.meal_plan:
             display_meal_plan(st.session_state.meal_plan)
 
