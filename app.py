@@ -575,91 +575,56 @@ async def save_recipe_embedding_with_embedding(name, ingredients, embedding):
 
 import time
 
-async def generate_meal(meal_type, day, prompt, cuisine="All", recipe_name=""):
+async def generate_meal(meal_type, day, prompt, cuisine="All"):
     try:
-        await init_http_session()
-        t_start = time.time()
-
-        data = {
-            "model": "gpt-4.1-mini",
-            "messages": [
+        # Use OpenAI client directly instead of aiohttp
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",  # or "gpt-4o-mini" if preferred
+            messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
-            "max_tokens": 4096,
-            "temperature": 0.7,
-            "presence_penalty": 0.1,
-            "frequency_penalty": 0.1
-        }
+            max_tokens=4096,
+            temperature=0.7,
+            presence_penalty=0.1,
+            frequency_penalty=0.1
+        )
 
-        headers = {
-            "Authorization": f"Bearer {openai.api_key}",
-            "Content-Type": "application/json"
-        }
+        # Get the generated content
+        response_text = response.choices[0].message.content
 
-        t_api_call = time.time()
-        async with session.post(
-            "https://api.openai.com/v1/chat/completions",
-            json=data,
-            headers=headers
-        ) as response:
-            t_api_done = time.time()
+        # 🔧 Fix tomato naming
+        response_text = replace_tomato_sauce(response_text)
 
-            if response.status == 200:
-                result = await response.json()
-                response_text = result['choices'][0]['message']['content']
+        # 🔍 DEBUG: Save raw text for inspection
+        with open(f"debug_day{day}_{meal_type.lower()}.txt", "w", encoding="utf-8") as f:
+            f.write(response_text)
 
-                # Replace tomato sauce wording
-                response_text = replace_tomato_sauce(response_text)
+        # Parse recipe
+        recipe = parse_recipe(response_text)
+        if recipe is None or not recipe.get("name") or not recipe.get("ingredients"):
+            return None
 
-                # Save raw output for debugging
-                with open(f"debug_day{day}_{meal_type.lower()}.txt", "w", encoding="utf-8") as f:
-                    f.write(response_text)
+        # Allergy/Diet/Health validation
+        if not is_recipe_safe(recipe["ingredients"], st.session_state.user_preferences):
+            return None
 
-                # Parse recipe
-                t_parse = time.time()
-                recipe = parse_recipe(response_text)
-                t_parse_done = time.time()
+        # Strict title check for restricted diet keywords
+        if not is_title_allowed_for_diet(recipe["name"], st.session_state.user_preferences.get("diet", [])):
+            print(f"[TITLE REJECTED] {meal_type} for Day {day} - Title violates diet restrictions.")
+            return None
 
-                if recipe is None or not recipe.get("name") or not recipe.get("ingredients"):
-                    print(f"❌ Invalid structure for {meal_type} on Day {day}")
-                    return None
+        # Similarity check before saving
+        if await is_similar_recipe(recipe["name"], recipe["ingredients"]):
+            return None
 
-                # Run safety checks
-                t_valid_start = time.time()
-                if not is_recipe_safe(recipe["name"], recipe["ingredients"], st.session_state.user_preferences):
-                    print(f"🚫 Rejected due to allergy/diet/health: {recipe['name']}")
-                    return None
+        # Save the recipe embedding only if it's safe and unique
+        await save_recipe_embedding(recipe["name"], recipe["ingredients"])
 
-                if not is_title_allowed_for_diet(recipe["name"], st.session_state.user_preferences.get("diet", [])):
-                    print(f"[TITLE REJECTED] {meal_type} for Day {day} - Title violates diet restrictions.")
-                    return None
-                t_valid_end = time.time()
-
-                # Batch save for embedding later
-                if "recipes_to_embed" in st.session_state:
-                    st.session_state.recipes_to_embed.append({
-                        "name": recipe["name"],
-                        "ingredients": recipe["ingredients"]
-                    })
-
-                t_done = time.time()
-                print(
-                    f"✅ {meal_type} (Day {day}, '{recipe['name']}') timings:"
-                    f" API: {t_api_done - t_api_call:.2f}s |"
-                    f" Parse: {t_parse_done - t_parse:.2f}s |"
-                    f" Validation: {t_valid_end - t_valid_start:.2f}s |"
-                    f" Total: {t_done - t_start:.2f}s"
-                )
-
-                return (meal_type, day, response_text)
-
-            else:
-                error_text = await response.text()
-                raise Exception(f"API request failed with status {response.status}: {error_text}")
+        return (meal_type, day, response_text)
 
     except Exception as e:
-        print(f"[ERROR] {meal_type} on Day {day} failed: {str(e)}")
+        st.error(f"Error generating {meal_type}: {str(e)}")
         return None
 
 async def save_all_embeddings():
