@@ -994,7 +994,19 @@ async def generate_meal_plan(user_prefs):
                             {selected_cuisine} Cuisine Requirements:
                             - Use authentic {selected_cuisine} ingredients and methods
                             - Follow {selected_cuisine} cultural traditions
-                            ...
+                            - Use traditional {selected_cuisine} dishes
+                            - Include {selected_cuisine} specific ingredients
+                            - Avoid mixing with other cuisines
+                            - Use authentic {selected_cuisine} cooking techniques
+                            - Follow {selected_cuisine} plating styles
+                            - Use proper {selected_cuisine} terminology
+                            - Ensure dish is recognizably {selected_cuisine}
+                            - The recipe MUST explicitly mention \"{selected_cuisine}\" in its description or title
+                        
+                            IMPORTANT: When generating the recipe:
+                            1. GPT MUST use the exact recipe name: \"{recipe_name}\" and not change or rephrase it.
+                            2. The recipe title in the output must exactly match this string, including punctuation and word order.
+                            3. GPT must NOT add any extra prefix (e.g. Day 1 - Lunch -) unless explicitly instructed.
                             """ + dietary_requirements + budget_requirements + measurement_requirements,
                             available_ingredients=available_ingredients,
                             authentic_recipes=[recipe_name]
