@@ -4,3 +4,4 @@ faiss-cpu
 pandas==2.2.2
 aiohttp==3.9.3
 numpy==1.26.4
+scikit-learn
