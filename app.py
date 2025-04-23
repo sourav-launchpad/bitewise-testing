@@ -670,6 +670,11 @@ def is_recipe_safe(ingredients_text, user_prefs):
 
     return True
 
+from openai import AsyncOpenAI  # NEW: for async calls
+
+# Initialize OpenAI Async client globally (best practice)
+client = AsyncOpenAI()
+
 # ========== FAISS Embedding Utils ==========
 async def get_embedding(text):
     response = await client.embeddings.create(
@@ -996,12 +1001,12 @@ async def generate_meal_plan(user_prefs):
                         not any(is_title_allowed_for_diet(r, [d]) for r in authentic_recipes)
                         for d in diet_list
                     ):
-                        #f"⚠️ No authentic titles matched the {diet_list} diet for {selected_cuisine} {meal}. Forcing GPT to generate a compliant custom recipe.")
+                        #st.warning(f"⚠️ No authentic titles matched the {diet_list} diet for {selected_cuisine} {meal}. Forcing GPT to generate a compliant custom recipe.")
                         recipe_name = f"Custom {selected_cuisine} {meal} (Diet-Compliant)"
                         meal_recipes = [recipe_name]
                         adaptive_generation = True
                     else:
-                        #st.info(f"💡 No diet-compliant titles found for {selected_cuisine} {meal}. Entering adaptive generation mode.")
+                        st.info(f"💡 No diet-compliant titles found for {selected_cuisine} {meal}. Entering adaptive generation mode.")
                         recipe_name = f"{selected_cuisine} {meal} - GPT Generated Fallback"
                         meal_recipes = [recipe_name]
                         adaptive_generation = True
