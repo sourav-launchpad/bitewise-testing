@@ -4,7 +4,7 @@ import pandas as pd
 import time
 from datetime import datetime
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import asyncio
 import aiohttp
 import faiss
