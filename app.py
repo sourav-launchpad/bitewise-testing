@@ -70,19 +70,6 @@ else:
 
 stored_embeddings = []  # (name, ingredients, embedding)
 
-session = None
-
-async def init_http_session():
-    global session
-    if session is None:
-        session = aiohttp.ClientSession()
-
-async def close_http_session():
-    global session
-    if session:
-        await session.close()
-        session = None
-        
 def parse_list(value):
     if isinstance(value, str):
         value = value.strip()
@@ -261,141 +248,221 @@ def replace_tomato_sauce(text):
 
 def get_user_preferences():
     try:
+        # Center the title using HTML
         st.markdown("<h1 style='text-align: center;'>🍽️ BiteWise - Personalized Meal Planner 🍽️</h1>", unsafe_allow_html=True)
 
+        # Create three columns for better layout
         col1, col2, col3 = st.columns(3)
 
         with col1:
+            # Use number_input with increment/decrement buttons, restricted to 1-7, default 1
             num_days = st.number_input(
                 "**Number of Days**",
                 min_value=1,
                 max_value=7,
                 value=1,
-                step=1,
-                key="num_days"
+                step=1
             )
-
+            
+            # Multi-select for diet types
             diet = st.multiselect(
                 "**Diet Type**",
                 options=[
-                    "None", "Whole30", "Paleo", "Ketogenic (Keto)", "Low-carb / High-protein",
-                    "High-carb / Low-fat", "Plant-based", "Whole food plant-based", "Vegan",
-                    "Vegetarian (Lacto-ovo, Lacto, Ovo)", "Pescatarian", "Flexitarian",
-                    "Pegan (Paleo + Vegan hybrid)", "DASH (Dietary Approaches to Stop Hypertension)",
-                    "MIND Diet (Mediterranean-DASH hybrid)", "Intermittent Fasting (e.g. 16:8, 5:2)",
-                    "Kosher", "Halal", "Jain", "Buddhist", "Seventh-day Adventist", "Rastafarian Ital"
+                    "None",
+                    "Whole30",
+                    "Paleo",
+                    "Ketogenic (Keto)",
+                    "Low-carb / High-protein",
+                    "High-carb / Low-fat",
+                    "Plant-based",
+                    "Whole food plant-based",
+                    "Vegan",
+                    "Vegetarian (Lacto-ovo, Lacto, Ovo)",
+                    "Pescatarian",
+                    "Flexitarian",
+                    "Pegan (Paleo + Vegan hybrid)",
+                    "DASH (Dietary Approaches to Stop Hypertension)",
+                    "MIND Diet (Mediterranean-DASH hybrid)",
+                    "Intermittent Fasting (e.g. 16:8, 5:2)",
+                    "Kosher",
+                    "Halal",
+                    "Jain",
+                    "Buddhist",
+                    "Seventh-day Adventist",
+                    "Rastafarian Ital"
                 ],
-                default=[],
-                placeholder="Choose an option",
-                key="diet"
+                default=[],  # Start with empty selection
+                placeholder="Choose an option"
             )
+            
+            # If no option is selected, set to "None"
             if not diet:
                 diet = ["None"]
+            # If "None" is selected along with other options, clear other selections
             elif "None" in diet and len(diet) > 1:
                 diet = ["None"]
-
+            
+            # Multi-select for allergies/intolerances
             allergies = st.multiselect(
                 "**Allergies/Intolerances**",
                 options=[
-                    "No allergies or intolerances", "Peanut allergy", "Tree nut allergy (e.g. almond, cashew, walnut)",
-                    "Shellfish allergy", "Fish allergy", "Egg allergy", "Milk allergy (cow's milk protein: casein and/or whey)",
-                    "Soy allergy", "Wheat allergy", "Sesame allergy", "Mustard allergy", "Lupin allergy",
-                    "Celery allergy", "Lactose intolerance", "Gluten intolerance / Non-celiac gluten sensitivity",
-                    "Fructose intolerance (hereditary or malabsorption)", "Histamine intolerance", "Salicylate sensitivity",
-                    "FODMAP intolerance", "Sulphite sensitivity", "MSG sensitivity", "Caffeine sensitivity",
-                    "Alcohol intolerance", "Artificial sweetener sensitivity", "Food additive intolerance (e.g. preservatives, colourings)"
+                    "No allergies or intolerances",
+                    "Peanut allergy",
+                    "Tree nut allergy (e.g. almond, cashew, walnut)",
+                    "Shellfish allergy",
+                    "Fish allergy",
+                    "Egg allergy",
+                    "Milk allergy (cow's milk protein: casein and/or whey)",
+                    "Soy allergy",
+                    "Wheat allergy",
+                    "Sesame allergy",
+                    "Mustard allergy",
+                    "Lupin allergy",
+                    "Celery allergy",
+                    "Lactose intolerance",
+                    "Gluten intolerance / Non-celiac gluten sensitivity",
+                    "Fructose intolerance (hereditary or malabsorption)",
+                    "Histamine intolerance",
+                    "Salicylate sensitivity",
+                    "FODMAP intolerance",
+                    "Sulphite sensitivity",
+                    "MSG sensitivity",
+                    "Caffeine sensitivity",
+                    "Alcohol intolerance",
+                    "Artificial sweetener sensitivity",
+                    "Food additive intolerance (e.g. preservatives, colourings)"
                 ],
-                default=[],
-                placeholder="Choose an option",
-                key="allergies"
+                default=[],  # Start with empty selection
+                placeholder="Choose an option"
             )
+            
+            # If no option is selected, set to "No allergies or intolerances"
             if not allergies:
                 allergies = ["No allergies or intolerances"]
+            # If "No allergies or intolerances" is selected along with other options, clear other selections
             elif "No allergies or intolerances" in allergies and len(allergies) > 1:
                 allergies = ["No allergies or intolerances"]
 
         with col2:
+            # Multi-select for health conditions
             health_conditions = st.multiselect(
                 "**Health Conditions**",
                 options=[
-                    "None", "Type 1 Diabetes", "Type 2 Diabetes", "Prediabetes / Insulin Resistance", "Metabolic Syndrome",
+                    "None",
+                    # Metabolic & Endocrine 
+                    "Type 1 Diabetes", "Type 2 Diabetes", "Prediabetes / Insulin Resistance", "Metabolic Syndrome",
                     "PCOS", "Hypothyroidism / Hashimoto's", "Hyperthyroidism / Graves'", "Adrenal Fatigue",
-                    "Cushing's Syndrome", "Gestational Diabetes", "Hypertension", "High Cholesterol / Dyslipidemia",
-                    "Cardiovascular Disease", "Stroke prevention", "Congestive Heart Failure", "Anticoagulant therapy (e.g. stable vitamin K for Warfarin)",
-                    "Anaemia (Iron, B12, Folate)", "Celiac Disease", "IBS (Irritable Bowel Syndrome)",
-                    "IBD (Crohn's, Ulcerative Colitis)", "GERD / Acid Reflux", "Peptic Ulcers", "Diverticulosis / Diverticulitis",
-                    "Gallbladder disease", "Pancreatitis", "Gastroparesis", "Liver disease / Fatty liver", "Bile acid malabsorption",
-                    "SIBO (Small Intestinal Bacterial Overgrowth)", "Chronic Kidney Disease (CKD)", "Kidney stones", "Nephrotic syndrome",
-                    "Gout", "Hemochromatosis", "Liver Cirrhosis", "Cancer-related weight loss / Cachexia",
-                    "Neutropenic diet (immunosuppressed)", "Low-residue diet (during flare-ups or treatment)",
-                    "Lupus", "Rheumatoid Arthritis", "Multiple Sclerosis", "Chronic hives / urticaria",
-                    "Mast Cell Activation Syndrome (MCAS)", "Epilepsy (Keto for seizures)", "ADHD",
-                    "Autism Spectrum Disorder", "Depression / Anxiety", "Migraine / Vestibular migraine",
-                    "Alzheimer's / Dementia", "Parkinson's Disease", "Osteoporosis", "Osteopenia",
-                    "Sarcopenia / Muscle loss", "Arthritis (Osteoarthritis, Gout, RA)", "Endometriosis",
-                    "PMS / PMDD", "Fertility (male and female)", "Pregnancy (Trimester-specific)",
-                    "Breastfeeding", "Menopause", "Erectile dysfunction", "Overweight / Obesity",
-                    "Underweight / Malnutrition", "Muscle gain", "Bariatric surgery (pre and post-op)",
-                    "Disordered eating / ED recovery", "Cachexia", "Acne", "Rosacea", "Eczema", "Psoriasis"
+                    "Cushing's Syndrome", "Gestational Diabetes",
+                    # Cardiovascular & Blood
+                    "Hypertension", "High Cholesterol / Dyslipidemia", "Cardiovascular Disease", "Stroke prevention",
+                    "Congestive Heart Failure", "Anticoagulant therapy (e.g. stable vitamin K for Warfarin)",
+                    "Anaemia (Iron, B12, Folate)",
+                    # Gastrointestinal
+                    "Celiac Disease", "IBS (Irritable Bowel Syndrome)", "IBD (Crohn's, Ulcerative Colitis)",
+                    "GERD / Acid Reflux", "Peptic Ulcers", "Diverticulosis / Diverticulitis", "Gallbladder disease",
+                    "Pancreatitis", "Gastroparesis", "Liver disease / Fatty liver", "Bile acid malabsorption",
+                    "SIBO (Small Intestinal Bacterial Overgrowth)",
+                    # Kidney, Liver, Gout
+                    "Chronic Kidney Disease (CKD)", "Kidney stones", "Nephrotic syndrome", "Gout", "Hemochromatosis",
+                    "Liver Cirrhosis",
+                    # Cancer & Treatment Recovery
+                    "Cancer-related weight loss / Cachexia", "Neutropenic diet (immunosuppressed)",
+                    "Low-residue diet (during flare-ups or treatment)",
+                    # Autoimmune & Immune Conditions
+                    "Lupus", "Rheumatoid Arthritis", "Multiple Sclerosis",
+                    "Chronic hives / urticaria", "Mast Cell Activation Syndrome (MCAS)",
+                    # Neurological & Mental Health
+                    "Epilepsy (Keto for seizures)", "ADHD", "Autism Spectrum Disorder", "Depression / Anxiety",
+                    "Migraine / Vestibular migraine", "Alzheimer's / Dementia", "Parkinson's Disease",
+                    # Muscle, Bone, Joint
+                    "Osteoporosis", "Osteopenia", "Sarcopenia / Muscle loss", "Arthritis (Osteoarthritis, Gout, RA)",
+                    # Reproductive & Hormonal
+                    "Endometriosis", "PMS / PMDD", "Fertility (male and female)", "Pregnancy (Trimester-specific)",
+                    "Breastfeeding", "Menopause", "Erectile dysfunction",
+                    # Weight & Nutrition Risk
+                    "Overweight / Obesity", "Underweight / Malnutrition", "Muscle gain",
+                    "Bariatric surgery (pre and post-op)", "Disordered eating / ED recovery", "Cachexia",
+                    # Skin Conditions
+                    "Acne", "Rosacea", "Eczema", "Psoriasis"
                 ],
-                default=[],
-                placeholder="Choose an option",
-                key="health_conditions"
+                default=[],  # Start with empty selection
+                placeholder="Choose an option"
             )
+            
+            # If no option is selected, set to "None"
             if not health_conditions:
                 health_conditions = ["None"]
+            # If "None" is selected along with other options, clear other selections
             elif "None" in health_conditions and len(health_conditions) > 1:
                 health_conditions = ["None"]
 
+            # Multi-select for meal type
             meal_type = st.multiselect(
                 "**Meal Type Preference**",
                 options=["All", "Breakfast", "Lunch", "Dinner"],
-                default=[],
-                placeholder="Choose an option",
-                key="meal_type"
+                default=[],  # Start with empty selection
+                placeholder="Choose an option"
             )
+            
+            # If no option is selected, set to "All"
             if not meal_type:
                 meal_type = ["All"]
+            # If "All" is selected along with other options, clear other selections
             elif "All" in meal_type and len(meal_type) > 1:
                 meal_type = ["All"]
 
+            # Multi-select for cuisine
             cuisine = st.multiselect(
                 "**Preferred Cuisine**",
                 options=[
-                    "All", "Mediterranean", "Thai", "Chinese", "Japanese", "Korean", "Vietnamese",
-                    "Indian", "Middle Eastern", "Latin American / Mexican", "African", "Nordic / Scandinavian",
-                    "Traditional Australian / British / American", "Eastern European", "Caribbean"
+                    "All",
+                    "Mediterranean",
+                    "Thai",
+                    "Chinese",
+                    "Japanese",
+                    "Korean",
+                    "Vietnamese",
+                    "Indian",
+                    "Middle Eastern",
+                    "Latin American / Mexican",
+                    "African",
+                    "Nordic / Scandinavian",
+                    "Traditional Australian / British / American",
+                    "Eastern European",
+                    "Caribbean"
                 ],
-                default=["Traditional Australian / British / American"],
-                placeholder="Choose an option",
-                key="cuisine"
+                default=["Traditional Australian / British / American"],  # Set default to Traditional Australian / British / American
+                placeholder="Choose an option"
             )
+            
+            # If no option is selected, set to "All"
             if not cuisine:
                 cuisine = ["All"]
+            # If "All" is selected along with other options, clear other selections
             elif "All" in cuisine and len(cuisine) > 1:
                 cuisine = ["All"]
 
         with col3:
             budget = st.selectbox(
                 "**Budget**",
-                options=["Tight budget ($3-$7)", "Moderate budget ($8-$15)", "Generous budget ($16-$30)", "No budget constraints ($31+)"],
-                index=1,
-                key="budget"
+                options=["Tight budget ($3-$7)", "Moderate budget ($8-$15)", 
+                        "Generous budget ($16-$30)", "No budget constraints ($31+)"],
+                index=1  # Default to "Moderate budget"
             )
-
-            time_constraint = st.selectbox(
+                        
+            time_constraint = st.selectbox( 
                 "**Available Time for Cooking**",
                 options=[
-                    "Busy schedule (less than 15 minutes)",
-                    "Moderate schedule (15 to 30 minutes)",
-                    "Busy on some days (30 to 45 minutes)",
-                    "Flexible schedule (45 to 60 minutes)",
+                    "Busy schedule (less than 15 minutes)",  
+                    "Moderate schedule (15 to 30 minutes)",  
+                    "Busy on some days (30 to 45 minutes)",  
+                    "Flexible schedule (45 to 60 minutes)",  
                     "No constraints (more than 60 minutes)"
                 ],
-                index=1,
-                key="time_constraint"
+                index=1
             )
 
+            # Map UI values to standardized cooking time ranges
             time_mapping = {
                 "Busy schedule (less than 15 minutes)": "no more than 15 minutes",
                 "Moderate schedule (15 to 30 minutes)": "between 15 and 30 minutes",
@@ -403,32 +470,36 @@ def get_user_preferences():
                 "Flexible schedule (45 to 60 minutes)": "between 45 and 60 minutes",
                 "No constraints (more than 60 minutes)": "no time limit"
             }
-            time_constraint = time_mapping.get(time_constraint, "between 15 and 30 minutes")
 
+            # Convert to standardized format immediately
+            time_constraint = time_mapping.get(time_constraint, "between 15 and 30 minutes")
+                        
+            # Changed from selectbox to number_input for serving size
             serving_size = st.number_input(
                 "**Number of Servings per Meal**",
                 min_value=1,
                 max_value=8,
-                value=2,
-                step=1,
-                key="serving_size"
+                value=2,  # Default to 2 servings
+                step=1
             )
 
+        # Create a dictionary with all preferences
         preferences = {
-            "num_days": int(num_days),
-            "diet": str(diet),
-            "health_conditions": str(health_conditions),
-            "meal_type": str(meal_type),
-            "cuisine": str(cuisine),
-            "budget": str(budget),
-            "time_constraint": time_constraint,
-            "serving_size": int(serving_size),
-            "allergies": str(allergies)
+            "num_days": int(num_days),  # Ensure it's an integer
+            "diet": str(diet),  # Ensure it's a string
+            "health_conditions": str(health_conditions),  # Ensure it's a string
+            "meal_type": str(meal_type),  # Ensure it's a string
+            "cuisine": str(cuisine),  # Ensure it's a string
+            "budget": str(budget),  # Ensure it's a string
+            "time_constraint": time_constraint,  # Already in standardized format
+            "serving_size": int(serving_size),  # Ensure it's an integer
+            "allergies": str(allergies)  # Ensure it's a string
         }
 
+        # Store preferences in session state
         st.session_state.user_preferences = preferences
-        return preferences
 
+        return preferences
     except Exception as e:
         st.error(f"Error getting user preferences: {str(e)}")
         return None
@@ -471,25 +542,6 @@ def build_allergy_block(allergies):
                 rules += f"\nALLERGY: {allergy_clean}\n"
                 rules += f"- STRICTLY AVOID: {', '.join(keywords)}\n"
     return rules.strip()
-
-async def is_similar_recipe_with_embedding(embedding):
-    if recipe_index.ntotal == 0:
-        return False
-    D, _ = recipe_index.search(np.array([embedding], dtype="float32"), k=1)
-    return D[0][0] < 0.15
-
-async def save_recipe_embedding_with_embedding(name, ingredients, embedding):
-    if embedding is None or len(embedding) != 1536:
-        print("❌ Invalid embedding, skipping save.")
-        return
-
-    recipe_index.add(np.array([embedding], dtype="float32"))
-    recipe_names.append(name)
-
-    # Don't write to disk here
-    print(f"✅ Saved recipe embedding in-memory for '{name}'")
-
-import time
 
 async def generate_meal(meal_type, day, prompt, cuisine="All"):
     try:
@@ -543,30 +595,6 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
         st.error(f"Error generating {meal_type}: {str(e)}")
         return None
 
-async def save_all_embeddings():
-    recipes = st.session_state.recipes_to_embed
-    if not recipes:
-        return
-
-    texts = [f"{r['name']}\n{r['ingredients']}" for r in recipes]
-
-    start_embed = time.time()
-    response = await client.embeddings.create(
-        model="text-embedding-ada-002",
-        input=texts
-    )
-    print(f"🧠 Embedding generation time: {time.time() - start_embed:.2f} seconds")
-
-    for i, recipe in enumerate(recipes):
-        embedding = response.data[i].embedding
-        if len(embedding) == 1536:
-            recipe_index.add(np.array([embedding], dtype="float32"))
-            recipe_names.append(recipe["name"])
-        else:
-            print(f"⚠️ Invalid embedding for {recipe['name']}")
-
-    print(f"✅ Batch-saved {len(recipes)} recipe embeddings.")
-
 def clean_recipe_text(text):
     """Clean recipe text for comparison."""
     # Remove measurements and quantities
@@ -581,8 +609,8 @@ def clean_recipe_text(text):
 
 from prompts import DIETARY_REQUIREMENTS
 
-def is_recipe_safe(recipe_name, ingredients_text, user_prefs):
-    text_to_check = f"{recipe_name.lower()}\n{ingredients_text.lower()}"
+def is_recipe_safe(ingredients_text, user_prefs):
+    ingredients_text = ingredients_text.lower()
 
     # 1. Allergy Check
     allergies = user_prefs.get("allergies", "")
@@ -591,7 +619,7 @@ def is_recipe_safe(recipe_name, ingredients_text, user_prefs):
             allergy = allergy.strip().lower()
             keywords = ALLERGEN_KEYWORDS.get(allergy, [])
             for keyword in keywords:
-                if re.search(rf"\b{re.escape(keyword)}\b", text_to_check):
+                if re.search(rf"\b{re.escape(keyword)}\b", ingredients_text):
                     print(f"[ALLERGY VIOLATION] Matched '{keyword}' for allergy '{allergy}'")
                     return False
 
@@ -601,11 +629,16 @@ def is_recipe_safe(recipe_name, ingredients_text, user_prefs):
         if isinstance(diet, str):
             diet = eval(diet) if diet.startswith("[") else [diet]
 
+        # Tokenize ingredients for exact match
+        words = set(re.findall(r'\b\w+\b', ingredients_text))
+
         for d in diet:
             if d in DIET_RESTRICTIONS:
                 for keyword in DIET_RESTRICTIONS[d]:
-                    if re.search(rf"\b{re.escape(keyword)}\b", text_to_check):
+                    if keyword in words:
                         print(f"[DIET VIOLATION] Matched '{keyword}' for diet '{d}'")
+                        print(f">>> Ingredients being checked: {ingredients_text}")
+                        print(f">>> Forbidden keyword: {keyword} for diet: {d}")
                         return False
 
     # 3. Health Condition Check
@@ -615,16 +648,11 @@ def is_recipe_safe(recipe_name, ingredients_text, user_prefs):
             condition = condition.strip().lower()
             keywords = HEALTH_RESTRICTIONS.get(condition, [])
             for keyword in keywords:
-                if re.search(rf"\b{re.escape(keyword)}\b", text_to_check):
+                if re.search(rf"\b{re.escape(keyword)}\b", ingredients_text):
                     print(f"[HEALTH VIOLATION] Matched '{keyword}' for condition '{condition}'")
                     return False
 
     return True
-
-from openai import AsyncOpenAI  # NEW: for async calls
-
-# Initialize OpenAI Async client globally (best practice)
-client = AsyncOpenAI()
 
 # ========== FAISS Embedding Utils ==========
 async def get_embedding(text):
@@ -777,12 +805,6 @@ async def generate_meal_plan(user_prefs):
         st.session_state.cuisine_distribution = {}
         st.session_state.used_recipe_names = set()
 
-        # ✅ FIX: Initialize or clear recipe embedding list at the start of generation
-        if 'recipes_to_embed' not in st.session_state:
-            st.session_state.recipes_to_embed = []
-        else:
-            st.session_state.recipes_to_embed.clear()
-
         if not isinstance(user_prefs, dict):
             raise ValueError("user_prefs must be a dictionary")
 
@@ -913,15 +935,15 @@ async def generate_meal_plan(user_prefs):
             random.shuffle(available_cuisines)
 
         semaphore = asyncio.Semaphore(10)
-            
-        async def limited_generate(meal_type, day, prompt, cuisine, recipe_name):
+
+        async def limited_generate(meal_type, day, prompt, cuisine):
             async with semaphore:
-                return await generate_meal(meal_type, day, prompt, cuisine, recipe_name)
+                return await generate_meal(meal_type, day, prompt, cuisine)
 
         tasks = []
-
+        used_cuisines = set()
         cuisine_index = 0
-        
+
         for day in range(1, num_days + 1):
             st.session_state.cuisine_distribution[day] = {
                 'breakfast': None,
@@ -934,34 +956,47 @@ async def generate_meal_plan(user_prefs):
             else:
                 meal_types = [m for m in ["Breakfast", "Lunch", "Dinner"] if m in meal_type]
 
-            day_meal_prompts = []  # [(meal_type, prompt, cuisine, recipe_name)]
-            meal_title_map = {}    # {meal_type: [titles]}
-
             for meal in meal_types:
                 selected_cuisine = available_cuisines[cuisine_index % len(available_cuisines)]
                 cuisine_index += 1
                 st.session_state.cuisine_distribution[day][meal.lower()] = selected_cuisine
+                used_cuisines.add(selected_cuisine)
 
                 authentic_recipes = AUTHENTIC_RECIPE_NAMES.get(selected_cuisine, [])
+                if not authentic_recipes:
+                    #st.warning(f"No authentic recipes found for {selected_cuisine} cuisine.")
+                    continue
+
                 meal_recipes = [
                     r for r in authentic_recipes
                     if meal.lower() in r.lower() and is_title_allowed_for_diet(r, diet_list)
                 ]
 
+                adaptive_generation = False
+
                 if not meal_recipes:
-                    fallback = f"{selected_cuisine} {meal} - GPT Generated Fallback"
-                    meal_recipes = [fallback]
+                    if any(
+                        d in DIET_RESTRICTIONS and
+                        not any(is_title_allowed_for_diet(r, [d]) for r in authentic_recipes)
+                        for d in diet_list
+                    ):
+                        #st.warning(f"⚠️ No authentic titles matched the {diet_list} diet for {selected_cuisine} {meal}. Forcing GPT to generate a compliant custom recipe.")
+                        recipe_name = f"Custom {selected_cuisine} {meal} (Diet-Compliant)"
+                        meal_recipes = [recipe_name]
+                        adaptive_generation = True
+                    else:
+                        st.info(f"💡 No diet-compliant titles found for {selected_cuisine} {meal}. Entering adaptive generation mode.")
+                        recipe_name = f"{selected_cuisine} {meal} - GPT Generated Fallback"
+                        meal_recipes = [recipe_name]
+                        adaptive_generation = True
 
                 random.shuffle(meal_recipes)
-                retry_titles = []
-                retry_prompts = []
 
                 for recipe_name in meal_recipes:
                     if recipe_name in st.session_state.used_recipe_names:
                         continue
 
-                    st.session_state.used_recipe_names.add(recipe_name)
-                    retry_titles.append(recipe_name)
+                    st.session_state.used_recipe_names.add(recipe_name)  # ✅ Mark it as used IMMEDIATELY
 
                     prompt = get_meal_prompt(
                         meal_type=meal,
@@ -973,62 +1008,43 @@ async def generate_meal_plan(user_prefs):
                         - Use authentic {selected_cuisine} ingredients and methods
                         - Follow {selected_cuisine} cultural traditions
                         - Use traditional {selected_cuisine} dishes
+                        - Include {selected_cuisine} specific ingredients
                         - Avoid mixing with other cuisines
+                        - Use authentic {selected_cuisine} cooking techniques
+                        - Follow {selected_cuisine} plating styles
+                        - Use proper {selected_cuisine} terminology
                         - Ensure dish is recognizably {selected_cuisine}
+                        - The recipe MUST explicitly mention \"{selected_cuisine}\" in its description or title
 
-                        IMPORTANT: Use the exact recipe name: \"{recipe_name}\". No rephrasing.
+                        IMPORTANT: When generating the recipe:
+                        1. GPT MUST use the exact recipe name: \"{recipe_name}\" and not change or rephrase it.
+                        2. The recipe title in the output must exactly match this string, including punctuation and word order.
+                        3. GPT must NOT add any extra prefix (e.g. Day 1 - Lunch -) unless explicitly instructed.
                         """ + dietary_requirements + budget_requirements + measurement_requirements,
                         available_ingredients=available_ingredients,
                         authentic_recipes=[recipe_name]
                     )
 
-                    retry_prompts.append(prompt)
+                    task = limited_generate(meal, day, prompt, selected_cuisine)
+                    tasks.append(task)
+                    break
 
-                    if len(retry_prompts) == 2:
-                        break
+        results = await asyncio.gather(*tasks)
 
-                meal_title_map[meal] = retry_titles
-                for i, prompt in enumerate(retry_prompts):
-                    day_meal_prompts.append((meal, prompt, selected_cuisine, retry_titles[i]))
-
-            # 🔁 Run all retries for this day in parallel (up to 15 tasks max)
-            meal_tasks = [
-                limited_generate(meal_type, day, prompt, cuisine, recipe_name)
-                for (meal_type, prompt, cuisine, recipe_name) in day_meal_prompts
-            ]
-
-            results = await asyncio.gather(*meal_tasks)
-
-            # ✅ Pick only the first successful result per meal
-            completed_meals = set()
-            for result in results:
-                if isinstance(result, tuple):
-                    meal_type = result[0]
-                    if meal_type not in completed_meals:
-                        st.session_state.generated_recipes.append({
-                            "day": day,
-                            "meal_type": meal_type,
-                            "recipe": result[2]
-                        })
-                        completed_meals.add(meal_type)
-
-            # ❌ Log missing meals
-            for meal in meal_types:
-                if meal not in completed_meals:
-                    print(f"[SKIP] No valid {meal} for Day {day}")
+        for result in results:
+            if result:
+                meal_type, day, recipe_text = result
+                st.session_state.generated_recipes.append({
+                    "day": day,
+                    "meal_type": meal_type,
+                    "recipe": recipe_text
+                })
 
         return st.session_state.generated_recipes
 
     except Exception as e:
-        #st.error(f"Error generating meal plan: {str(e)}")
+        st.error(f"Error generating meal plan: {str(e)}")
         return []
-
-    finally:
-        await save_all_embeddings()
-        faiss.write_index(recipe_index, INDEX_FILE)
-        with open(NAMES_FILE, "wb") as f:
-            pickle.dump(recipe_names, f)
-        print("✅ FAISS index and names saved to disk at end.")
 
 def display_meal_plan(meal_plan):
     st.title("Your Personalized Meal Plan")
@@ -1219,8 +1235,7 @@ def extract_grains(recipe_text):
     
     return grains
 
-# ========== ASYNC MAIN FUNCTION ==========
-async def main_async():
+def main():
     try:
         user_prefs = get_user_preferences()
 
@@ -1228,7 +1243,8 @@ async def main_async():
             st.error("Failed to get user preferences. Please try again.")
             return
 
-        st.markdown("""
+        st.markdown(
+            """
             <style>
             div.stSpinner > div {
                 display: flex;
@@ -1236,13 +1252,16 @@ async def main_async():
                 align-items: center;
             }
             </style>
-        """, unsafe_allow_html=True)
+            """,
+            unsafe_allow_html=True,
+        )
 
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
+                        # ✅ FULL RESET (session + in-memory + optional disk)
                         st.session_state.used_recipe_names = set()
                         st.session_state.generated_recipes = []
                         st.session_state.meal_types_used = set()
@@ -1252,16 +1271,15 @@ async def main_async():
                         recipe_index.reset()
                         recipe_names.clear()
 
+                        # Optional disk reset for FAISS files (safe for testing)
                         if os.path.exists(INDEX_FILE):
                             os.remove(INDEX_FILE)
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
 
+                        # 🔁 Generate
                         start_time = time.time()
-                        meal_plan = await generate_meal_plan(user_prefs)
-                        end_time = time.time()
-                        print(f"⏱️ Total generation time: {end_time - start_time:.2f} seconds")
-
+                        meal_plan = asyncio.run(generate_meal_plan(user_prefs))
                         st.session_state.meal_plan = meal_plan
 
                         if meal_plan:
@@ -1274,12 +1292,9 @@ async def main_async():
                         else:
                             st.error("Failed to Generate Meal Plan. Please Try Again")
 
-                        await close_http_session()
-
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
                         st.session_state.meal_plan = None
-                        await close_http_session()
 
         if st.session_state.meal_plan:
             display_meal_plan(st.session_state.meal_plan)
@@ -1287,26 +1302,5 @@ async def main_async():
     except Exception as e:
         st.error(f"An unexpected error occurred: {str(e)}")
 
-
-# ========== SYNC WRAPPER FOR STREAMLIT ==========
-def main():
-    asyncio.run(main_async())
-
-
-import streamlit as st
-
-# Run the async app logic only once when the button is clicked
-if "run_meal_plan" not in st.session_state:
-    st.session_state.run_meal_plan = False
-
-user_prefs = get_user_preferences()
-
-col1, col2, col3 = st.columns([1, 2, 1])
-with col2:
-    if st.button("Generate Meal Plan"):
-        st.session_state.run_meal_plan = True
-
-# Only run main async logic if the button was pressed
-if st.session_state.run_meal_plan and user_prefs:
-    with st.spinner("Generating Your Personalized Meal Plan..."):
-        asyncio.run(main_async())
+if __name__ == "__main__":
+    main()
