@@ -1030,10 +1030,10 @@ async def generate_meal_plan(user_prefs):
                 except Exception as e:
                     print(f"⚠️ Error in meal generation for {meal} on Day {day}: {e}")
         
-        # ✅ FINAL except for the main try block
-        except Exception as e:
-            st.error(f"Error generating meal plan: {str(e)}")
-            return []
+    # ✅ FINAL except for the main try block
+    except Exception as e:
+        st.error(f"Error generating meal plan: {str(e)}")
+        return []
 
 def display_meal_plan(meal_plan):
     st.title("Your Personalized Meal Plan")
