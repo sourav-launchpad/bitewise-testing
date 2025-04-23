@@ -1,4 +1,10 @@
 import streamlit as st
+# Set page config
+st.set_page_config(
+    page_title="BiteWise",
+    page_icon="🍽️",
+    layout="wide"
+)
 import openai
 import pandas as pd
 import time
@@ -29,13 +35,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from openai import AsyncOpenAI
-
-# Set page config
-st.set_page_config(
-    page_title="BiteWise",
-    page_icon="🍽️",
-    layout="wide"
-)
 
 client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
