@@ -1001,6 +1001,8 @@ async def generate_meal_plan(user_prefs):
                     if recipe_name in st.session_state.used_recipe_names:
                         continue
 
+                    st.session_state.used_recipe_names.add(recipe_name)  # ✅ Mark it as used IMMEDIATELY
+
                     prompt = get_meal_prompt(
                         meal_type=meal,
                         day=day,
