@@ -1376,5 +1376,11 @@ async def actual_main():
     except Exception as e:
         st.error(f"An unexpected error occurred: {str(e)}")
 
-# Streamlit will run this
-await actual_main()
+# 👇 Place at the END of your app.py
+import streamlit.runtime.scriptrunner.script_run_context as script_run_context
+
+if script_run_context.get_script_run_ctx():
+    import asyncio
+    if "run_flag" not in st.session_state:
+        st.session_state.run_flag = True
+        asyncio.create_task(actual_main())
