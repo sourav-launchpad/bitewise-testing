@@ -547,7 +547,7 @@ async def generate_meal(meal_type, day, prompt, cuisine="All"):
     try:
         # Use OpenAI client directly instead of aiohttp
         response = await client.chat.completions.create(
-            model="gpt-4.1-mini",  # or "gpt-4o-mini" if preferred
+            model="gpt-4o-mini",  # or "gpt-4o-mini" if preferred
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
@@ -653,6 +653,11 @@ def is_recipe_safe(ingredients_text, user_prefs):
                     return False
 
     return True
+
+from openai import AsyncOpenAI  # NEW: for async calls
+
+# Initialize OpenAI Async client globally (best practice)
+client = AsyncOpenAI()
 
 # ========== FAISS Embedding Utils ==========
 async def get_embedding(text):
@@ -934,7 +939,7 @@ async def generate_meal_plan(user_prefs):
             available_cuisines = cuisine_prefs.copy()
             random.shuffle(available_cuisines)
 
-        semaphore = asyncio.Semaphore(63)
+        semaphore = asyncio.Semaphore(10)
 
         async def limited_generate(meal_type, day, prompt, cuisine):
             async with semaphore:
@@ -972,20 +977,31 @@ async def generate_meal_plan(user_prefs):
                     if meal.lower() in r.lower() and is_title_allowed_for_diet(r, diet_list)
                 ]
 
+                adaptive_generation = False
+
                 if not meal_recipes:
-                    fallback = f"{selected_cuisine} {meal} - GPT Generated Fallback"
-                    meal_recipes = [fallback]
+                    if any(
+                        d in DIET_RESTRICTIONS and
+                        not any(is_title_allowed_for_diet(r, [d]) for r in authentic_recipes)
+                        for d in diet_list
+                    ):
+                        #st.warning(f"⚠️ No authentic titles matched the {diet_list} diet for {selected_cuisine} {meal}. Forcing GPT to generate a compliant custom recipe.")
+                        recipe_name = f"Custom {selected_cuisine} {meal} (Diet-Compliant)"
+                        meal_recipes = [recipe_name]
+                        adaptive_generation = True
+                    else:
+                        st.info(f"💡 No diet-compliant titles found for {selected_cuisine} {meal}. Entering adaptive generation mode.")
+                        recipe_name = f"{selected_cuisine} {meal} - GPT Generated Fallback"
+                        meal_recipes = [recipe_name]
+                        adaptive_generation = True
 
                 random.shuffle(meal_recipes)
-                retry_prompts = []
-                retry_titles = []
 
                 for recipe_name in meal_recipes:
                     if recipe_name in st.session_state.used_recipe_names:
                         continue
 
-                    st.session_state.used_recipe_names.add(recipe_name)
-                    retry_titles.append(recipe_name)
+                    st.session_state.used_recipe_names.add(recipe_name)  # ✅ Mark it as used IMMEDIATELY
 
                     prompt = get_meal_prompt(
                         meal_type=meal,
@@ -1014,30 +1030,20 @@ async def generate_meal_plan(user_prefs):
                         authentic_recipes=[recipe_name]
                     )
 
-                    retry_prompts.append(prompt)
+                    task = limited_generate(meal, day, prompt, selected_cuisine)
+                    tasks.append(task)
+                    break
 
-                    if len(retry_prompts) == 5:
-                        break  # ✅ Only try 3 titles max
+        results = await asyncio.gather(*tasks)
 
-                # Run all 2–3 retry prompts in parallel
-                retry_tasks = [
-                    limited_generate(meal, day, p, selected_cuisine)
-                    for p in retry_prompts
-                ]
-                results = await asyncio.gather(*retry_tasks)
-
-                # Pick the first successful generation
-                for idx, result in enumerate(results):
-                    if result:
-                        meal_type, day, recipe_text = result
-                        st.session_state.generated_recipes.append({
-                            "day": day,
-                            "meal_type": meal_type,
-                            "recipe": recipe_text
-                        })
-                        break
-                else:
-                    print(f"[SKIP] No valid {meal} for Day {day} after retries")
+        for result in results:
+            if result:
+                meal_type, day, recipe_text = result
+                st.session_state.generated_recipes.append({
+                    "day": day,
+                    "meal_type": meal_type,
+                    "recipe": recipe_text
+                })
 
         return st.session_state.generated_recipes
 
