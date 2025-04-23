@@ -1300,10 +1300,7 @@ def extract_grains(recipe_text):
     
     return grains
 
-import nest_asyncio
-nest_asyncio.apply()
-
-async def main():
+async def async_main():
     try:
         user_prefs = get_user_preferences()
 
@@ -1329,6 +1326,7 @@ async def main():
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
+                        # ✅ FULL RESET (session + in-memory + optional disk)
                         st.session_state.used_recipe_names = set()
                         st.session_state.generated_recipes = []
                         st.session_state.meal_types_used = set()
@@ -1343,7 +1341,6 @@ async def main():
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
 
-                        # ✅ This is safe now because we are inside an async function
                         meal_plan = await generate_meal_plan(user_prefs)
                         st.session_state.meal_plan = meal_plan
 
@@ -1367,5 +1364,9 @@ async def main():
     except Exception as e:
         st.error(f"An unexpected error occurred: {str(e)}")
 
-import asyncio
-asyncio.create_task(main())
+def main():
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    loop.run_until_complete(async_main())
+
+main()
