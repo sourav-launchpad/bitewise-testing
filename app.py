@@ -1285,6 +1285,3 @@ def run_async_main():
 
 if script_run_context.get_script_run_ctx():
     run_async_main()
-
-if __name__ == "__main__":
-    main()
