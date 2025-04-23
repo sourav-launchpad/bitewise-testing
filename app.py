@@ -36,7 +36,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from openai import AsyncOpenAI
 
-client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+if "OPENAI_API_KEY" in st.secrets:
+    client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+else:
+    st.error("❌ OpenAI API key not found in Streamlit secrets.")
+    st.stop()
+
+st.write("🔐 API Key detected:", st.secrets.get("OPENAI_API_KEY"))
+    
 RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
 # ========== FAISS Embedding Index Setup ==========
