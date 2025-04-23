@@ -1234,69 +1234,52 @@ def extract_grains(recipe_text):
     
     return grains
 
-def main():
-    try:
-        user_prefs = get_user_preferences()
+async def main():
+    user_prefs = get_user_preferences()
+    if user_prefs is None:
+        st.error("Failed to get user preferences. Please try again.")
+        return
 
-        if user_prefs is None:
-            st.error("Failed to get user preferences. Please try again.")
-            return
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        if st.button("Generate Meal Plan"):
+            with st.spinner("Generating Your Personalized Meal Plan..."):
+                try:
+                    st.session_state.used_recipe_names = set()
+                    st.session_state.generated_recipes = []
+                    st.session_state.meal_types_used = set()
+                    st.session_state.cuisines_used = set()
+                    st.session_state.cuisine_distribution = {}
 
-        st.markdown(
-            """
-            <style>
-            div.stSpinner > div {
-                display: flex;
-                justify-content: center;
-                align-items: center;
-            }
-            </style>
-            """,
-            unsafe_allow_html=True,
-        )
+                    recipe_index.reset()
+                    recipe_names.clear()
+                    if os.path.exists(INDEX_FILE):
+                        os.remove(INDEX_FILE)
+                    if os.path.exists(NAMES_FILE):
+                        os.remove(NAMES_FILE)
 
-        col1, col2, col3 = st.columns([1, 2, 1])
-        with col2:
-            if st.button("Generate Meal Plan"):
-                with st.spinner("Generating Your Personalized Meal Plan..."):
-                    try:
-                        st.session_state.used_recipe_names = set()
-                        st.session_state.generated_recipes = []
-                        st.session_state.meal_types_used = set()
-                        st.session_state.cuisines_used = set()
-                        st.session_state.cuisine_distribution = {}
-            
-                        recipe_index.reset()
-                        recipe_names.clear()
-                        if os.path.exists(INDEX_FILE):
-                            os.remove(INDEX_FILE)
-                        if os.path.exists(NAMES_FILE):
-                            os.remove(NAMES_FILE)
-            
-                        # ✅ FIXED: Streamlit-safe asyncio execution
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                        try:
-                            meal_plan = loop.run_until_complete(generate_meal_plan(user_prefs))
-                        finally:
-                            loop.close()
-            
-                        st.session_state.meal_plan = meal_plan
-            
-                        if meal_plan:
-                            st.success("Meal Plan Generated Successfully!")
-                        else:
-                            st.error("Failed to Generate Meal Plan. Please Try Again")
-            
-                    except Exception as e:
-                        st.error(f"An error occurred: {str(e)}")
-                        st.session_state.meal_plan = None
-            
-        if st.session_state.meal_plan:
-            display_meal_plan(st.session_state.meal_plan)
+                    # ✅ Use await inside Streamlit's async-safe context
+                    meal_plan = await generate_meal_plan(user_prefs)
+                    st.session_state.meal_plan = meal_plan
 
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {str(e)}")
+                    if meal_plan:
+                        st.success("Meal Plan Generated Successfully!")
+                    else:
+                        st.error("Failed to Generate Meal Plan. Please Try Again")
 
-if __name__ == "__main__":
-    main()
+                except Exception as e:
+                    st.error(f"An error occurred: {str(e)}")
+                    st.session_state.meal_plan = None
+
+    if st.session_state.meal_plan:
+        display_meal_plan(st.session_state.meal_plan)
+
+import streamlit.runtime.scriptrunner.script_run_context as script_run_context
+
+if script_run_context.get_script_run_ctx():
+    # Inside Streamlit
+    import asyncio
+    asyncio.run(main())  # ❌ DON'T DO THIS IN STREAMLIT
+else:
+    import asyncio
+    asyncio.run(main())  # ✅ Only for CLI testing
