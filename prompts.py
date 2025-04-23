@@ -330,8 +330,9 @@ Generate a list of creative and original recipe names based on the given dish de
 
 **Guidelines:**
 - Use clear, descriptive language.  
-- Avoid generic or overused words like: *Fragrant*, *Oceanic*, *Zesty*, *Stir-Fry*, *Delight*, *Aussie*, *Brekkie*, *Lemony* 
-- Subtle wordplay, alliteration, or sensory imagery is encouraged — only where it feels organic.  
+- Avoid generic or overused words like: *Fragrant*, *Oceanic*, *Zesty*, *Stir-Fry*, *Delight*, *Aussie*, *Brekkie*, *Lemony*
+- IMPORTANT: For any dish that uses tomato as a base (like in curries or stews), describe it as "tomato-based" instead of using the term "tomato sauce" unless it is an actual prepared sauce like pasta sauce or ketchup. This avoids confusion with traditional Western sauces.
+- Subtle wordplay, alliteration, or sensory imagery is encouraged — only where it feels organic.
 - Focus on the key ingredient(s), cooking method, or regional influence.  
 - The name should feel modern, refined, and not overly "foodie" or forced.
   
@@ -450,7 +451,6 @@ AUTHENTIC_RECIPE_NAMES = {
     "Sweet Potato Hash with Black Beans, Scrambled Egg, and Salsa | Breakfast",
     "Steel-Cut Oats with Banana, Carrot, Toasted Nuts, and Cinnamon | Breakfast",
     "Breakfast Quesadilla with Spinach, Egg, and Tomato Salsa | Breakfast",
-    "Peanut Butter and Banana on Wholegrain Toast with Grated Zucchini | Breakfast",
     "Spinach and Mushroom Omelette with Wholemeal Toast and Baked Capsicum | Breakfast",
     "Breakfast Burrito with Pinto Beans, Brown Rice, Grilled Onion, and Egg | Breakfast",
     "Greek Yogurt Parfait with Granola, Roasted Carrot, and Berries | Breakfast",
@@ -489,9 +489,9 @@ AUTHENTIC_RECIPE_NAMES = {
     "Chickpea and Spinach Curry with Wholegrain Roti | Lunch",
 
     # British Lunches
-    "Shepherd’s Pie with Cauliflower Mash and Garden Peas | Lunch",
+    "Shepherd's Pie with Cauliflower Mash and Garden Peas | Lunch",
     "Wholemeal Fish Finger Sandwich with Tartare Slaw | Lunch",
-    "Ploughman’s Lunch with Wholegrain Bread, Cheddar, and Pickled Veg | Lunch",
+    "Ploughman's Lunch with Wholegrain Bread, Cheddar, and Pickled Veg | Lunch",
     "Grilled Mackerel with Beetroot Salad and Rye Croutons | Lunch",
     "Lentil and Vegetable Pasties with Spinach and Tomato Salad | Lunch",
     "Bubble and Squeak Cakes with Poached Egg and Rocket | Lunch",
@@ -560,8 +560,8 @@ AUTHENTIC_RECIPE_NAMES = {
     "Fish Pie with Sweet Potato Topping and Steamed Greens | Dinner",
     "Bangers and Mash with Onion Gravy and Steamed Carrots | Dinner",
     "Toad in the Hole with Kale, Carrot, and Onion Gravy | Dinner",
-    "Ploughman’s Platter with Wholegrain Crackers and Pickled Veg | Dinner",
-    "Lamb and Lentil Shepherd’s Pie with Cauliflower Mash | Dinner",
+    "Ploughman's Platter with Wholegrain Crackers and Pickled Veg | Dinner",
+    "Lamb and Lentil Shepherd's Pie with Cauliflower Mash | Dinner",
     "Vegetarian Haggis with Oatmeal, Lentils, Turnips, and Green Beans | Dinner",
     "Poached Haddock with Barley, Spinach, and Mustard Cream | Dinner",
     "Beef and Leek Casserole with Wholemeal Dumplings | Dinner",
@@ -703,7 +703,8 @@ AUTHENTIC_RECIPE_NAMES = {
   "Butter Chicken with Brown Rice and Sauteed Greens | Lunch",
   "Aloo Baingan with Quinoa and Mint Raita | Lunch",
   "Lentil-Stuffed Paratha with Mixed Veg Pickle and Yogurt | Lunch",
-    # Dinner
+  
+  # Dinner
   "Methi Matar Malai with Whole Wheat Naan and Beet-Carrot Salad | Dinner",
   "Tandoori Salmon with Masala Sweet Potato Mash and Sauteed Beans | Dinner",
   "Mushroom Kadai with Multigrain Rotis and Garlic Raita | Dinner",
@@ -712,7 +713,7 @@ AUTHENTIC_RECIPE_NAMES = {
   "Mixed Dal Tadka with Wholegrain Roti and Kachumber Salad",
   "Bhindi Do Pyaza with Bajra Roti and Peanut-Coconut Slaw | Dinner",
   "Paneer Bhuna Masala with Jeera Quinoa and Green Beans | Dinner",
-  "Spicy Egg Curry with Brown Rice and Lemon Cabbage Stir-Fry | Dinner",
+  "Egg Curry with Brown Rice and Lemon Cabbage Stir-Fry | Dinner",
   "Vegetable Tofu Stir Fry with Buckwheat Noodles and Toasted Sesame | Dinner",
   "Fish Curry with Steamed Red Rice and Cucumber-Tomato Kachumber | Dinner",
   "Baingan Bharta with Jowar Roti and Spiced Yogurt | Dinner",
@@ -1335,7 +1336,7 @@ AUTHENTIC_RECIPE_NAMES = {
     "Mediterranean Spiced Chicken with Wild Rice and Mixed Salad | Dinner",
     "Chickpea and Barley Skillet with Capsicum and Yogurt Drizzle | Dinner",
     "Grilled Fish with Tomato Chickpea Ragu and Steamed Zucchini | Dinner",
-    "Lentil Shepherd’s Pie with Olive Oil Mashed Sweet Potato | Dinner",
+    "Lentil Shepherd's Pie with Olive Oil Mashed Sweet Potato | Dinner",
     "Spinach and Chickpea Curry with Brown Rice and Lemon Yogurt | Dinner"
 ],
     "Korean": [
@@ -1646,7 +1647,7 @@ AUTHENTIC_RECIPE_NAMES = {
 ],
     "Middle Eastern": [
     "Ful Medames with Wholemeal Pita, Tomato-Cucumber Salad, and Olive Oil | Breakfast",
-    "Labneh with Za’atar, Wholegrain Flatbread, and Fresh Vegetable Plate | Breakfast",
+    "Labneh with Za'atar, Wholegrain Flatbread, and Fresh Vegetable Plate | Breakfast",
     "Scrambled Eggs with Tomato (Shakshuka-style) and Wholegrain Pita | Breakfast",
     "Hummus with Steamed Chickpeas, Wholegrain Crackers, and Cucumber-Tomato Slices | Breakfast",
     "Fava Bean Patties with Wholegrain Wrap and Pickled Turnips | Breakfast",
@@ -1777,7 +1778,7 @@ AUTHENTIC_RECIPE_NAMES = {
     "Lamb and Lentil Stew with Steamed Greens and Wholegrain Flatbread | Dinner",
     "Chickpea and Spinach Fritters with Freekeh and Cucumber-Tomato Salad | Dinner",
     "Grilled Chicken Thigh Skewers with Quinoa Tabbouleh and Garlic Sauce | Dinner",
-    "Wholegrain Flatbread Pizza with Chickpeas, Tomato, and Za’atar | Dinner",
+    "Wholegrain Flatbread Pizza with Chickpeas, Tomato, and Za'atar | Dinner",
     "Tofu Shawarma Bowl with Brown Rice, Roasted Vegetables, and Tahini | Dinner",
     "Stuffed Capsicum with Spiced Lentils, Tomato Sauce, and Couscous | Dinner",
     "Fava Bean Stew with Grilled Eggplant and Wholegrain Bread | Dinner",
@@ -2447,35 +2448,35 @@ def get_budget_constraints(budget_type):
 
 def get_time_constraints(time_constraint):
     constraints = {
-        "Busy schedule (15 mins)": {
+        "no more than 15 minutes": {
             "max_time": "15 minutes",
             "methods": ["stir-fry", "pan-fry", "boiling", "air-frying"],
             "avoid": ["baking", "roasting", "slow-cooking"],
             "prep": ["pre-cut", "canned", "frozen"],
             "steps": ["simple", "quick", "minimal"]
         },
-        "Moderate schedule (30 mins)": {
+        "between 15 and 30 minutes": {
             "max_time": "30 minutes",
             "methods": ["stir-fry", "pan-fry", "boiling", "baking", "air-frying"],
             "avoid": ["slow-cooking", "complex techniques"],
             "prep": ["fresh", "pre-cut", "canned"],
             "steps": ["moderate", "standard", "balanced"]
         },
-        "Busy on some days (45 mins)": {
+        "between 30 and 45 minutes": {
             "max_time": "45 minutes",
             "methods": ["all methods"],
             "avoid": ["slow-cooking"],
             "prep": ["fresh", "pre-cut", "canned"],
             "steps": ["detailed", "elaborate", "complex"]
         },
-        "Flexible Schedule (60 mins)": {
+        "between 45 and 60 minutes": {
             "max_time": "60 minutes",
             "methods": ["all methods"],
             "avoid": [],
             "prep": ["fresh", "pre-cut", "canned"],
             "steps": ["detailed", "elaborate", "complex"]
         },
-        "No Constraints (Any duration)": {
+        "no time limit": {
             "max_time": "No limit",
             "methods": ["all methods"],
             "avoid": [],
