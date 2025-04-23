@@ -38,7 +38,7 @@ st.set_page_config(
 )
 
 client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-st.write("🔑 API KEY CHECK:", st.secrets.get("OPENAI_API_KEY", "❌ Not Found"))
+# st.write("🔑 API KEY CHECK:", st.secrets.get("OPENAI_API_KEY", "❌ Not Found"))
 
 RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
