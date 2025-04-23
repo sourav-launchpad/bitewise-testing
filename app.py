@@ -29,6 +29,14 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 from openai import AsyncOpenAI
+
+# Set page config
+st.set_page_config(
+    page_title="BiteWise",
+    page_icon="🍽️",
+    layout="wide"
+)
+
 client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 st.write("🔑 API KEY CHECK:", st.secrets.get("OPENAI_API_KEY", "❌ Not Found"))
 
@@ -142,13 +150,6 @@ STANDARD_MEASUREMENTS = {
     "1 tbsp": 15,      # ml
     "1 tsp": 5,        # ml
 }
-
-# Set page config
-st.set_page_config(
-    page_title="BiteWise",
-    page_icon="🍽️",
-    layout="wide"
-)
 
 # Custom CSS
 st.markdown("""
