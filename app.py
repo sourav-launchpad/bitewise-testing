@@ -1303,7 +1303,7 @@ def extract_grains(recipe_text):
 import nest_asyncio
 nest_asyncio.apply()
 
-def main():
+async def main():
     try:
         user_prefs = get_user_preferences()
 
@@ -1343,9 +1343,8 @@ def main():
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
 
-                        # ✅ CORRECT: Await it using event loop since this is inside sync block
-                        loop = asyncio.get_event_loop()
-                        meal_plan = loop.run_until_complete(generate_meal_plan(user_prefs))
+                        # ✅ This is safe now because we are inside an async function
+                        meal_plan = await generate_meal_plan(user_prefs)
                         st.session_state.meal_plan = meal_plan
 
                         if meal_plan:
@@ -1368,5 +1367,5 @@ def main():
     except Exception as e:
         st.error(f"An unexpected error occurred: {str(e)}")
 
-if __name__ == "__main__":
-    main()
+import asyncio
+asyncio.create_task(main())
