@@ -997,59 +997,57 @@ async def generate_meal_plan(user_prefs):
 
                 random.shuffle(meal_recipes)
 
-                for recipe_name in meal_recipes:
-                    if recipe_name in st.session_state.used_recipe_names:
-                        continue
+successful = False  # Flag to break early on success
 
-                    st.session_state.used_recipe_names.add(recipe_name)  # ✅ Mark it as used IMMEDIATELY
+for recipe_name in meal_recipes:
+    if recipe_name in st.session_state.used_recipe_names:
+        continue
 
-                    prompt = get_meal_prompt(
-                        meal_type=meal,
-                        day=day,
-                        user_prefs=formatted_prefs,
-                        health_requirements=health_requirements,
-                        cuisine_requirements=f"""
-                        {selected_cuisine} Cuisine Requirements:
-                        - Use authentic {selected_cuisine} ingredients and methods
-                        - Follow {selected_cuisine} cultural traditions
-                        - Use traditional {selected_cuisine} dishes
-                        - Include {selected_cuisine} specific ingredients
-                        - Avoid mixing with other cuisines
-                        - Use authentic {selected_cuisine} cooking techniques
-                        - Follow {selected_cuisine} plating styles
-                        - Use proper {selected_cuisine} terminology
-                        - Ensure dish is recognizably {selected_cuisine}
-                        - The recipe MUST explicitly mention \"{selected_cuisine}\" in its description or title
+    st.session_state.used_recipe_names.add(recipe_name)  # ✅ Mark as used immediately
 
-                        IMPORTANT: When generating the recipe:
-                        1. GPT MUST use the exact recipe name: \"{recipe_name}\" and not change or rephrase it.
-                        2. The recipe title in the output must exactly match this string, including punctuation and word order.
-                        3. GPT must NOT add any extra prefix (e.g. Day 1 - Lunch -) unless explicitly instructed.
-                        """ + dietary_requirements + budget_requirements + measurement_requirements,
-                        available_ingredients=available_ingredients,
-                        authentic_recipes=[recipe_name]
-                    )
+    prompt = get_meal_prompt(
+        meal_type=meal,
+        day=day,
+        user_prefs=formatted_prefs,
+        health_requirements=health_requirements,
+        cuisine_requirements=f"""
+        {selected_cuisine} Cuisine Requirements:
+        - Use authentic {selected_cuisine} ingredients and methods
+        - Follow {selected_cuisine} cultural traditions
+        - Use traditional {selected_cuisine} dishes
+        - Include {selected_cuisine} specific ingredients
+        - Avoid mixing with other cuisines
+        - Use authentic {selected_cuisine} cooking techniques
+        - Follow {selected_cuisine} plating styles
+        - Use proper {selected_cuisine} terminology
+        - Ensure dish is recognizably {selected_cuisine}
+        - The recipe MUST explicitly mention \"{selected_cuisine}\" in its description or title
 
-                    task = limited_generate(meal, day, prompt, selected_cuisine)
-                    tasks.append(task)
-                    break
+        IMPORTANT: When generating the recipe:
+        1. GPT MUST use the exact recipe name: \"{recipe_name}\" and not change or rephrase it.
+        2. The recipe title in the output must exactly match this string, including punctuation and word order.
+        3. GPT must NOT add any extra prefix (e.g. Day 1 - Lunch -) unless explicitly instructed.
+        """ + dietary_requirements + budget_requirements + measurement_requirements,
+        available_ingredients=available_ingredients,
+        authentic_recipes=[recipe_name]
+    )
 
-        results = await asyncio.gather(*tasks)
+    # Try generating the recipe
+    result = await limited_generate(meal, day, prompt, selected_cuisine)
 
-        for result in results:
-            if result:
-                meal_type, day, recipe_text = result
-                st.session_state.generated_recipes.append({
-                    "day": day,
-                    "meal_type": meal_type,
-                    "recipe": recipe_text
-                })
+    if result:
+        meal_type, day, recipe_text = result
+        st.session_state.generated_recipes.append({
+            "day": day,
+            "meal_type": meal_type,
+            "recipe": recipe_text
+        })
+        successful = True
+        break  # ✅ Success, break the loop
 
-        return st.session_state.generated_recipes
-
-    except Exception as e:
-        st.error(f"Error generating meal plan: {str(e)}")
-        return []
+# Log if nothing worked after trying all
+if not successful:
+    print(f"[SKIP] All {meal} options failed for Day {day} - {selected_cuisine}")
 
 def display_meal_plan(meal_plan):
     st.title("Your Personalized Meal Plan")
