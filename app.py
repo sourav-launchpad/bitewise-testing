@@ -41,8 +41,6 @@ if "OPENAI_API_KEY" in st.secrets:
 else:
     st.error("❌ OpenAI API key not found in Streamlit secrets.")
     st.stop()
-
-st.write("🔐 API Key detected:", st.secrets.get("OPENAI_API_KEY"))
     
 RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
