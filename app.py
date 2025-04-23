@@ -1303,8 +1303,6 @@ def extract_grains(recipe_text):
     
     return grains
 
-import streamlit as st
-
 async def actual_main():
     try:
         user_prefs = get_user_preferences()
@@ -1313,6 +1311,7 @@ async def actual_main():
             st.error("Failed to get user preferences. Please try again.")
             return
 
+        # UI Spinner Styling
         st.markdown("""
             <style>
             div.stSpinner > div {
@@ -1328,23 +1327,26 @@ async def actual_main():
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
+                        # Reset state
                         st.session_state.used_recipe_names = set()
                         st.session_state.generated_recipes = []
                         st.session_state.meal_types_used = set()
                         st.session_state.cuisines_used = set()
                         st.session_state.cuisine_distribution = {}
 
+                        # Reset FAISS index & names if needed
                         recipe_index.reset()
                         recipe_names.clear()
-
                         if os.path.exists(INDEX_FILE):
                             os.remove(INDEX_FILE)
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
 
+                        # Begin generation
                         start_time = time.time()
                         meal_plan = await generate_meal_plan(user_prefs)
                         end_time = time.time()
+
                         print(f"⏱️ Total generation time: {end_time - start_time:.2f} seconds")
 
                         st.session_state.meal_plan = meal_plan
@@ -1359,18 +1361,20 @@ async def actual_main():
                         else:
                             st.error("Failed to Generate Meal Plan. Please Try Again")
 
+                        # Always close session
                         await close_http_session()
 
                     except Exception as e:
-                        st.error(f"An error occurred: {str(e)}")
+                        st.error(f"An error occurred during generation: {str(e)}")
                         st.session_state.meal_plan = None
                         await close_http_session()
 
+        # Display Meal Plan
         if st.session_state.meal_plan:
             display_meal_plan(st.session_state.meal_plan)
 
     except Exception as e:
         st.error(f"An unexpected error occurred: {str(e)}")
 
-if __name__ == "__main__":
-    main()  # ✅ Runs only if this file is executed directly (not needed for Streamlit UI)
+# Streamlit will run this
+await actual_main()
