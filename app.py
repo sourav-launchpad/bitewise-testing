@@ -1262,26 +1262,27 @@ def main():
                         st.session_state.meal_types_used = set()
                         st.session_state.cuisines_used = set()
                         st.session_state.cuisine_distribution = {}
-
+            
                         recipe_index.reset()
                         recipe_names.clear()
                         if os.path.exists(INDEX_FILE):
                             os.remove(INDEX_FILE)
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
-
-                        # ✅ Correct async-safe execution
-                        loop = asyncio.get_event_loop()
-                        if loop.is_running():
-                            asyncio.create_task(async_main(user_prefs))
-                        else:
-                            loop.run_until_complete(async_main(user_prefs))
-
-                        if st.session_state.meal_plan:
+            
+                        # ✅ FIX: Create new loop and run coroutine
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                        meal_plan = loop.run_until_complete(generate_meal_plan(user_prefs))
+                        loop.close()
+            
+                        st.session_state.meal_plan = meal_plan
+            
+                        if meal_plan:
                             st.success("Meal Plan Generated Successfully!")
                         else:
                             st.error("Failed to Generate Meal Plan. Please Try Again")
-
+            
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
                         st.session_state.meal_plan = None
