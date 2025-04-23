@@ -148,13 +148,6 @@ STANDARD_MEASUREMENTS = {
     "1 tsp": 5,        # ml
 }
 
-# Set page config
-st.set_page_config(
-    page_title="BiteWise",
-    page_icon="🍽️",
-    layout="wide"
-)
-
 # Custom CSS
 st.markdown("""
     <style>
