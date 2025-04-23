@@ -30,7 +30,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from openai import AsyncOpenAI
 
-client = AsyncOpenAI(api_key=st.secrets("OPENAI_API_KEY"))
+client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
