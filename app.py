@@ -939,7 +939,7 @@ async def generate_meal_plan(user_prefs):
             available_cuisines = cuisine_prefs.copy()
             random.shuffle(available_cuisines)
 
-        semaphore = asyncio.Semaphore(10)
+        semaphore = asyncio.Semaphore(21)
 
         async def limited_generate(meal_type, day, prompt, cuisine):
             async with semaphore:
