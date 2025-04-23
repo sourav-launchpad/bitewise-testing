@@ -1300,7 +1300,27 @@ def extract_grains(recipe_text):
     
     return grains
 
-async def async_main():
+async def async_main(user_prefs):
+    # Run async meal generation logic
+    try:
+        meal_plan = await generate_meal_plan(user_prefs)
+        st.session_state.meal_plan = meal_plan
+
+        if meal_plan:
+            st.markdown(
+                "<div style='text-align: center; background-color: #d4edda; padding: 10px; border-radius: 5px; color: #155724; font-weight: bold;'>"
+                "Meal Plan Generated Successfully!"
+                "</div>",
+                unsafe_allow_html=True
+            )
+        else:
+            st.error("Failed to Generate Meal Plan. Please Try Again")
+
+    except Exception as e:
+        st.error(f"❌ Error during meal generation: {str(e)}")
+        st.session_state.meal_plan = None
+
+def main():
     try:
         user_prefs = get_user_preferences()
 
@@ -1326,7 +1346,6 @@ async def async_main():
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
-                        # ✅ FULL RESET (session + in-memory + optional disk)
                         st.session_state.used_recipe_names = set()
                         st.session_state.generated_recipes = []
                         st.session_state.meal_types_used = set()
@@ -1341,32 +1360,25 @@ async def async_main():
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
 
-                        meal_plan = await generate_meal_plan(user_prefs)
-                        st.session_state.meal_plan = meal_plan
-
-                        if meal_plan:
-                            st.markdown(
-                                "<div style='text-align: center; background-color: #d4edda; padding: 10px; border-radius: 5px; color: #155724; font-weight: bold;'>"
-                                "Meal Plan Generated Successfully!"
-                                "</div>",
-                                unsafe_allow_html=True
-                            )
+                        # ✅ Run async inside Streamlit-safe environment
+                        import asyncio
+                        loop = asyncio.get_event_loop()
+                        if loop.is_running():
+                            loop.create_task(async_main(user_prefs))
                         else:
-                            st.error("Failed to Generate Meal Plan. Please Try Again")
+                            loop.run_until_complete(async_main(user_prefs))
 
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
                         st.session_state.meal_plan = None
 
+        # Display the meal plan if it exists
         if st.session_state.meal_plan:
             display_meal_plan(st.session_state.meal_plan)
 
     except Exception as e:
-        st.error(f"An unexpected error occurred: {str(e)}")
+        st.error(f"An unexpected error occurred in the app: {str(e)}")
 
-def main():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(async_main())
+if __name__ == "__main__":
+    main()
 
-main()
