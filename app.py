@@ -705,34 +705,37 @@ import re
 
 def parse_recipe(recipe_text):
     try:
-        # Strip markdown formatting and clean whitespace
-        cleaned_text = recipe_text.replace("__", "").strip()
+        # Remove markdown bold and clean
+        cleaned = recipe_text.replace("**", "").replace("__", "").strip()
 
-        # Match title: "**Recipe Name | MealType**"
-        title_match = re.search(r"\*\*(.*?)\s*\|\s*(Breakfast|Lunch|Dinner)\*\*", recipe_text, re.IGNORECASE)
-        if not title_match:
-            # Fallback: try any bold line with a pipe
-            title_match = re.search(r"\*\*(.*?)\|", recipe_text)
+        # Title extraction
+        title_match = re.search(r"(?:Day\s*\d+\s*-\s*)?(.*?)(?:\||\n)", cleaned)
         name = title_match.group(1).strip() if title_match else None
 
-        # Match ingredients section (robust against bullet styles and spacing)
+        # Ingredients: multi-line or inline handling
         ingredients_match = re.search(
-            r"(?i)\*\*Ingredients\*\*\s*[:\-]?\s*(.*?)(?:\n\s*\*\*(Instructions|Description|Total Time|Serves)\*\*|$)",
-            recipe_text,
+            r"(?i)(?:ingredients|ingredient list)\s*[:\-]?\s*(.*?)(?:\n\s*(instructions|description|total time|serves)\b|$)",
+            cleaned,
             re.DOTALL
         )
-        ingredients_raw = ingredients_match.group(1).strip() if ingredients_match else None
 
-        if not name or not ingredients_raw:
+        if ingredients_match:
+            raw_ingredients = ingredients_match.group(1).strip()
+            # Handle bullet list or inline
+            if '\n' in raw_ingredients:
+                lines = [line.strip("-• ").strip() for line in raw_ingredients.splitlines() if line.strip()]
+                ingredients = ", ".join(lines)
+            else:
+                ingredients = raw_ingredients
+        else:
+            ingredients = None
+
+        if not name or not ingredients:
             print("❌ parse_recipe() failed: Missing recipe name or ingredients.")
             print("----- RAW TEXT BEGIN -----")
             print(recipe_text)
             print("----- RAW TEXT END -------")
             return None
-
-        # Clean and normalize ingredient lines
-        lines = [line.strip("-• ").strip() for line in ingredients_raw.splitlines() if line.strip()]
-        ingredients = ", ".join(lines)
 
         return {
             "name": name,
