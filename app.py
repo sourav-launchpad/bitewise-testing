@@ -1329,7 +1329,6 @@ def main():
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
-                        # ✅ FULL RESET (session + in-memory + optional disk)
                         st.session_state.used_recipe_names = set()
                         st.session_state.generated_recipes = []
                         st.session_state.meal_types_used = set()
@@ -1344,10 +1343,9 @@ def main():
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
 
-                        # 🔁 Generate (this is the fix!)
-                        start_time = time.time()
-                        meal_plan = asyncio.get_event_loop().run_until_complete(generate_meal_plan(user_prefs))
-
+                        # ✅ CORRECT: Await it using event loop since this is inside sync block
+                        loop = asyncio.get_event_loop()
+                        meal_plan = loop.run_until_complete(generate_meal_plan(user_prefs))
                         st.session_state.meal_plan = meal_plan
 
                         if meal_plan:
