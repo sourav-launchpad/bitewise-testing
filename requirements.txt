@@ -1,5 +1,6 @@
 streamlit==1.33.0
-openai==1.23.6
+openai
+faiss-cpu
 pandas==2.2.2
 aiohttp==3.9.3
 numpy==1.26.4
