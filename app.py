@@ -1377,8 +1377,20 @@ def main():
     asyncio.run(main_async())
 
 
-# ========== ENTRY POINT FOR STREAMLIT ==========
-if __name__ == "__main__":
-    main()
-else:
-    main()  # ✅ Also run inside Streamlit
+import streamlit as st
+
+# Run the async app logic only once when the button is clicked
+if "run_meal_plan" not in st.session_state:
+    st.session_state.run_meal_plan = False
+
+user_prefs = get_user_preferences()
+
+col1, col2, col3 = st.columns([1, 2, 1])
+with col2:
+    if st.button("Generate Meal Plan"):
+        st.session_state.run_meal_plan = True
+
+# Only run main async logic if the button was pressed
+if st.session_state.run_meal_plan and user_prefs:
+    with st.spinner("Generating Your Personalized Meal Plan..."):
+        asyncio.run(main_async())
