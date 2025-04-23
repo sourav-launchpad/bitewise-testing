@@ -1016,8 +1016,8 @@ async def generate_meal_plan(user_prefs):
 
                     retry_prompts.append(prompt)
 
-                    if len(retry_prompts) == 2:
-                        break  # ✅ Only try 2 titles max
+                    if len(retry_prompts) == 3:
+                        break  # ✅ Only try 3 titles max
 
                 # Run all 2–3 retry prompts in parallel
                 retry_tasks = [
@@ -1242,7 +1242,8 @@ def main():
             st.error("Failed to get user preferences. Please try again.")
             return
 
-        st.markdown("""
+        st.markdown(
+            """
             <style>
             div.stSpinner > div {
                 display: flex;
@@ -1250,39 +1251,46 @@ def main():
                 align-items: center;
             }
             </style>
-        """, unsafe_allow_html=True)
+            """,
+            unsafe_allow_html=True,
+        )
 
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
+                        # ✅ FULL RESET (session + in-memory + optional disk)
                         st.session_state.used_recipe_names = set()
                         st.session_state.generated_recipes = []
                         st.session_state.meal_types_used = set()
                         st.session_state.cuisines_used = set()
                         st.session_state.cuisine_distribution = {}
-            
+
                         recipe_index.reset()
                         recipe_names.clear()
+
+                        # Optional disk reset for FAISS files (safe for testing)
                         if os.path.exists(INDEX_FILE):
                             os.remove(INDEX_FILE)
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
-            
-                        # ✅ FIX: Create new loop and run coroutine
-                        loop = asyncio.new_event_loop()
-                        asyncio.set_event_loop(loop)
-                        meal_plan = loop.run_until_complete(generate_meal_plan(user_prefs))
-                        loop.close()
-            
+
+                        # 🔁 Generate
+                        start_time = time.time()
+                        meal_plan = asyncio.run(generate_meal_plan(user_prefs))
                         st.session_state.meal_plan = meal_plan
-            
+
                         if meal_plan:
-                            st.success("Meal Plan Generated Successfully!")
+                            st.markdown(
+                                "<div style='text-align: center; background-color: #d4edda; padding: 10px; border-radius: 5px; color: #155724; font-weight: bold;'>"
+                                "Meal Plan Generated Successfully!"
+                                "</div>",
+                                unsafe_allow_html=True
+                            )
                         else:
                             st.error("Failed to Generate Meal Plan. Please Try Again")
-            
+
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
                         st.session_state.meal_plan = None
