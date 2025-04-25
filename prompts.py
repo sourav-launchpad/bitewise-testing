@@ -1,28 +1,120 @@
 ALLERGEN_KEYWORDS = {
-    "Peanut allergy": ["peanut", "satay", "groundnut", "peanut butter", "peanut oil"],
-    "Tree nut allergy (e.g. almond, cashew, walnut)": ["almond", "cashew", "walnut", "pecan", "hazelnut", "nutmeg", "nut butter"],
-    "Shellfish allergy": ["shrimp", "prawn", "crab", "lobster", "scampi", "scallop"],
-    "Fish allergy": ["salmon", "tuna", "cod", "trout", "anchovy", "mackerel", "sardine", "fish sauce"],
-    "Egg allergy": ["egg", "mayonnaise", "aioli", "meringue", "custard"],
-    "Milk allergy (cow's milk protein: casein and/or whey)": ["milk", "cream", "cheese", "yogurt", "butter", "ghee", "paneer", "kefir"],
-    "Soy allergy": ["soy", "soybean", "tofu", "edamame", "tempeh", "miso", "tamari", "soy sauce"],
-    "Wheat allergy": ["wheat", "flour", "breadcrumbs", "semolina", "couscous", "bulgur"],
-    "Sesame allergy": ["sesame", "tahini", "sesame oil"],
-    "Mustard allergy": ["mustard", "mustard seeds", "mustard oil"],
-    "Lupin allergy": ["lupin", "lupine"],
-    "Celery allergy": ["celery", "celeriac"],
-    "Lactose intolerance": ["milk", "cream", "cheese", "butter", "yogurt", "lactose"],
-    "Gluten intolerance / Non-celiac gluten sensitivity": ["wheat", "barley", "rye", "malt", "spelt", "triticale", "gluten"],
-    "Fructose intolerance (hereditary or malabsorption)": ["fructose", "honey", "apples", "pears", "agave", "high-fructose corn syrup"],
-    "Histamine intolerance": ["canned fish", "fermented foods", "aged cheese", "wine", "sauerkraut", "vinegar", "spinach"],
-    "Salicylate sensitivity": ["berries", "tomato", "mint", "peppermint", "chilli", "capsicum"],
-    "FODMAP intolerance": ["onion", "garlic", "wheat", "apple", "pear", "honey", "mango", "milk"],
-    "Sulphite sensitivity": ["sulphite", "preservative 220", "dried fruit", "wine", "vinegar", "processed meat"],
-    "MSG sensitivity": ["msg", "monosodium glutamate", "flavour enhancer 621"],
-    "Caffeine sensitivity": ["coffee", "tea", "chocolate", "cocoa", "cola"],
-    "Alcohol intolerance": ["wine", "beer", "spirits", "rum", "vodka"],
-    "Artificial sweetener sensitivity": ["aspartame", "saccharin", "sucralose", "acesulfame", "stevia"],
-    "Food additive intolerance (e.g. preservatives, colourings)": ["preservative", "colouring", "flavour enhancer", "additive", "emulsifier"],
+    "Peanut allergy": [
+        "peanut", "satay", "groundnut", "peanut butter", "peanut oil", "chopped peanuts", "crushed peanuts"
+    ],
+
+    "Tree nut allergy (e.g. almond, cashew, walnut)": [
+        "almond", "cashew", "walnut", "pecan", "hazelnut", "macadamia", "pine nut", "nutmeg", "nut butter", 
+        "nut crusted", "almond meal", "walnut pesto", "cashew cheese", "pecan pie"
+    ],
+
+    "Shellfish allergy": [
+        "shrimp", "prawn", "crab", "lobster", "scampi", "scallop", "shellfish", "seafood mix", 
+        "shrimp paste", "crab cakes", "prawn crackers", "tempura prawn", "lobster roll"
+    ],
+
+    "Egg allergy": [
+        "egg", "eggs", "omelette", "scramble", "frittata", "boiled egg", "egg sauce", "poached egg", "fried egg", "devilled egg", "baked egg", "egg salad", "egg muffin", "egg wrap", "mayonnaise", "aioli", 
+        "custard", "meringue", "egg wash", "egg-based dressing"
+    ],
+
+    "Fish allergy": [
+        "fish", "salmon", "tuna", "mackerel", "trout", "cod", "sardine", "barramundi", "snapper", 
+        "anchovy", "haddock", "halibut", "tilapia", "sea bass", "sashimi", "grilled fish", "poached fish", 
+        "smoked salmon", "fish sauce", "canned tuna", "tuna salad", "miso cod", "fish curry", "tuna steak"
+    ],
+
+    "Milk allergy (cow's milk protein: casein and/or whey)": [
+        "milk", "cream", "cheese", "yogurt", "butter", "ghee", "paneer", "kefir", "whipped cream", 
+        "custard", "cheesy", "milkshake", "creamy sauce", "cream cheese", "cheesecake", "milk bun", 
+        "ice cream", "feta", "parmesan", "mozzarella"
+    ],
+
+    "Soy allergy": [
+        "soy", "soybean", "tofu", "edamame", "tempeh", "miso", "tamari", "soy sauce", 
+        "textured vegetable protein", "tvp", "soya", "soy milk", "tofu scramble"
+    ],
+
+    "Wheat allergy": [
+        "wheat", "flour", "breadcrumbs", "semolina", "couscous", "bulgur", "wheat pasta", 
+        "wheat wrap", "wholemeal flour", "gluten bread"
+    ],
+
+    "Sesame allergy": [
+        "sesame", "tahini", "sesame oil", "sesame crusted", "sesame dressing", "sesame seed bun"
+    ],
+
+    "Mustard allergy": [
+        "mustard", "mustard seeds", "mustard oil", "wholegrain mustard", "honey mustard", "mustard dressing"
+    ],
+
+    "Lupin allergy": [
+        "lupin", "lupine", "lupin flour"
+    ],
+
+    "Celery allergy": [
+        "celery", "celeriac", "celery root", "celery salt", "celery sticks"
+    ],
+
+    "Lactose intolerance": [
+        "milk", "cream", "cheese", "butter", "yogurt", "lactose", "ice cream", "creamy", 
+        "custard", "feta", "paneer", "mozzarella", "ghee", "dairy"
+    ],
+
+    "Gluten intolerance / Non-celiac gluten sensitivity": [
+        "wheat", "barley", "rye", "malt", "spelt", "triticale", "gluten", "bread", 
+        "noodles", "pasta", "couscous", "biscuit", "cake", "pie crust"
+    ],
+
+    "Fructose intolerance (hereditary or malabsorption)": [
+        "fructose", "honey", "apples", "pears", "agave", "high-fructose corn syrup", 
+        "fruit juice", "fruit salad", "apple pie", "pear tart"
+    ],
+
+    "Histamine intolerance": [
+        "canned fish", "fermented foods", "aged cheese", "wine", "sauerkraut", "vinegar", 
+        "spinach", "cured meats", "smoked fish", "pickles", "kombucha", "soy sauce", "miso"
+    ],
+
+    "Salicylate sensitivity": [
+        "berries", "tomato", "mint", "peppermint", "chilli", "capsicum", "spicy salsa", 
+        "hot sauce", "tomato paste", "tomato-based"
+    ],
+
+    "FODMAP intolerance": [
+        "onion", "garlic", "wheat", "apple", "pear", "honey", "mango", "milk", 
+        "asparagus", "leek", "legumes", "beans", "cauliflower", "broccoli (stalk)"
+    ],
+
+    "Sulphite sensitivity": [
+        "sulphite", "preservative 220", "dried fruit", "wine", "vinegar", "processed meat", 
+        "sulphur dioxide", "sausages", "cured meats", "sultanas", "bacon"
+    ],
+
+    "MSG sensitivity": [
+        "msg", "monosodium glutamate", "flavour enhancer 621", "umami seasoning", "instant noodles", 
+        "seasoning powder", "flavour booster"
+    ],
+
+    "Caffeine sensitivity": [
+        "coffee", "tea", "chocolate", "cocoa", "cola", "espresso", "latte", "mocha", 
+        "energy drink", "iced coffee"
+    ],
+
+    "Alcohol intolerance": [
+        "wine", "beer", "spirits", "rum", "vodka", "whiskey", "brandy", "cooking wine", 
+        "red wine reduction", "white wine sauce"
+    ],
+
+    "Artificial sweetener sensitivity": [
+        "aspartame", "saccharin", "sucralose", "acesulfame", "stevia", "sweetener", 
+        "sugar substitute", "diet soda", "light yogurt"
+    ],
+
+    "Food additive intolerance (e.g. preservatives, colourings)": [
+        "preservative", "colouring", "flavour enhancer", "additive", "emulsifier", 
+        "e-number", "processed snack", "coloured icing", "packet soup", "artificial flavour"
+    ]
 }
 
 HEALTH_RESTRICTIONS = {
