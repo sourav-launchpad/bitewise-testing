@@ -1182,10 +1182,12 @@ async def generate_meal_plan(user_prefs):
                         _, _, token_stream_func = result
                         token_gen = token_stream_func()
 
-                        # Stream to UI
+                        # Direct native OpenAI streaming
+                        await stream_container.write_stream(token_gen)
+                        
+                        # Then collect full text
                         recipe_text = ""
                         async for token in token_gen:
-                            stream_container.markdown(token, unsafe_allow_html=True)
                             recipe_text += token
 
 
