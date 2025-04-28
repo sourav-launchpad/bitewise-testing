@@ -1647,5 +1647,10 @@ async def main():
         await close_http_session()
 
 if __name__ == "__main__":
-    # Streamlit runs this automatically — no manual asyncio needed
-    pass
+    user_prefs = get_user_preferences()
+
+    if user_prefs:
+        import asyncio
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(main())
