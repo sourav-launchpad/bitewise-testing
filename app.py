@@ -4,7 +4,6 @@ import pandas as pd
 import time
 from datetime import datetime
 import os
-from dotenv import load_dotenv
 import asyncio
 import aiohttp
 import faiss
@@ -35,9 +34,6 @@ from difflib import SequenceMatcher
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
-# Load environment variables
-load_dotenv()
 
 # Set OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
