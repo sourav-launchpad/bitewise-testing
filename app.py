@@ -511,7 +511,6 @@ st.markdown("""
 
 async def generate_meal(meal_type, day, prompt, cuisine="All", recipe_name=""):
     try:
-        # Call the AsyncOpenAI client (client is already set up globally)
         response = await client.chat.completions.create(
             model="gpt-4o-mini",
             stream=True,
@@ -525,15 +524,25 @@ async def generate_meal(meal_type, day, prompt, cuisine="All", recipe_name=""):
             frequency_penalty=0.1
         )
 
-        # Define token stream generator
-        async def token_stream():
+        async def token_stream_async():
             async for chunk in response:
                 token = chunk.choices[0].delta.content
                 if token:
                     yield token
 
-        return (meal_type, day, lambda: token_stream())
-        
+        def token_stream_sync():
+            loop = asyncio.get_event_loop()
+            async_gen = token_stream_async()
+
+            while True:
+                try:
+                    token = loop.run_until_complete(async_gen.__anext__())
+                    yield token
+                except StopAsyncIteration:
+                    break
+
+        return (meal_type, day, token_stream_sync)
+
     except Exception as e:
         print(f"[ERROR] {meal_type} on Day {day} failed: {str(e)}")
         return None
@@ -1183,7 +1192,8 @@ async def generate_meal_plan(user_prefs):
                         token_gen = token_stream_func()
 
                         # Direct native OpenAI streaming
-                        await stream_container.write_stream(token_gen)
+                        await stream_container.write_stream(token_stream_func())
+
                         
                         # Then collect full text
                         recipe_text = ""
