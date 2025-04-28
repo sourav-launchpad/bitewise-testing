@@ -1646,21 +1646,15 @@ async def main():
     finally:
         await close_http_session()
 
-def run_app():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(main())
-
 import asyncio
 
-if __name__ == "__main__":
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+try:
+    loop = asyncio.get_event_loop()
+except RuntimeError:
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
 
-    if loop.is_running():
-        asyncio.create_task(main())
-    else:
-        loop.run_until_complete(main())
+if loop.is_running():
+    asyncio.create_task(main())
+else:
+    asyncio.run(main())
