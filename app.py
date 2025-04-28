@@ -1179,7 +1179,9 @@ async def generate_meal_plan(user_prefs):
                     result = await limited_generate(meal, day, prompt, selected_cuisine, recipe_name)
 
                     if isinstance(result, tuple):
-                        _, _, token_gen_func = result
+                        _, _, token_stream_func = result
+                        token_gen = token_stream_func()
+
 
                         # Start streaming + capturing at the same time
                         live_stream, get_full_text = stream_with_validation(token_gen, None)
