@@ -537,6 +537,7 @@ def get_user_preferences():
     except Exception as e:
         st.error(f"Error getting user preferences: {str(e)}")
         return None
+
 def build_diet_rules_block(diet_type):
     diet_rules = ""
     if diet_type != "None":
@@ -1556,35 +1557,25 @@ import streamlit as st
 
 async def main():
     try:
-        # ✅ Load or Get user prefs only once
-        if 'user_preferences' not in st.session_state:
-            user_prefs = get_user_preferences()
-            if user_prefs is None:
-                st.error("Failed to get user preferences. Please try again.")
-                return
-            st.session_state.user_preferences = user_prefs
-        else:
-            user_prefs = st.session_state.user_preferences
+        user_prefs = get_user_preferences()
 
+        if user_prefs is None:
+            st.error("Failed to get user preferences. Please try again.")
+            return
+
+        # Initialize success message flag if not set
         if 'show_success_message' not in st.session_state:
             st.session_state.show_success_message = False
 
+        # Placeholder for success message so it can be cleared
         success_placeholder = st.empty()
 
-        # 🛠️ FIX: Only columns for the button (not full page)
-        st.markdown("<h1 style='text-align: center;'>🍽️ BiteWise - Personalized Meal Planner 🍽️</h1>", unsafe_allow_html=True)
-
-        # 🛠️ Display the form normally (NO col1/col2/col3 here)
-        # (Move get_user_preferences() OUTSIDE the col2)
-        get_user_preferences()
-
-        # 🛠️ Only this part: center the button
-        col1, col2, col3 = st.columns([0.25, 1.5, 0.25])
+        col1, col2, col3 = st.columns([0.05, 2.9, 0.05])
         with col2:
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
-                        # ✅ FULL RESET
+                        # ✅ FULL STATE RESET
                         st.session_state.used_recipe_names = set()
                         st.session_state.generated_recipes = []
                         st.session_state.meal_types_used = set()
@@ -1593,23 +1584,27 @@ async def main():
                         st.session_state.structure_counts = {}
                         st.session_state.recipes_to_embed = []
                         st.session_state.show_success_message = False
-                        st.session_state.meal_plan = None
+                        st.session_state.meal_plan = None  # ✅ CLEAR PREVIOUS PLAN
 
+                        # ✅ RESET FAISS MEMORY + FILES
                         recipe_index.reset()
                         recipe_names.clear()
-                        if os.path.exists(INDEX_FILE):
-                            os.remove(INDEX_FILE)
-                        if os.path.exists(NAMES_FILE):
-                            os.remove(NAMES_FILE)
+                        if os.path.exists(INDEX_FILE): os.remove(INDEX_FILE)
+                        if os.path.exists(NAMES_FILE): os.remove(NAMES_FILE)
 
-                        # ✅ USE already loaded user_prefs from session state
-                        await generate_meal_plan(user_prefs)
+                        # ✅ GENERATE
+                        start_time = time.time()
+                        meal_plan = await generate_meal_plan(user_prefs)
+                        end_time = time.time()
+                        print(f"⏱️ Total generation time: {end_time - start_time:.2f} seconds")
 
-                        if st.session_state.generated_recipes:
+                        st.session_state.meal_plan = meal_plan
+
+                        if meal_plan:
                             st.session_state.show_success_message = True
                         else:
                             st.session_state.show_success_message = False
-                            st.error("Failed to Generate Meal Plan. Please Try Again.")
+                            #st.error("Failed to Generate Meal Plan. Please Try Again")
 
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
@@ -1619,6 +1614,7 @@ async def main():
                     finally:
                         await close_http_session()
 
+        # ✅ SUCCESS BANNER
         if st.session_state.get("show_success_message", False):
             success_placeholder.markdown(
                 """
@@ -1640,6 +1636,7 @@ async def main():
         else:
             success_placeholder.empty()
 
+        # ✅ DISPLAY PLAN
         if st.session_state.meal_plan:
             display_meal_plan(st.session_state.meal_plan)
 
@@ -1649,13 +1646,11 @@ async def main():
     finally:
         await close_http_session()
 
-
-
 def run_app():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(main())
 
-# For local execution
 if __name__ == "__main__":
-    run_app()
+    import asyncio
+    asyncio.run(main())
