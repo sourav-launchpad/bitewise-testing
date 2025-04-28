@@ -102,7 +102,7 @@ COMMON_MEASUREMENTS = {
     "head": ["garlic", "lettuce", "cabbage"],
     "whole": ["lemon", "lime", "orange", "potato", "onion", "carrot", "tomato", "zucchini", "capsicum", "mushroom"],
     "package": ["frozen vegetables", "frozen peas", "frozen corn", "mixed vegetables"],
-    "kg": ["chicken thighs", "chicken breasts", "prawn", "beef mince", "pork shoulder", "potatoes", "rice", "onions", "carrots", "kale", "spinach", "mushroom"],
+    "kg": ["chicken thighs", "carp", "steak", "chicken breasts", "prawn", "beef mince", "pork shoulder", "potatoes", "rice", "onions", "carrots", "kale", "spinach", "mushroom"],
     "gram": ["cheese", "greek yogurt", "butter", "feta", "ricotta"],
     "slice": ["bread", "toast", "rye bread"],
     "dozen": ["eggs"],
@@ -120,7 +120,7 @@ CATEGORIES = {
         "frozen corn", "mixed vegetables", "frozen spinach", "frozen berries", "frozen edamame"
     ],
     "Budget Proteins": [
-        "chicken thighs", "chicken breasts", "prawn", "beef mince", "pork shoulder", "whole chicken",
+        "chicken thighs", "carp", "steak", "chicken breasts", "prawn", "beef mince", "pork shoulder", "whole chicken",
         "turkey mince", "salmon", "tuna", "sardine", "haddock", "egg", "tofu", "tempeh", "lentil",
         "chickpea", "black bean", "white bean", "kidney bean", "edamame", "anchovy", "pollock", "mackerel",
         "smoked tofu", "soft tofu", "firm tofu", "silken tofu", "canned tuna", "canned salmon"
@@ -1038,6 +1038,29 @@ def stream_with_validation(token_gen, validate_callback):
     # Return generator and validator callback access
     return live_stream(), lambda: full_text_holder["text"]
 
+def title_matches_ingredients(title: str, ingredients_text: str) -> bool:
+    """
+    Check if the main keyword in the title appears in the ingredients.
+    If not, assume mismatch.
+    """
+    title = title.lower()
+    ingredients_text = ingredients_text.lower()
+
+    # Extract main candidate keywords from title (very simple split by words)
+    keywords = re.findall(r'\b\w+\b', title)
+
+    for word in keywords:
+        # Skip common filler words
+        if word in ["with", "and", "on", "in", "the", "of", "a", "an", "served", "style", "grilled", "roasted", "baked", "fried"]:
+            continue
+
+        # Check if that word exists inside ingredients
+        if word in ingredients_text:
+            return True  # Found a match
+
+    # If none match, bad title
+    return False
+
 async def generate_meal_plan(user_prefs):
     stream_container = st.container()  # placeholder for streaming
     try:
@@ -1180,7 +1203,7 @@ async def generate_meal_plan(user_prefs):
             """,
             "Moderate budget": """
             Use these moderately priced ingredients:
-            - Proteins: chicken thighs, chicken breasts, ground beef, tofu, eggs
+            - Proteins: chicken thighs, steak, carp, chicken breasts, ground beef, tofu, eggs
             - Vegetables: seasonal vegetables, frozen vegetables
             - Grains: rice, pasta, bread
             - Include some fresh herbs and spices
@@ -1332,6 +1355,11 @@ async def generate_meal_plan(user_prefs):
                         parsed = parse_recipe(recipe_text)
                         if not parsed:
                             print(f"[REJECTED] could not parse")
+                            continue
+
+                        # ✅ Title vs ingredients consistency check
+                        if not title_matches_ingredients(parsed["name"], parsed["ingredients"]):
+                            print(f"[REJECTED] Title '{parsed['name']}' mismatch with ingredients")
                             continue
 
                         if not is_recipe_safe(recipe_text, parsed["ingredients"], formatted_prefs):
