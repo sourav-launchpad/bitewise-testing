@@ -1,6 +1,6 @@
 ALLERGEN_KEYWORDS = {
     "Peanut allergy": [
-        "peanut", "satay", "groundnut", "peanut butter", "peanut oil", "chopped peanuts", "crushed peanuts"
+        "peanut", "satay", "groundnut", "peanut butter", "peanut oil", "chopped peanuts", "crushed peanuts", "pad thai", "satay sauce"
     ],
 
     "Tree nut allergy (e.g. almond, cashew, walnut)": [
@@ -15,13 +15,13 @@ ALLERGEN_KEYWORDS = {
 
     "Egg allergy": [
         "egg", "eggs", "omelette", "scramble", "frittata", "boiled egg", "egg sauce", "poached egg", "fried egg", "devilled egg", "baked egg", "egg salad", "egg muffin", "egg wrap", "mayonnaise", "aioli", 
-        "custard", "meringue", "egg wash", "egg-based dressing"
+        "custard", "meringue", "egg wash", "egg-based dressing", "tempura", "katsu"
     ],
 
     "Fish allergy": [
         "fish", "salmon", "tuna", "mackerel", "trout", "cod", "carp", "sardine", "barramundi", "snapper", 
         "anchovy", "haddock", "halibut", "tilapia", "sea bass", "sashimi", "grilled fish", "poached fish", 
-        "smoked salmon", "fish sauce", "canned tuna", "tuna salad", "miso cod", "fish curry", "tuna steak"
+        "smoked salmon", "fish sauce", "canned tuna", "tuna salad", "miso cod", "fish curry", "tuna steak", "worcestershire sauce", "tempura", "katsu"
     ],
 
     "Milk allergy (cow's milk protein: casein and/or whey)": [
@@ -116,11 +116,6 @@ ALLERGEN_KEYWORDS = {
         "e-number", "processed snack", "coloured icing", "packet soup", "artificial flavour"
     ]
 }
-
-# Extra critical additions
-ALLERGEN_KEYWORDS["Fish allergy"].extend(["worcestershire sauce", "tempura", "katsu"])
-ALLERGEN_KEYWORDS["Peanut allergy"].extend(["pad thai", "satay sauce"])
-ALLERGEN_KEYWORDS["Egg allergy"].extend(["tempura", "katsu"])
 
 HEALTH_RESTRICTIONS = {
     "Type 1 Diabetes": ["sugar", "syrup", "honey", "sweetened drinks", "refined carbs", "desserts", "savoury", "sweet", "spicy"],
