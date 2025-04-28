@@ -1646,15 +1646,6 @@ async def main():
     finally:
         await close_http_session()
 
-import asyncio
-
-try:
-    loop = asyncio.get_event_loop()
-except RuntimeError:
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-if loop.is_running():
-    asyncio.create_task(main())
-else:
-    asyncio.run(main())
+if __name__ == "__main__":
+    # Streamlit runs this automatically — no manual asyncio needed
+    pass
