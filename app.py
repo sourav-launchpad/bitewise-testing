@@ -511,64 +511,27 @@ st.markdown("""
 
 async def generate_meal(meal_type, day, prompt, cuisine="All", recipe_name=""):
     try:
-        await init_http_session()
-
-        data = {
-            "model": "gpt-4o-mini",
-            "stream": True,
-            "messages": [
+        # Call the AsyncOpenAI client (client is already set up globally)
+        response = await client.chat.completions.create(
+            model="gpt-4o-mini",
+            stream=True,
+            messages=[
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
-            "temperature": 0.7,
-            "max_tokens": 4096,
-            "presence_penalty": 0.1,
-            "frequency_penalty": 0.1
-        }
+            temperature=0.7,
+            max_tokens=4096,
+            presence_penalty=0.1,
+            frequency_penalty=0.1
+        )
 
-        headers = {
-            "Authorization": f"Bearer {openai.api_key}",
-            "Content-Type": "application/json"
-        }
-
-        # ✅ Capture the stream into recipe_text
-        recipe_text = ""
-
-        def token_stream():
-            q = queue.Queue()
-
-            async def fetch():
-                async with aiohttp.ClientSession() as sess:
-                    async with sess.post("https://api.openai.com/v1/chat/completions", json=data, headers=headers) as response:
-                        async for line in response.content:
-                            if line:
-                                decoded_line = line.decode("utf-8").strip()
-                                if decoded_line.startswith("data: "):
-                                    decoded_line = decoded_line.replace("data: ", "")
-                                    if decoded_line == "[DONE]":
-                                        break
-                                    try:
-                                        parsed = json.loads(decoded_line)
-                                        token = parsed["choices"][0]["delta"].get("content", "")
-                                        q.put(token)
-                                    except Exception as e:
-                                        print(f"[STREAM ERROR] Could not parse: {decoded_line} — {e}")
-                q.put(None)
-
-            threading.Thread(target=lambda: asyncio.run(fetch()), daemon=True).start()
-
-            def generator():
-                while True:
-                    token = q.get()
-                    if token is None:
-                        break
-                    nonlocal recipe_text
-                    recipe_text += token
+        # Define token stream generator
+        async def token_stream():
+            async for chunk in response:
+                token = chunk.choices[0].delta.content
+                if token:
                     yield token
 
-            return generator()
-
-        recipe_text = ""
         return (meal_type, day, token_stream)
 
     except Exception as e:
