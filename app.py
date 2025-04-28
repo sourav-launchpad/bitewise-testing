@@ -1652,5 +1652,4 @@ def run_app():
     loop.run_until_complete(main())
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    main()  # NOT asyncio.run(main())
