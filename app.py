@@ -1182,24 +1182,12 @@ async def generate_meal_plan(user_prefs):
                         _, _, token_stream_func = result
                         token_gen = token_stream_func()
 
-
-                        # Start streaming + capturing at the same time
-                        live_stream, get_full_text = stream_with_validation(token_gen, None)
-
-
-                        # Stream to UI container
-                        stream_container.write_stream(live_stream)
-
-                        # Wait for full text to complete (safely)
-                        start = time.time()
-                        timeout = 40  # seconds
+                        # Stream to UI
                         recipe_text = ""
+                        async for token in token_gen:
+                            stream_container.markdown(token, unsafe_allow_html=True)
+                            recipe_text += token
 
-                        while time.time() - start < timeout:
-                            recipe_text = get_full_text()
-                            if "Serves" in recipe_text and "Instructions" in recipe_text and len(recipe_text) > 400:
-                                break
-                            time.sleep(0.2)
 
                         # If still empty → skip
                         if not recipe_text.strip():
