@@ -1,4 +1,12 @@
 import streamlit as st
+
+# Set page config
+st.set_page_config(
+    page_title="BiteWise",
+    page_icon="🍽️",
+    layout="wide"
+)
+
 import openai
 import pandas as pd
 import time
@@ -18,13 +26,6 @@ from prompts import (
     DIETARY_REQUIREMENTS,
     IMPORTANT_RULES,
     AUTHENTIC_RECIPE_NAMES
-)
-
-# Set page config
-st.set_page_config(
-    page_title="BiteWise",
-    page_icon="🍽️",
-    layout="wide"
 )
 
 from prompts import HEALTH_RESTRICTIONS, ALLERGEN_KEYWORDS, DIET_RESTRICTIONS
