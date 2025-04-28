@@ -1552,8 +1552,5 @@ async def main():
     finally:
         await close_http_session()
 
-if __name__ == "__main__":
-    import asyncio
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(main())
+import asyncio
+asyncio.run(main())
