@@ -2,7 +2,7 @@ import streamlit as st
 import openai
 import pandas as pd
 import time
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 from datetime import datetime
 import os
 import asyncio
