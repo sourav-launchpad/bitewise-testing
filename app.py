@@ -966,10 +966,13 @@ def stream_and_buffer(token_gen):
     recipe_text_holder = {"text": ""}
 
     def producer():
-        for token in token_gen:
-            q.put(token)
-            recipe_text_holder["text"] += token
-        q.put(None)
+        async def run():
+            async for token in token_gen:
+                full_text_holder["text"] += token
+                q.put(token)
+            q.put(None)
+        asyncio.run(run())
+
 
     def streamer():
         while True:
@@ -988,10 +991,13 @@ def stream_with_validation(token_gen, validate_callback):
 
     # Background producer thread
     def producer():
-        for token in token_gen:
-            full_text_holder["text"] += token
-            q.put(token)
-        q.put(None)
+        async def run():
+            async for token in token_gen:
+                full_text_holder["text"] += token
+                q.put(token)
+            q.put(None)
+        asyncio.run(run())
+
 
     # Live generator stream to UI
     def live_stream():
