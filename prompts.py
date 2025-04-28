@@ -10,7 +10,7 @@ ALLERGEN_KEYWORDS = {
 
     "Shellfish allergy": [
         "shrimp", "prawn", "crab", "lobster", "scampi", "scallop", "shellfish", "seafood mix", 
-        "shrimp paste", "crab cakes", "prawn crackers", "tempura prawn", "lobster roll"
+        "shrimp paste", "crab cakes", "prawn crackers", "tempura prawn", "lobster roll", "carp"
     ],
 
     "Egg allergy": [
