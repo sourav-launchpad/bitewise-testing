@@ -4,7 +4,7 @@ import streamlit as st
 st.set_page_config(
     page_title="BiteWise",
     page_icon="🍽️",
-    layout="wide"if isinstance(result, tuple):
+    layout="wide"
 )
 
 import openai
