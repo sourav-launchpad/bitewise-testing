@@ -1571,8 +1571,15 @@ async def main():
 
         success_placeholder = st.empty()
 
-        col1, col2, col3 = st.columns([0.05, 2.9, 0.05])
+        # 🛠️ FIX: Only columns for the button (not full page)
+        st.markdown("<h1 style='text-align: center;'>🍽️ BiteWise - Personalized Meal Planner 🍽️</h1>", unsafe_allow_html=True)
 
+        # 🛠️ Display the form normally (NO col1/col2/col3 here)
+        # (Move get_user_preferences() OUTSIDE the col2)
+        get_user_preferences()
+
+        # 🛠️ Only this part: center the button
+        col1, col2, col3 = st.columns([0.25, 1.5, 0.25])
         with col2:
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
@@ -1641,6 +1648,7 @@ async def main():
 
     finally:
         await close_http_session()
+
 
 
 def run_app():
