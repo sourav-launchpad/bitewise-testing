@@ -117,6 +117,11 @@ ALLERGEN_KEYWORDS = {
     ]
 }
 
+# Extra critical additions
+ALLERGEN_KEYWORDS["Fish allergy"].extend(["worcestershire sauce", "tempura", "katsu"])
+ALLERGEN_KEYWORDS["Peanut allergy"].extend(["pad thai", "satay sauce"])
+ALLERGEN_KEYWORDS["Egg allergy"].extend(["tempura", "katsu"])
+
 HEALTH_RESTRICTIONS = {
     "Type 1 Diabetes": ["sugar", "syrup", "honey", "sweetened drinks", "refined carbs", "desserts", "savoury", "sweet", "spicy"],
     "Type 2 Diabetes": ["sugar", "syrup", "sweetened drinks", "refined carbs", "white rice", "pastries", "savoury", "sweet", "spicy"],
