@@ -1,28 +1,30 @@
 import streamlit as st
-# Set page config
-st.set_page_config(
-    page_title="BiteWise",
-    page_icon="🍽️",
-    layout="wide"
-)
 import openai
 import pandas as pd
 import time
 from datetime import datetime
 import os
-#from dotenv import load_dotenv
+from dotenv import load_dotenv
 import asyncio
 import aiohttp
 import faiss
 import numpy as np
 import os
 import pickle
+import json
 from prompts import (
     get_meal_prompt, 
     SYSTEM_PROMPT,
     DIETARY_REQUIREMENTS,
     IMPORTANT_RULES,
     AUTHENTIC_RECIPE_NAMES
+)
+
+# Set page config
+st.set_page_config(
+    page_title="BiteWise",
+    page_icon="🍽️",
+    layout="wide"
 )
 
 from prompts import HEALTH_RESTRICTIONS, ALLERGEN_KEYWORDS, DIET_RESTRICTIONS
@@ -34,14 +36,16 @@ from difflib import SequenceMatcher
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+# Load environment variables
+load_dotenv()
+
+# Set OpenAI API key
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
 from openai import AsyncOpenAI
 
-if "OPENAI_API_KEY" in st.secrets:
-    client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-else:
-    st.error("❌ OpenAI API key not found in Streamlit secrets.")
-    st.stop()
-    
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
 RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
 # ========== FAISS Embedding Index Setup ==========
