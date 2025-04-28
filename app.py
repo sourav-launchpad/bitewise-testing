@@ -971,7 +971,9 @@ def stream_and_buffer(token_gen):
                 full_text_holder["text"] += token
                 q.put(token)
             q.put(None)
-        asyncio.run(run())
+    
+        loop = asyncio.get_event_loop()
+        asyncio.run_coroutine_threadsafe(run(), loop)
 
 
     def streamer():
@@ -989,14 +991,15 @@ def stream_with_validation(token_gen, validate_callback):
     full_text_holder = {"text": ""}
     is_valid = {"passed": False}
 
-    # Background producer thread
     def producer():
         async def run():
             async for token in token_gen:
                 full_text_holder["text"] += token
                 q.put(token)
             q.put(None)
-        asyncio.run(run())
+    
+        loop = asyncio.get_event_loop()
+        asyncio.run_coroutine_threadsafe(run(), loop)
 
 
     # Live generator stream to UI
