@@ -1573,6 +1573,8 @@ async def main():
         col1, col2, col3 = st.columns([0.05, 2.9, 0.05])
         with col2:
             if st.button("Generate Meal Plan"):
+                loop = asyncio.get_event_loop()
+                loop.create_task(main())
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
                         # ✅ FULL STATE RESET
@@ -1646,10 +1648,3 @@ async def main():
     finally:
         await close_http_session()
 
-def run_app():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(main())
-
-if __name__ == "__main__":
-    main()  # NOT asyncio.run(main())
