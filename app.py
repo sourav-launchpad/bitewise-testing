@@ -289,15 +289,16 @@ def get_user_preferences():
         col1, col2, col3 = st.columns(3)
 
         with col1:
+            # Use number_input with increment/decrement buttons, restricted to 1-7, default 1
             num_days = st.number_input(
                 "**Number of Days**",
                 min_value=1,
                 max_value=7,
                 value=1,
-                step=1,
-                key="num_days"
+                step=1
             )
-
+            
+            # Multi-select for diet types
             diet = st.multiselect(
                 "**Diet Type**",
                 options=[
@@ -324,16 +325,18 @@ def get_user_preferences():
                     "Seventh-day Adventist",
                     "Rastafarian Ital"
                 ],
-                default=[],
-                placeholder="Choose an option",
-                key="diet"
+                default=[],  # Start with empty selection
+                placeholder="Choose an option"
             )
-
+            
+            # If no option is selected, set to "None"
             if not diet:
                 diet = ["None"]
+            # If "None" is selected along with other options, clear other selections
             elif "None" in diet and len(diet) > 1:
                 diet = ["None"]
-
+            
+            # Multi-select for allergies/intolerances
             allergies = st.multiselect(
                 "**Allergies/Intolerances**",
                 options=[
@@ -363,113 +366,134 @@ def get_user_preferences():
                     "Artificial sweetener sensitivity",
                     "Food additive intolerance (e.g. preservatives, colourings)"
                 ],
-                default=[],
-                placeholder="Choose an option",
-                key="allergies"
+                default=[],  # Start with empty selection
+                placeholder="Choose an option"
             )
-
+            
+            # If no option is selected, set to "No allergies or intolerances"
             if not allergies:
                 allergies = ["No allergies or intolerances"]
+            # If "No allergies or intolerances" is selected along with other options, clear other selections
             elif "No allergies or intolerances" in allergies and len(allergies) > 1:
                 allergies = ["No allergies or intolerances"]
 
         with col2:
+            # Multi-select for health conditions
             health_conditions = st.multiselect(
                 "**Health Conditions**",
                 options=[
                     "None",
-                    # (list of health conditions same as you had)
+                    # Metabolic & Endocrine 
                     "Type 1 Diabetes", "Type 2 Diabetes", "Prediabetes / Insulin Resistance", "Metabolic Syndrome",
                     "PCOS", "Hypothyroidism / Hashimoto's", "Hyperthyroidism / Graves'", "Adrenal Fatigue",
                     "Cushing's Syndrome", "Gestational Diabetes",
+                    # Cardiovascular & Blood
                     "Hypertension", "High Cholesterol / Dyslipidemia", "Cardiovascular Disease", "Stroke prevention",
                     "Congestive Heart Failure", "Anticoagulant therapy (e.g. stable vitamin K for Warfarin)",
                     "Anaemia (Iron, B12, Folate)",
+                    # Gastrointestinal
                     "Celiac Disease", "IBS (Irritable Bowel Syndrome)", "IBD (Crohn's, Ulcerative Colitis)",
                     "GERD / Acid Reflux", "Peptic Ulcers", "Diverticulosis / Diverticulitis", "Gallbladder disease",
                     "Pancreatitis", "Gastroparesis", "Liver disease / Fatty liver", "Bile acid malabsorption",
                     "SIBO (Small Intestinal Bacterial Overgrowth)",
+                    # Kidney, Liver, Gout
                     "Chronic Kidney Disease (CKD)", "Kidney stones", "Nephrotic syndrome", "Gout", "Hemochromatosis",
                     "Liver Cirrhosis",
+                    # Cancer & Treatment Recovery
                     "Cancer-related weight loss / Cachexia", "Neutropenic diet (immunosuppressed)",
                     "Low-residue diet (during flare-ups or treatment)",
+                    # Autoimmune & Immune Conditions
                     "Lupus", "Rheumatoid Arthritis", "Multiple Sclerosis",
                     "Chronic hives / urticaria", "Mast Cell Activation Syndrome (MCAS)",
+                    # Neurological & Mental Health
                     "Epilepsy (Keto for seizures)", "ADHD", "Autism Spectrum Disorder", "Depression / Anxiety",
                     "Migraine / Vestibular migraine", "Alzheimer's / Dementia", "Parkinson's Disease",
+                    # Muscle, Bone, Joint
                     "Osteoporosis", "Osteopenia", "Sarcopenia / Muscle loss", "Arthritis (Osteoarthritis, Gout, RA)",
+                    # Reproductive & Hormonal
                     "Endometriosis", "PMS / PMDD", "Fertility (male and female)", "Pregnancy (Trimester-specific)",
                     "Breastfeeding", "Menopause", "Erectile dysfunction",
+                    # Weight & Nutrition Risk
                     "Overweight / Obesity", "Underweight / Malnutrition", "Muscle gain",
                     "Bariatric surgery (pre and post-op)", "Disordered eating / ED recovery", "Cachexia",
+                    # Skin Conditions
                     "Acne", "Rosacea", "Eczema", "Psoriasis"
                 ],
-                default=[],
-                placeholder="Choose an option",
-                key="health_conditions"
+                default=[],  # Start with empty selection
+                placeholder="Choose an option"
             )
-
+            
+            # If no option is selected, set to "None"
             if not health_conditions:
                 health_conditions = ["None"]
+            # If "None" is selected along with other options, clear other selections
             elif "None" in health_conditions and len(health_conditions) > 1:
                 health_conditions = ["None"]
 
+            # Multi-select for meal type
             meal_type = st.multiselect(
                 "**Meal Type Preference**",
                 options=["All", "Breakfast", "Lunch", "Dinner"],
-                default=[],
-                placeholder="Choose an option",
-                key="meal_type"
+                default=[],  # Start with empty selection
+                placeholder="Choose an option"
             )
-
+            
+            # If no option is selected, set to "All"
             if not meal_type:
                 meal_type = ["All"]
+            # If "All" is selected along with other options, clear other selections
             elif "All" in meal_type and len(meal_type) > 1:
                 meal_type = ["All"]
 
+            # Multi-select for cuisine
             cuisine = st.multiselect(
                 "**Preferred Cuisine**",
                 options=[
                     "All",
-                    "Mediterranean", "Thai", "Chinese", "Japanese", "Korean",
-                    "Vietnamese", "Indian", "Middle Eastern", "Latin American / Mexican",
-                    "African", "Nordic / Scandinavian", "Traditional Australian / British / American",
-                    "Eastern European", "Caribbean"
+                    "Mediterranean",
+                    "Thai",
+                    "Chinese",
+                    "Japanese",
+                    "Korean",
+                    "Vietnamese",
+                    "Indian",
+                    "Middle Eastern",
+                    "Latin American / Mexican",
+                    "African",
+                    "Nordic / Scandinavian",
+                    "Traditional Australian / British / American",
+                    "Eastern European",
+                    "Caribbean"
                 ],
-                default=["Traditional Australian / British / American"],
-                placeholder="Choose an option",
-                key="cuisine"
+                default=["Traditional Australian / British / American"],  # Set default to Traditional Australian / British / American
+                placeholder="Choose an option"
             )
-
+            
+            # If no option is selected, set to "All"
             if not cuisine:
                 cuisine = ["All"]
+            # If "All" is selected along with other options, clear other selections
             elif "All" in cuisine and len(cuisine) > 1:
                 cuisine = ["All"]
 
         with col3:
             budget = st.selectbox(
                 "**Budget**",
-                options=[
-                    "Tight budget ($3-$7)", 
-                    "Moderate budget ($8-$15)", 
-                    "Generous budget ($16-$30)", 
-                    "No budget constraints ($31+)"
-                ],
-                index=1,
-                key="budget"
+                options=["Tight budget ($3-$7)", "Moderate budget ($8-$15)", 
+                        "Generous budget ($16-$30)", "No budget constraints ($31+)"],
+                index=1  # Default to "Moderate budget"
             )
-
-            time_constraint = st.selectbox(
+                        
+            time_constraint = st.selectbox( 
                 "**Available Time for Cooking**",
                 options=[
-                    "Busy schedule (less than 15 minutes)",
-                    "Moderate schedule (15 to 30 minutes)",
-                    "Busy on some days (30 to 45 minutes)",
-                    "Flexible schedule (45 to 60 minutes)",
+                    "Busy schedule (less than 15 minutes)",  
+                    "Moderate schedule (15 to 30 minutes)",  
+                    "Busy on some days (30 to 45 minutes)",  
+                    "Flexible schedule (45 to 60 minutes)",  
                     "No constraints (more than 60 minutes)"
                 ],
-                index=1,
-                key="time_constraint"
+                index=1
             )
 
             # Map UI values to standardized cooking time ranges
@@ -481,37 +505,38 @@ def get_user_preferences():
                 "No constraints (more than 60 minutes)": "no time limit"
             }
 
+            # Convert to standardized format immediately
             time_constraint = time_mapping.get(time_constraint, "between 15 and 30 minutes")
-
+                        
+            # Changed from selectbox to number_input for serving size
             serving_size = st.number_input(
                 "**Number of Servings per Meal**",
                 min_value=1,
                 max_value=8,
-                value=2,
-                step=1,
-                key="serving_size"
+                value=2,  # Default to 2 servings
+                step=1
             )
 
-        # Assemble preferences
+        # Create a dictionary with all preferences
         preferences = {
-            "num_days": int(num_days),
-            "diet": str(diet),
-            "health_conditions": str(health_conditions),
-            "meal_type": str(meal_type),
-            "cuisine": str(cuisine),
-            "budget": str(budget),
-            "time_constraint": time_constraint,
-            "serving_size": int(serving_size),
-            "allergies": str(allergies)
+            "num_days": int(num_days),  # Ensure it's an integer
+            "diet": str(diet),  # Ensure it's a string
+            "health_conditions": str(health_conditions),  # Ensure it's a string
+            "meal_type": str(meal_type),  # Ensure it's a string
+            "cuisine": str(cuisine),  # Ensure it's a string
+            "budget": str(budget),  # Ensure it's a string
+            "time_constraint": time_constraint,  # Already in standardized format
+            "serving_size": int(serving_size),  # Ensure it's an integer
+            "allergies": str(allergies)  # Ensure it's a string
         }
 
+        # Store preferences in session state
         st.session_state.user_preferences = preferences
-        return preferences
 
+        return preferences
     except Exception as e:
         st.error(f"Error getting user preferences: {str(e)}")
         return None
-
 def build_diet_rules_block(diet_type):
     diet_rules = ""
     if diet_type != "None":
@@ -1531,23 +1556,24 @@ import streamlit as st
 
 async def main():
     try:
-        user_prefs = get_user_preferences()
+        # ✅ Load or Get user prefs only once
+        if 'user_preferences' not in st.session_state:
+            user_prefs = get_user_preferences()
+            if user_prefs is None:
+                st.error("Failed to get user preferences. Please try again.")
+                return
+            st.session_state.user_preferences = user_prefs
+        else:
+            user_prefs = st.session_state.user_preferences
 
-        if user_prefs is None:
-            st.error("Failed to get user preferences. Please try again.")
-            return
-
-        # Initialize success message flag if not set
         if 'show_success_message' not in st.session_state:
             st.session_state.show_success_message = False
 
-        # Placeholder for success message so it can be cleared
         success_placeholder = st.empty()
 
         col1, col2, col3 = st.columns([0.05, 2.9, 0.05])
-        
+
         with col2:
-            # Make the button
             if st.button("Generate Meal Plan"):
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
@@ -1560,39 +1586,32 @@ async def main():
                         st.session_state.structure_counts = {}
                         st.session_state.recipes_to_embed = []
                         st.session_state.show_success_message = False
-                        st.session_state.meal_plan = None  # ✅ CLEAR PREVIOUS PLAN
-        
-                        # ✅ RESET FAISS
+                        st.session_state.meal_plan = None
+
                         recipe_index.reset()
                         recipe_names.clear()
                         if os.path.exists(INDEX_FILE):
                             os.remove(INDEX_FILE)
                         if os.path.exists(NAMES_FILE):
                             os.remove(NAMES_FILE)
-        
-                        # ✅ GET USER PREFS
-                        user_prefs = get_user_preferences()
-                        if user_prefs is None:
-                            st.error("Failed to get user preferences. Please try again.")
+
+                        # ✅ USE already loaded user_prefs from session state
+                        await generate_meal_plan(user_prefs)
+
+                        if st.session_state.generated_recipes:
+                            st.session_state.show_success_message = True
                         else:
-                            # ✅ DIRECTLY AWAIT MAIN FUNCTIONS
-                            await generate_meal_plan(user_prefs)
-        
-                            if st.session_state.generated_recipes:
-                                st.session_state.show_success_message = True
-                            else:
-                                st.session_state.show_success_message = False
-                                st.error("Failed to Generate Meal Plan. Please Try Again.")
-        
+                            st.session_state.show_success_message = False
+                            st.error("Failed to Generate Meal Plan. Please Try Again.")
+
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
                         st.session_state.meal_plan = None
                         st.session_state.show_success_message = False
-        
+
                     finally:
                         await close_http_session()
 
-        # ✅ SUCCESS BANNER
         if st.session_state.get("show_success_message", False):
             success_placeholder.markdown(
                 """
@@ -1614,7 +1633,6 @@ async def main():
         else:
             success_placeholder.empty()
 
-        # ✅ DISPLAY PLAN
         if st.session_state.meal_plan:
             display_meal_plan(st.session_state.meal_plan)
 
@@ -1624,6 +1642,7 @@ async def main():
     finally:
         await close_http_session()
 
+
 def run_app():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
@@ -1632,4 +1651,3 @@ def run_app():
 # For local execution
 if __name__ == "__main__":
     run_app()
-
