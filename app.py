@@ -4,7 +4,7 @@ import streamlit as st
 st.set_page_config(
     page_title="BiteWise",
     page_icon="🍽️",
-    layout="wide"
+    layout="wide"if isinstance(result, tuple):
 )
 
 import openai
@@ -1312,19 +1312,19 @@ async def generate_meal_plan(user_prefs):
                     result = await limited_generate(meal, day, prompt, selected_cuisine, recipe_name)
 
                     if isinstance(result, tuple):
-                        _, _, token_gen_func = result
-
+                        _, _, token_gen = result
+                    
                         # Start streaming + capturing at the same time
                         live_stream, get_full_text = stream_with_validation(token_gen, None)
-
+                    
                         # Stream to UI container
                         stream_container.write_stream(live_stream)
-
+                    
                         # Wait for full text to complete (safely)
                         start = time.time()
                         timeout = 40  # seconds
                         recipe_text = ""
-
+                    
                         while time.time() - start < timeout:
                             recipe_text = get_full_text()
                             if "Serves" in recipe_text and "Instructions" in recipe_text and len(recipe_text) > 400:
