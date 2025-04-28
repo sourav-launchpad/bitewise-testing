@@ -19,7 +19,7 @@ ALLERGEN_KEYWORDS = {
     ],
 
     "Fish allergy": [
-        "fish", "salmon", "tuna", "mackerel", "trout", "cod", "sardine", "barramundi", "snapper", 
+        "fish", "salmon", "tuna", "mackerel", "trout", "cod", "carp", "sardine", "barramundi", "snapper", 
         "anchovy", "haddock", "halibut", "tilapia", "sea bass", "sashimi", "grilled fish", "poached fish", 
         "smoked salmon", "fish sauce", "canned tuna", "tuna salad", "miso cod", "fish curry", "tuna steak"
     ],
