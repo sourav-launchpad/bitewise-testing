@@ -1563,18 +1563,14 @@ async def main():
             st.error("Failed to get user preferences. Please try again.")
             return
 
-        # Initialize success message flag if not set
         if 'show_success_message' not in st.session_state:
             st.session_state.show_success_message = False
 
-        # Placeholder for success message so it can be cleared
         success_placeholder = st.empty()
 
         col1, col2, col3 = st.columns([0.05, 2.9, 0.05])
         with col2:
             if st.button("Generate Meal Plan"):
-                loop = asyncio.get_event_loop()
-                loop.create_task(main())
                 with st.spinner("Generating Your Personalized Meal Plan..."):
                     try:
                         # ✅ FULL STATE RESET
@@ -1586,7 +1582,7 @@ async def main():
                         st.session_state.structure_counts = {}
                         st.session_state.recipes_to_embed = []
                         st.session_state.show_success_message = False
-                        st.session_state.meal_plan = None  # ✅ CLEAR PREVIOUS PLAN
+                        st.session_state.meal_plan = None
 
                         # ✅ RESET FAISS MEMORY + FILES
                         recipe_index.reset()
@@ -1606,7 +1602,6 @@ async def main():
                             st.session_state.show_success_message = True
                         else:
                             st.session_state.show_success_message = False
-                            #st.error("Failed to Generate Meal Plan. Please Try Again")
 
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
@@ -1647,4 +1642,5 @@ async def main():
 
     finally:
         await close_http_session()
+
 
