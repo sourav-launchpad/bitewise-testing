@@ -1,18 +1,10 @@
 import streamlit as st
-
-# Set page config
-st.set_page_config(
-    page_title="BiteWise",
-    page_icon="🍽️",
-    layout="wide"
-)
-
 import openai
 import pandas as pd
 import time
 from datetime import datetime
 import os
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 import asyncio
 import aiohttp
 import faiss
@@ -28,6 +20,13 @@ from prompts import (
     AUTHENTIC_RECIPE_NAMES
 )
 
+# Set page config
+st.set_page_config(
+    page_title="BiteWise",
+    page_icon="🍽️",
+    layout="wide"
+)
+
 from prompts import HEALTH_RESTRICTIONS, ALLERGEN_KEYWORDS, DIET_RESTRICTIONS
 
 import random
@@ -38,18 +37,14 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load environment variables
-# load_dotenv()
+load_dotenv()
 
 # Set OpenAI API key
-# openai.api_key = os.getenv("OPENAI_API_KEY")
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 from openai import AsyncOpenAI
 
-if "OPENAI_API_KEY" in st.secrets:
-    client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-else:
-    st.error("❌ OpenAI API key not found in Streamlit secrets.")
-    st.stop()
+client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
@@ -605,30 +600,69 @@ st.markdown("""
 
 async def generate_meal(meal_type, day, prompt, cuisine="All", recipe_name=""):
     try:
-        response = await client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[
+        await init_http_session()
+
+        data = {
+            "model": "gpt-4o-mini",
+            "stream": True,
+            "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
                 {"role": "user", "content": prompt}
             ],
-            stream=True,
-            temperature=0.7,
-            max_tokens=4096,
-            presence_penalty=0.1,
-            frequency_penalty=0.1
-        )
+            "temperature": 0.7,
+            "max_tokens": 4096,
+            "presence_penalty": 0.1,
+            "frequency_penalty": 0.1
+        }
 
-        async def token_stream():
-            async for chunk in response:
-                if chunk.choices and chunk.choices[0].delta.content:
-                    yield chunk.choices[0].delta.content
+        headers = {
+            "Authorization": f"Bearer {openai.api_key}",
+            "Content-Type": "application/json"
+        }
 
-        return (meal_type, day, token_stream())
+        # ✅ Capture the stream into recipe_text
+        recipe_text = ""
+
+        def token_stream():
+            q = queue.Queue()
+
+            async def fetch():
+                async with aiohttp.ClientSession() as sess:
+                    async with sess.post("https://api.openai.com/v1/chat/completions", json=data, headers=headers) as response:
+                        async for line in response.content:
+                            if line:
+                                decoded_line = line.decode("utf-8").strip()
+                                if decoded_line.startswith("data: "):
+                                    decoded_line = decoded_line.replace("data: ", "")
+                                    if decoded_line == "[DONE]":
+                                        break
+                                    try:
+                                        parsed = json.loads(decoded_line)
+                                        token = parsed["choices"][0]["delta"].get("content", "")
+                                        q.put(token)
+                                    except Exception as e:
+                                        print(f"[STREAM ERROR] Could not parse: {decoded_line} — {e}")
+                q.put(None)
+
+            threading.Thread(target=lambda: asyncio.run(fetch()), daemon=True).start()
+
+            def generator():
+                while True:
+                    token = q.get()
+                    if token is None:
+                        break
+                    nonlocal recipe_text
+                    recipe_text += token
+                    yield token
+
+            return generator()
+
+        recipe_text = ""
+        return (meal_type, day, token_stream)
 
     except Exception as e:
         print(f"[ERROR] {meal_type} on Day {day} failed: {str(e)}")
         return None
-
 
 import threading
 import queue
@@ -966,15 +1000,10 @@ def stream_and_buffer(token_gen):
     recipe_text_holder = {"text": ""}
 
     def producer():
-        async def run():
-            async for token in token_gen:
-                full_text_holder["text"] += token
-                q.put(token)
-            q.put(None)
-    
-        loop = asyncio.get_event_loop()
-        asyncio.run_coroutine_threadsafe(run(), loop)
-
+        for token in token_gen:
+            q.put(token)
+            recipe_text_holder["text"] += token
+        q.put(None)
 
     def streamer():
         while True:
@@ -991,16 +1020,12 @@ def stream_with_validation(token_gen, validate_callback):
     full_text_holder = {"text": ""}
     is_valid = {"passed": False}
 
+    # Background producer thread
     def producer():
-        async def run():
-            async for token in token_gen:
-                full_text_holder["text"] += token
-                q.put(token)
-            q.put(None)
-    
-        loop = asyncio.get_event_loop()
-        asyncio.run_coroutine_threadsafe(run(), loop)
-
+        for token in token_gen:
+            full_text_holder["text"] += token
+            q.put(token)
+        q.put(None)
 
     # Live generator stream to UI
     def live_stream():
@@ -1281,19 +1306,20 @@ async def generate_meal_plan(user_prefs):
                     result = await limited_generate(meal, day, prompt, selected_cuisine, recipe_name)
 
                     if isinstance(result, tuple):
-                        _, _, token_gen = result
-                    
+                        _, _, token_gen_func = result
+                        token_gen = token_gen_func()
+
                         # Start streaming + capturing at the same time
                         live_stream, get_full_text = stream_with_validation(token_gen, None)
-                    
+
                         # Stream to UI container
                         stream_container.write_stream(live_stream)
-                    
+
                         # Wait for full text to complete (safely)
                         start = time.time()
                         timeout = 40  # seconds
                         recipe_text = ""
-                    
+
                         while time.time() - start < timeout:
                             recipe_text = get_full_text()
                             if "Serves" in recipe_text and "Instructions" in recipe_text and len(recipe_text) > 400:
@@ -1532,9 +1558,11 @@ async def main():
             st.error("Failed to get user preferences. Please try again.")
             return
 
+        # Initialize success message flag if not set
         if 'show_success_message' not in st.session_state:
             st.session_state.show_success_message = False
 
+        # Placeholder for success message so it can be cleared
         success_placeholder = st.empty()
 
         col1, col2, col3 = st.columns([0.05, 2.9, 0.05])
@@ -1551,7 +1579,7 @@ async def main():
                         st.session_state.structure_counts = {}
                         st.session_state.recipes_to_embed = []
                         st.session_state.show_success_message = False
-                        st.session_state.meal_plan = None
+                        st.session_state.meal_plan = None  # ✅ CLEAR PREVIOUS PLAN
 
                         # ✅ RESET FAISS MEMORY + FILES
                         recipe_index.reset()
@@ -1571,6 +1599,7 @@ async def main():
                             st.session_state.show_success_message = True
                         else:
                             st.session_state.show_success_message = False
+                            #st.error("Failed to Generate Meal Plan. Please Try Again")
 
                     except Exception as e:
                         st.error(f"An error occurred: {str(e)}")
@@ -1612,10 +1641,11 @@ async def main():
     finally:
         await close_http_session()
 
-
-import asyncio
-
-if __name__ == "__main__":
+def run_app():
     loop = asyncio.new_event_loop()
     asyncio.set_event_loop(loop)
     loop.run_until_complete(main())
+
+# For local execution
+if __name__ == "__main__":
+    run_app()
