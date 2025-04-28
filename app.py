@@ -4,7 +4,7 @@ import pandas as pd
 import time
 from datetime import datetime
 import os
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import asyncio
 import aiohttp
 import faiss
@@ -37,14 +37,18 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load environment variables
-load_dotenv()
+# load_dotenv()
 
 # Set OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# openai.api_key = os.getenv("OPENAI_API_KEY")
 
 from openai import AsyncOpenAI
 
-client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+if "OPENAI_API_KEY" in st.secrets:
+    client = AsyncOpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+else:
+    st.error("❌ OpenAI API key not found in Streamlit secrets.")
+    st.stop()
 
 RESET_FAISS_ON_START = True  # Toggle this for clean dev runs
 
