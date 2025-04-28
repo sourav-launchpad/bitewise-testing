@@ -1440,36 +1440,36 @@ async def main():
         # Placeholder for success message so it can be cleared
         success_placeholder = st.empty()
 
-col1, col2, col3 = st.columns([0.05, 2.9, 0.05])
-with col2:
-    if st.button("Generate Meal Plan"):
-        with st.spinner("Generating Your Personalized Meal Plan..."):
-            try:
-                # ✅ FULL STATE RESET
-                st.session_state.used_recipe_names = set()
-                st.session_state.generated_recipes = []
-                st.session_state.meal_types_used = set()
-                st.session_state.cuisines_used = set()
-                st.session_state.cuisine_distribution = {}
-                st.session_state.structure_counts = {}
-                st.session_state.recipes_to_embed = []
-                st.session_state.show_success_message = False
-                st.session_state.meal_plan = None  # ✅ CLEAR PREVIOUS PLAN
-
-                # ✅ RESET FAISS MEMORY + FILES
-                recipe_index.reset()
-                recipe_names.clear()
-                if os.path.exists(INDEX_FILE): os.remove(INDEX_FILE)
-                if os.path.exists(NAMES_FILE): os.remove(NAMES_FILE)
-
-                # ✅ GENERATE SAFELY
-                user_prefs = get_user_preferences()  # ensure user_prefs available
-                asyncio.create_task(generate_meal_plan(user_prefs))
-
-            except Exception as e:
-                st.error(f"An error occurred: {str(e)}")
-                st.session_state.meal_plan = None
-                st.session_state.show_success_message = False
+        col1, col2, col3 = st.columns([0.05, 2.9, 0.05])
+        with col2:
+            if st.button("Generate Meal Plan"):
+                with st.spinner("Generating Your Personalized Meal Plan..."):
+                    try:
+                        # ✅ FULL STATE RESET
+                        st.session_state.used_recipe_names = set()
+                        st.session_state.generated_recipes = []
+                        st.session_state.meal_types_used = set()
+                        st.session_state.cuisines_used = set()
+                        st.session_state.cuisine_distribution = {}
+                        st.session_state.structure_counts = {}
+                        st.session_state.recipes_to_embed = []
+                        st.session_state.show_success_message = False
+                        st.session_state.meal_plan = None  # ✅ CLEAR PREVIOUS PLAN
+        
+                        # ✅ RESET FAISS MEMORY + FILES
+                        recipe_index.reset()
+                        recipe_names.clear()
+                        if os.path.exists(INDEX_FILE): os.remove(INDEX_FILE)
+                        if os.path.exists(NAMES_FILE): os.remove(NAMES_FILE)
+        
+                        # ✅ GENERATE SAFELY
+                        user_prefs = get_user_preferences()  # ensure user_prefs available
+                        asyncio.create_task(generate_meal_plan(user_prefs))
+        
+                    except Exception as e:
+                        st.error(f"An error occurred: {str(e)}")
+                        st.session_state.meal_plan = None
+                        st.session_state.show_success_message = False
 
 
         # ✅ SUCCESS BANNER
