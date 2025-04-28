@@ -293,7 +293,6 @@ def get_user_preferences():
                 max_value=7,
                 value=1,
                 step=1,
-                key="num_days_input"
             )
 
             diet = st.multiselect(
@@ -423,8 +422,7 @@ def get_user_preferences():
                 min_value=1,
                 max_value=8,
                 value=2,
-                step=1,
-                key="serving_size_input"
+                step=1
             )
 
         preferences = {
