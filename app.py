@@ -892,14 +892,16 @@ def stream_and_buffer(token_gen):
 def stream_with_validation(token_gen, validate_callback):
     q = queue.Queue()
     full_text_holder = {"text": ""}
-    is_valid = {"passed": False}
 
     # Background producer thread
     def producer():
-        for token in token_gen:
-            full_text_holder["text"] += token
-            q.put(token)
-        q.put(None)
+        async def run():
+            async for token in token_gen:
+                full_text_holder["text"] += token
+                q.put(token)
+            q.put(None)
+        
+        asyncio.run(run())
 
     # Live generator stream to UI
     def live_stream():
@@ -912,7 +914,6 @@ def stream_with_validation(token_gen, validate_callback):
     # Kick off producer thread
     threading.Thread(target=producer).start()
 
-    # Return generator and validator callback access
     return live_stream(), lambda: full_text_holder["text"]
 
 async def generate_meal_plan(user_prefs):
