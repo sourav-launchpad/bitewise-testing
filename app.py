@@ -1517,4 +1517,11 @@ async def main():
         await close_http_session()
 
 import asyncio
-asyncio.run(main())
+
+if __name__ == "__main__":
+    if hasattr(st, "_is_running_with_streamlit") and st._is_running_with_streamlit:
+        # If Streamlit is running, use asyncio.create_task
+        asyncio.create_task(main())
+    else:
+        # For local debug runs
+        asyncio.run(main())
