@@ -532,8 +532,8 @@ async def generate_meal(meal_type, day, prompt, cuisine="All", recipe_name=""):
                 if token:
                     yield token
 
-        return (meal_type, day, token_stream())
-
+        return (meal_type, day, lambda: token_stream())
+        
     except Exception as e:
         print(f"[ERROR] {meal_type} on Day {day} failed: {str(e)}")
         return None
