@@ -1313,7 +1313,6 @@ async def generate_meal_plan(user_prefs):
 
                     if isinstance(result, tuple):
                         _, _, token_gen_func = result
-                        token_gen = token_gen_func()
 
                         # Start streaming + capturing at the same time
                         live_stream, get_full_text = stream_with_validation(token_gen, None)
