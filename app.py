@@ -1293,10 +1293,13 @@ async def generate_meal_plan(user_prefs):
                     if recipe_name in st.session_state.used_recipe_names:
                         continue
                     retry_titles.append(recipe_name)
-                meal_title_map[meal] = retry_titles
 
-                found = False
+                found = False  # ✅ Reset found per meal type
+
                 for recipe_name in retry_titles:
+                    if found:
+                        break  # ✅ Break retry_titles loop if already found
+
                     if recipe_name in st.session_state.used_recipe_names:
                         continue
 
@@ -1329,13 +1332,9 @@ async def generate_meal_plan(user_prefs):
                         _, _, token_gen_func = result
                         token_gen = token_gen_func()
 
-                        # Start streaming + capturing at the same time
                         live_stream, get_full_text = stream_with_validation(token_gen, None)
+                        # DO NOT stream here yet
 
-                        # Stream to UI container
-                        stream_container.write_stream(live_stream)
-
-                        # Wait for full text to complete (safely)
                         start = time.time()
                         timeout = 40  # seconds
                         recipe_text = ""
@@ -1346,18 +1345,15 @@ async def generate_meal_plan(user_prefs):
                                 break
                             time.sleep(0.2)
 
-                        # If still empty → skip
                         if not recipe_text.strip():
                             print("[SKIPPED] Recipe generation timed out or failed.")
                             continue
 
-                        # Validate full recipe
                         parsed = parse_recipe(recipe_text)
                         if not parsed:
                             print(f"[REJECTED] could not parse")
                             continue
 
-                        # ✅ Title vs ingredients consistency check
                         if not title_matches_ingredients(parsed["name"], parsed["ingredients"]):
                             print(f"[REJECTED] Title '{parsed['name']}' mismatch with ingredients")
                             continue
@@ -1371,15 +1367,25 @@ async def generate_meal_plan(user_prefs):
                             print(f"[REJECTED] duplicate {meal_key}")
                             continue
 
-                        # Store it ✅
+                        # ✅ All validations passed - Save the final recipe
                         st.session_state.generated_recipes.append({
                             "day": day,
                             "meal_type": meal,
                             "recipe": recipe_text
                         })
                         st.session_state.used_recipe_names.add(recipe_name)
+
+                        # ✅ Now (ONLY NOW) Stream it to Streamlit UI
+                        stream_container.write_stream(live_stream)
+
                         found = True
-                        break
+                        break  # ✅ Stop trying more titles for this meal
+
+                if not found:
+                    print(f"[FAIL] Could not generate {meal} for Day {day} — moving on.")
+                    continue  # ✅ Move to next meal type
+                else:
+                    print(f"[SUCCESS] {meal} generated for Day {day} ✅")
 
     finally:
         await save_all_embeddings()
@@ -1387,6 +1393,9 @@ async def generate_meal_plan(user_prefs):
         with open(NAMES_FILE, "wb") as f:
             pickle.dump(recipe_names, f)
         print("✅ FAISS index and names saved to disk at end.")
+
+        return st.session_state.generated_recipes  # ✅ Correct place
+
 
 def display_meal_plan(meal_plan):
     #st.title("Your Personalized Meal Plan")
